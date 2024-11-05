@@ -9,7 +9,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.podbike.app.R
 import com.podbike.app.ui.base.BaseActivity
 
-class DashboardActivity : BaseActivity {
+class DashboardActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

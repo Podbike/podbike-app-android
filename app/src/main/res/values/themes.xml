@@ -6,4 +6,9 @@
     </style>
 
     <style name="Theme.Podbike" parent="Base.Theme.Podbike" />
+
+    <style name="Theme.Podbike.Splash" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
+
 </resources>

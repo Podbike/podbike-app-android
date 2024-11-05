@@ -24,6 +24,11 @@ android {
             option("--add-exports", "jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED")
             option("--add-exports", "jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED")
         }
+        correctErrorTypes true
+    }
+
+    hilt {
+        enableAggregatingTask = false
     }
 
     defaultConfig {
