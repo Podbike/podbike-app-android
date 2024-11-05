@@ -87,6 +87,9 @@ dependencies {
     implementation platform(libs.firebase.bom)
     implementation libs.firebase.crashlytics
     implementation libs.google.services
+    implementation libs.navigation.fragment.ktx
+    implementation libs.navigation.ui.ktx
+    implementation libs.view.pager
 
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit
