@@ -1,8 +1,18 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
     <style name="Base.Theme.Podbike" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="colorPrimary">@color/color_primary</item>
+        <item name="colorAccent">@color/color_accent</item>
+        <item name="android:windowBackground">@drawable/gradient_background</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="materialButtonStyle">@style/PodButton</item>
+    </style>
+
+    <style name="Base.Theme.Podbike.Splash" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@color/black</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
     <style name="Theme.Podbike" parent="Base.Theme.Podbike" />
@@ -16,13 +26,105 @@
         <item name="android:textSize">24sp</item>
         <item name="android:textColor">@android:color/white</item>
         <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">@font/poppins_bold</item>
     </style>
 
-    // TextBody style 16sp text, white and regular
     <style name="TextBody" parent="TextAppearance.MaterialComponents.Body1">
         <item name="android:textSize">16sp</item>
         <item name="android:textColor">@android:color/white</item>
         <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="MaterialButton" parent="Widget.MaterialComponents.Button">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    // TextButton style 16sp text, white and bold
+
+    <style name="TextButton" parent="TextAppearance.MaterialComponents.Button">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="PodDivider">
+        <item name="android:layout_height">1dp</item>
+        <item name="android:background">#A9A9A9</item>
+    </style>
+
+    <style name="PodEntry">
+        <item name="android:layout_height">50dp</item>
+        <item name="android:textColor">@color/text_color_secondary</item>
+        <item name="android:textColorHint">@color/text_color_secondary</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:fontFamily">@font/poppins_bold</item>
+    </style>
+
+    <style name="PodSettingsHeader">
+        <item name="android:textColor">@color/text_color_secondary</item>
+        <item name="android:layout_marginTop">5dp</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:fontFamily">@font/poppins_bold</item>
+    </style>
+
+    <style name="PodLabelTitle">
+        <item name="android:textColor">@color/text_color_secondary</item>
+        <item name="android:fontFamily">@font/poppins_bold</item>
+        <item name="android:textSize">36sp</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+
+    <style name="PodLabelGreen">
+        <item name="android:textColor">@color/text_color_primary</item>
+        <item name="android:fontFamily">@font/poppins_bold</item>
+    </style>
+
+    <!-- PodLabelBlack Style -->
+    <style name="PodLabelBlack">
+        <item name="android:textColor">@color/text_color_quaternary</item>
+        <item name="android:fontFamily">@font/poppins_bold</item>
+    </style>
+
+    <!-- PodLabelWhite Style -->
+    <style name="PodLabelWhite">
+        <item name="android:textColor">@color/text_color_secondary</item>
+        <item name="android:fontFamily">@font/poppins_bold</item>
+    </style>
+
+    <!-- PodLabelWhiteBold Style -->
+    <style name="PodLabelWhiteBold">
+        <item name="android:textColor">@color/text_color_secondary</item>
+        <item name="android:fontFamily">@font/poppins_bold</item>
+    </style>
+
+    <!-- PodLabelAlert Style -->
+    <style name="PodLabelAlert">
+        <item name="android:textColor">@color/text_color_secondary</item>
+        <item name="android:background">@color/text_color_quinary</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">36sp</item>
+        <item name="android:fontFamily">@font/poppins_bold</item>
+    </style>
+
+    <!-- PodButton Style -->
+    <style name="PodButton" parent="Widget.MaterialComponents.Button">
+        <item name="android:textColor">@color/text_color_secondary</item>
+        <item name="android:background">@drawable/rounded_corners</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="textAllCaps">false</item>
+        <item name="android:paddingVertical">8dp</item>
+        <item name="android:fontFamily">@font/poppins_bold</item>
+    </style>
+
+    <!-- PodButtonAlt Style -->
+    <style name="PodButtonAlt">
+        <item name="android:textColor">@color/text_color_secondary</item>
+        <item name="android:background">#00000000</item> <!-- Transparent -->
+        <item name="android:layout_gravity">center</item>
+        <item name="android:layout_width">200dp</item>
+        <item name="android:fontFamily">@font/poppins_bold</item>
     </style>
 
 </resources>

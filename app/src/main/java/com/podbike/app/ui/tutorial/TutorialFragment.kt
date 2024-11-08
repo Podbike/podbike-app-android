@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.navigation.Navigation
 import androidx.viewpager2.widget.ViewPager2
 import com.podbike.app.R
 
@@ -20,6 +21,18 @@ class TutorialFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val viewPager = view.findViewById<ViewPager2>(R.id.viewPager)
-        viewPager.adapter = TutorialPagerAdapter()
+        val tutorialPagerAdapter = TutorialPagerAdapter(
+            onNextClick = {
+                viewPager.currentItem = viewPager.currentItem + 1
+            },
+            onPreviousClick = {
+                viewPager.currentItem = viewPager.currentItem - 1
+            },
+            onExitClick = {
+                Navigation.findNavController(view)
+                    .navigate(R.id.action_tutorialFragment_to_showTutorialFragment)
+            }
+        )
+        viewPager.adapter = tutorialPagerAdapter
     }
 }

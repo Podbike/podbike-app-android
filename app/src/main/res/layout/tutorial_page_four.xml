@@ -3,51 +3,63 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingVertical="32dp"
-    android:paddingHorizontal="16dp">
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="32dp">
 
     <TextView
-        android:id="@+id/tutorial_page_one_header"
+        android:id="@+id/tutorial_page_four_header"
         style="@style/TextHeader"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="48dp"
         android:gravity="center"
-        android:text="@string/TutorialWelcome"
+        android:text="@string/TutorialButtons"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.5" />
 
-    <ImageView
-        android:id="@+id/tutorial_page_one_body_logo_image"
-        android:layout_width="0dp"
-        android:layout_height="100dp"
-        android:foregroundGravity="center"
-        android:importantForAccessibility="no"
-        android:src="@drawable/logo"
-        app:layout_constraintBottom_toTopOf="@id/tutorial_page_one_navigation"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tutorial_page_one_header"
-        app:layout_constraintVertical_bias="0.3" />
-
     <TextView
-        android:id="@+id/tutorial_page_one_body_logo_text"
+        android:id="@+id/tutorial_page_four_body_buttons_text"
         style="@style/PodLabelWhite"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="@string/TutorialIntroduction"
-        app:layout_constraintBottom_toTopOf="@id/tutorial_page_one_navigation"
+        android:text="@string/TutorialHandlebars"
+        app:layout_constraintBottom_toTopOf="@id/tutorial_page_four_body_buttons_image"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tutorial_page_one_body_logo_image"
-        app:layout_constraintVertical_bias="0.25" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/tutorial_page_four_body_buttons_image"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:foregroundGravity="center"
+        android:importantForAccessibility="no"
+        android:src="@drawable/buttons"
+        app:layout_constraintBottom_toTopOf="@id/tutorial_page_four_body_cadence_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tutorial_page_four_body_buttons_text"
+        app:layout_constraintVertical_bias="0.2" />
+
+    <TextView
+        android:id="@+id/tutorial_page_four_body_cadence_text"
+        style="@style/PodLabelWhite"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:gravity="center"
+        android:text="@string/TutorialFurther"
+        app:layout_constraintBottom_toTopOf="@id/tutorial_page_four_navigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tutorial_page_four_body_buttons_image" />
 
     <include
-        android:id="@+id/tutorial_page_one_navigation"
-        layout="@layout/tutorial_navigation_start"
+        android:id="@+id/tutorial_page_four_navigation"
+        layout="@layout/tutorial_navigation_exit"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -1,27 +1,28 @@
-package com.podbike.app.ui.splash
+package com.podbike.app.ui.tutorial
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
+import androidx.navigation.Navigation
 import com.podbike.app.R
 
-class SplashFragment : Fragment() {
+class ShowTutorialFragment : Fragment() {
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_splash, container, false)
+        return inflater.inflate(R.layout.fragment_show_tutorial, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Handler(Looper.getMainLooper()).postDelayed({
-            findNavController().navigate(R.id.action_splashFragment_to_dashboardFragment)
-        }, 2000)
+
+        view.findViewById<View>(R.id.show_tutorial_button)?.setOnClickListener {
+            Navigation.findNavController(view)
+                .navigate(R.id.action_showTutorialFragment_to_tutorialFragment)
+        }
     }
 }

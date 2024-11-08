@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingVertical="32dp"
+    android:paddingHorizontal="16dp">
+
+    <TextView
+        android:id="@+id/tutorial_page_two_header"
+        style="@style/TextHeader"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="48dp"
+        android:gravity="center"
+        android:text="@string/TutorialSymbols"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5" />
+
+    <TextView
+        android:id="@+id/tutorial_page_two_body_assistance_text"
+        style="@style/PodLabelWhite"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/TutorialAssistance"
+        app:layout_constraintBottom_toTopOf="@id/tutorial_page_two_body_cadence_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.41000003" />
+
+    <ImageView
+        android:id="@+id/tutorial_page_two_body_assistance_image"
+        android:layout_width="0dp"
+        android:layout_height="64dp"
+        android:foregroundGravity="center"
+        android:importantForAccessibility="no"
+        android:src="@drawable/electric_assistance"
+        app:layout_constraintBottom_toTopOf="@id/tutorial_page_two_body_cadence_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tutorial_page_two_body_assistance_text"
+        app:layout_constraintVertical_bias="0.1" />
+
+    <TextView
+        android:id="@+id/tutorial_page_two_body_cadence_text"
+        style="@style/PodLabelWhite"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/TutorialCadence"
+        app:layout_constraintBottom_toTopOf="@id/tutorial_page_one_navigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tutorial_page_two_body_assistance_text" />
+
+    <ImageView
+        android:id="@+id/tutorial_page_two_body_cadence_image"
+        android:layout_width="0dp"
+        android:layout_height="80dp"
+        android:foregroundGravity="center"
+        android:importantForAccessibility="no"
+        android:src="@drawable/cadence"
+        app:layout_constraintBottom_toTopOf="@id/tutorial_page_one_navigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tutorial_page_two_body_cadence_text"
+        app:layout_constraintVertical_bias="0.1" />
+
+    <include
+        android:id="@+id/tutorial_page_one_navigation"
+        layout="@layout/tutorial_navigation_next"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
