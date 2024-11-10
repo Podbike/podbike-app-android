@@ -36,6 +36,7 @@
         android:id="@+id/tutorial_page_two_body_assistance_image"
         android:layout_width="0dp"
         android:layout_height="64dp"
+        android:layout_marginHorizontal="16dp"
         android:foregroundGravity="center"
         android:importantForAccessibility="no"
         android:src="@drawable/electric_assistance"

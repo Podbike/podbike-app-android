@@ -59,7 +59,7 @@
         <item name="android:textColor">@color/text_color_secondary</item>
         <item name="android:textColorHint">@color/text_color_secondary</item>
         <item name="android:textSize">18sp</item>
-        <item name="android:fontFamily">@font/poppins_bold</item>
+        <item name="android:fontFamily">@font/poppins</item>
     </style>
 
     <style name="PodSettingsHeader">
@@ -78,19 +78,19 @@
 
     <style name="PodLabelGreen">
         <item name="android:textColor">@color/text_color_primary</item>
-        <item name="android:fontFamily">@font/poppins_bold</item>
+        <item name="android:fontFamily">@font/poppins</item>
     </style>
 
     <!-- PodLabelBlack Style -->
     <style name="PodLabelBlack">
         <item name="android:textColor">@color/text_color_quaternary</item>
-        <item name="android:fontFamily">@font/poppins_bold</item>
+        <item name="android:fontFamily">@font/poppins</item>
     </style>
 
     <!-- PodLabelWhite Style -->
     <style name="PodLabelWhite">
         <item name="android:textColor">@color/text_color_secondary</item>
-        <item name="android:fontFamily">@font/poppins_bold</item>
+        <item name="android:fontFamily">@font/poppins</item>
     </style>
 
     <!-- PodLabelWhiteBold Style -->
@@ -115,7 +115,7 @@
         <item name="android:layout_gravity">center</item>
         <item name="textAllCaps">false</item>
         <item name="android:paddingVertical">8dp</item>
-        <item name="android:fontFamily">@font/poppins_bold</item>
+        <item name="android:fontFamily">@font/poppins</item>
     </style>
 
     <!-- PodButtonAlt Style -->
@@ -124,7 +124,7 @@
         <item name="android:background">#00000000</item> <!-- Transparent -->
         <item name="android:layout_gravity">center</item>
         <item name="android:layout_width">200dp</item>
-        <item name="android:fontFamily">@font/poppins_bold</item>
+        <item name="android:fontFamily">@font/poppins</item>
     </style>
 
 </resources>
