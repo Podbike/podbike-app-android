@@ -24,5 +24,10 @@ class ShowTutorialFragment : Fragment() {
             Navigation.findNavController(view)
                 .navigate(R.id.action_showTutorialFragment_to_tutorialFragment)
         }
+
+        view.findViewById<View>(R.id.show_settings_button)?.setOnClickListener {
+            Navigation.findNavController(view)
+                .navigate(R.id.action_showTutorialFragment_to_settingsFragment)
+        }
     }
 }
