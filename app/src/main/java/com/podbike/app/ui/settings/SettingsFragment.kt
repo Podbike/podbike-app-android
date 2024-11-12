@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.podbike.app.R
 
@@ -18,6 +19,13 @@ class SettingsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        //TODO add generic back handling
+        view.findViewById<View>(R.id.app_bar_back).setOnClickListener {
+            requireActivity().onBackPressed()
+        }
+        view.findViewById<TextView>(R.id.app_bar_title).text =
+            getString(R.string.SettingsPageTitle)
 
         buildSettings()
     }
@@ -44,6 +52,13 @@ class SettingsFragment : Fragment() {
         val aboutDeviceView = SettingView(requireContext(), getString(R.string.AboutDevice))
         val frikarPoliciesView = SettingView(requireContext(), getString(R.string.SettingsPolicies))
 
+        val appVersion = requireContext().packageManager.getPackageInfo(
+            requireContext().packageName,
+            0
+        ).versionName
+        val appVersionText = getString(R.string.SettingsAppVersion) + " " + appVersion
+        val appVersionView = SettingFooterView(requireContext(), appVersionText)
+
         linearLayout?.run {
             addView(settingGroupView)
             addView(languageSettingView)
@@ -56,6 +71,7 @@ class SettingsFragment : Fragment() {
             addView(aboutGroupView)
             addView(aboutDeviceView)
             addView(frikarPoliciesView)
+            addView(appVersionView)
         }
     }
 }
