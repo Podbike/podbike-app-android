@@ -1,20 +1,29 @@
 package com.podbike.app.ui.settings
 
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings.ACTION_APP_LOCALE_SETTINGS
+import android.provider.Settings.ACTION_LOCALE_SETTINGS
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.podbike.app.R
+import com.podbike.app.databinding.FragmentSettingsBinding
 
 class SettingsFragment : Fragment() {
+
+    private lateinit var binding: FragmentSettingsBinding
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_settings, container, false)
+        binding = FragmentSettingsBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -27,16 +36,29 @@ class SettingsFragment : Fragment() {
         view.findViewById<TextView>(R.id.app_bar_title).text =
             getString(R.string.SettingsPageTitle)
 
-        buildSettings()
+        buildSettings(view)
     }
 
-    private fun buildSettings() {
-        val linearLayout = view?.findViewById<ViewGroup>(R.id.fragment_settings_linear_layout)
+    private fun buildSettings(view: View) {
+        val linearLayout = view.findViewById<ViewGroup>(R.id.fragment_settings_linear_layout)
 
         val settingGroupView =
             SettingGroupView(requireContext(), getString(R.string.SettingsGeneral))
         val languageSettingView =
-            SettingView(requireContext(), getString(R.string.SettingsLanguage))
+            SettingView(requireContext(), getString(R.string.SettingsLanguage)) {
+                val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    Intent(
+                        ACTION_APP_LOCALE_SETTINGS
+                    )
+                } else {
+                    Intent(
+                        ACTION_LOCALE_SETTINGS
+                    )
+                }
+                val uri = Uri.fromParts("package", context?.packageName, null)
+                intent.data = uri
+                startActivity(intent)
+            }
         val manageConnectionsView =
             SettingView(requireContext(), getString(R.string.SettingsDevices))
         val frikarUpdateView = SettingView(requireContext(), getString(R.string.SettingsUpdate))

@@ -48,6 +48,14 @@ android {
         }
     }
 
+    buildFeatures {
+        viewBinding true
+    }
+
+    androidResources {
+        generateLocaleConfig true
+    }
+
     flavorDimensions "environment"
     productFlavors {
         dev {

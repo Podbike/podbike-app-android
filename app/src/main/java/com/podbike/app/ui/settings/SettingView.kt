@@ -9,8 +9,13 @@ import com.podbike.app.R
 
 class SettingView : ConstraintLayout {
 
-    constructor(context: Context, name: String) : super(context) {
-        init(context, name)
+    constructor(
+        context: Context,
+        name: String,
+        onClick: () -> Unit = {}
+    ) : super(context) {
+        init(context, name, onClick)
+
     }
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
@@ -25,9 +30,10 @@ class SettingView : ConstraintLayout {
         init(context, null)
     }
 
-    private fun init(context: Context, name: String?) {
+    private fun init(context: Context, name: String?, onClick: () -> Unit = {}) {
         LayoutInflater.from(context).inflate(R.layout.item_setting, this, true)
         name?.let { setSettingName(it) }
+        setOnClickListener { onClick() }
     }
 
     fun setSettingName(name: String) {
