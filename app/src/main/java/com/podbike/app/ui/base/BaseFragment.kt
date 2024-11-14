@@ -1,11 +1,12 @@
 package com.podbike.app.ui.base
 
 import androidx.fragment.app.Fragment
+import com.podbike.app.ui.navigation.IntentManager
+import javax.inject.Inject
 
-class BaseFragment: Fragment() {
+open class BaseFragment: Fragment() {
 
-    fun setAppBarTitle(title: String) {
+    @Inject
+    lateinit var intentManager: IntentManager
 
-        requireActivity().title = title
-    }
 }
