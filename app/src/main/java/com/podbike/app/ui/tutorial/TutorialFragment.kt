@@ -8,25 +8,29 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import androidx.viewpager2.widget.ViewPager2
 import com.podbike.app.R
+import com.podbike.app.databinding.FragmentTutorialBinding
 
 class TutorialFragment : Fragment() {
+
+    private lateinit var binding: FragmentTutorialBinding
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_tutorial, container, false)
+    ): View {
+        binding = FragmentTutorialBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val viewPager = view.findViewById<ViewPager2>(R.id.viewPager)
+        val viewPager = binding.viewPager
         val tutorialPagerAdapter = TutorialPagerAdapter(
             onNextClick = {
-                viewPager.currentItem = viewPager.currentItem + 1
+                viewPager.currentItem += 1
             },
             onPreviousClick = {
-                viewPager.currentItem = viewPager.currentItem - 1
+                viewPager.currentItem -= 1
             },
             onExitClick = {
                 Navigation.findNavController(view)

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.Navigation
 import com.podbike.app.R
 import com.podbike.app.data.DistanceUnit
 import com.podbike.app.data.SpeedUnit
@@ -28,7 +29,7 @@ class SettingsFragment : BaseFragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentSettingsBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -37,7 +38,7 @@ class SettingsFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.appBar.appBarBack.setOnClickListener {
-            requireActivity().onBackPressed()
+            requireActivity().onBackPressedDispatcher.onBackPressed()
         }
         binding.appBar.appBarTitle.text = getString(R.string.SettingsPageTitle)
         buildSettings(view)
@@ -95,7 +96,11 @@ class SettingsFragment : BaseFragment() {
 
         val aboutGroupView = SettingGroupView(requireContext(), getString(R.string.SettingsAbout))
         val aboutDeviceView = SettingView(requireContext(), getString(R.string.AboutDevice))
-        val frikarPoliciesView = SettingView(requireContext(), getString(R.string.SettingsPolicies))
+        val frikarPoliciesView =
+            SettingView(requireContext(), getString(R.string.SettingsPolicies)) {
+                Navigation.findNavController(view)
+                    .navigate(R.id.action_settingsFragment_to_privacyPolicyFragment)
+            }
 
         val appVersion = requireContext().packageManager.getPackageInfo(
             requireContext().packageName,
