@@ -29,7 +29,8 @@
         app:layout_constraintBottom_toTopOf="@id/tutorial_page_four_body_buttons_image"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/tutorial_page_four_header"
+        app:layout_constraintVertical_bias="0.45" />
 
     <ImageView
         android:id="@+id/tutorial_page_four_body_buttons_image"
