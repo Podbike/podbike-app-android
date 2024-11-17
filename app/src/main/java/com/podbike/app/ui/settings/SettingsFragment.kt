@@ -87,7 +87,6 @@ class SettingsFragment : BaseFragment() {
                     getString(R.string.SettingsTemperatureUnit),
                     listOf(
                         TemperatureUnit.CELSIUS.name to getString(R.string.SettingsTemperatureC),
-                        TemperatureUnit.KELVIN.name to getString(R.string.SettingsTemperatureK),
                         TemperatureUnit.FAHRENHEIT.name to getString(R.string.SettingsTemperatureF)
                     ),
                     KEY_TEMPERATURE_UNIT
