@@ -9,5 +9,5 @@ enum class DistanceUnit {
 }
 
 enum class TemperatureUnit {
-    CELSIUS, KELVIN, FAHRENHEIT
+    CELSIUS, FAHRENHEIT
 }

@@ -2,6 +2,9 @@ package com.podbike.app.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.icu.util.LocaleData
+import android.icu.util.ULocale
+import android.os.Build
 
 class UserPreferencesImpl(context: Context) : UserPreferences {
 
@@ -21,7 +24,7 @@ class UserPreferencesImpl(context: Context) : UserPreferences {
 
     override fun getSpeedUnit(): SpeedUnit {
         val speedUnitName =
-            sharedPreferences.getString(KEY_SPEED_UNIT, SpeedUnit.KILOMETERS_PER_HOUR.name)
+            sharedPreferences.getString(KEY_SPEED_UNIT, getDefaultSpeedUnit().name)
         return SpeedUnit.valueOf(speedUnitName!!)
     }
 
@@ -31,7 +34,7 @@ class UserPreferencesImpl(context: Context) : UserPreferences {
 
     override fun getDistanceUnit(): DistanceUnit {
         val distanceUnitName =
-            sharedPreferences.getString(KEY_DISTANCE_UNIT, DistanceUnit.KILOMETERS.name)
+            sharedPreferences.getString(KEY_DISTANCE_UNIT, getDefaultDistanceUnit().name)
         return DistanceUnit.valueOf(distanceUnitName!!)
     }
 
@@ -41,7 +44,44 @@ class UserPreferencesImpl(context: Context) : UserPreferences {
 
     override fun getTemperatureUnit(): TemperatureUnit {
         val temperatureUnitName =
-            sharedPreferences.getString(KEY_TEMPERATURE_UNIT, TemperatureUnit.CELSIUS.name)
+            sharedPreferences.getString(KEY_TEMPERATURE_UNIT, getDefaultTemperatureUnit().name)
         return TemperatureUnit.valueOf(temperatureUnitName!!)
     }
+
+    private fun getDefaultSpeedUnit(): SpeedUnit {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            when (LocaleData.getMeasurementSystem(ULocale.getDefault())) {
+                LocaleData.MeasurementSystem.US -> SpeedUnit.MILES_PER_HOUR
+                LocaleData.MeasurementSystem.SI, LocaleData.MeasurementSystem.UK -> SpeedUnit.KILOMETERS_PER_HOUR
+                else -> SpeedUnit.KILOMETERS_PER_HOUR
+            }
+        } else {
+            SpeedUnit.KILOMETERS_PER_HOUR
+        }
+    }
+
+    private fun getDefaultDistanceUnit(): DistanceUnit {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            when (LocaleData.getMeasurementSystem(ULocale.getDefault())) {
+                LocaleData.MeasurementSystem.US, LocaleData.MeasurementSystem.UK -> DistanceUnit.MILES
+                LocaleData.MeasurementSystem.SI -> DistanceUnit.KILOMETERS
+                else -> DistanceUnit.KILOMETERS
+            }
+        } else {
+            DistanceUnit.KILOMETERS
+        }
+    }
+
+    private fun getDefaultTemperatureUnit(): TemperatureUnit {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            when (LocaleData.getMeasurementSystem(ULocale.getDefault())) {
+                LocaleData.MeasurementSystem.US -> TemperatureUnit.FAHRENHEIT
+                LocaleData.MeasurementSystem.SI, LocaleData.MeasurementSystem.UK -> TemperatureUnit.CELSIUS
+                else -> TemperatureUnit.CELSIUS
+            }
+        } else {
+            TemperatureUnit.CELSIUS
+        }
+    }
+
 }
