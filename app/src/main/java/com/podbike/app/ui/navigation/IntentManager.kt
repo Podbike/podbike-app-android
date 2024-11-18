@@ -15,11 +15,11 @@ class IntentManager @Inject constructor(@ApplicationContext private val context:
     fun openLocaleSettings() {
         val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             Intent(ACTION_APP_LOCALE_SETTINGS)
+                .apply { data = Uri.fromParts("package", context.packageName, null) }
         } else {
             Intent(ACTION_LOCALE_SETTINGS)
         }
-        val uri = Uri.fromParts("package", context.packageName, null)
-        intent.data = uri
+
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         context.startActivity(intent)
     }

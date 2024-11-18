@@ -6,9 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
-import androidx.viewpager2.widget.ViewPager2
 import com.podbike.app.R
 import com.podbike.app.databinding.FragmentTutorialBinding
+import com.podbike.app.ui.base.adjustEdgeToEdgePaddings
 
 class TutorialFragment : Fragment() {
 
@@ -18,7 +18,9 @@ class TutorialFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentTutorialBinding.inflate(inflater, container, false)
+        binding = FragmentTutorialBinding.inflate(inflater, container, false).apply {
+            root.adjustEdgeToEdgePaddings()
+        }
         return binding.root
     }
 

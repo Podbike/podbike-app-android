@@ -11,6 +11,7 @@ import androidx.navigation.fragment.findNavController
 import com.podbike.app.R
 import com.podbike.app.databinding.FragmentDevicesBinding
 import com.podbike.app.ui.base.BaseFragment
+import com.podbike.app.ui.base.adjustEdgeToEdgePaddings
 import com.podbike.app.ui.scanning.DevicesViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
@@ -27,7 +28,9 @@ class DevicesFragment : BaseFragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentDevicesBinding.inflate(inflater, container, false)
+        binding = FragmentDevicesBinding.inflate(inflater, container, false).apply {
+            root.adjustEdgeToEdgePaddings()
+        }
         return binding.root
     }
 

@@ -15,6 +15,7 @@ import com.podbike.app.data.UserPreferencesImpl.Companion.KEY_SPEED_UNIT
 import com.podbike.app.data.UserPreferencesImpl.Companion.KEY_TEMPERATURE_UNIT
 import com.podbike.app.databinding.FragmentSettingsBinding
 import com.podbike.app.ui.base.BaseFragment
+import com.podbike.app.ui.base.adjustEdgeToEdgePaddings
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -30,7 +31,9 @@ class SettingsFragment : BaseFragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentSettingsBinding.inflate(inflater, container, false)
+        binding = FragmentSettingsBinding.inflate(inflater, container, false).apply {
+            root.adjustEdgeToEdgePaddings()
+        }
         return binding.root
     }
 

@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.tabs.TabLayoutMediator
 import com.podbike.app.R
 import com.podbike.app.databinding.FragmentPrivacyPolicyBinding
+import com.podbike.app.ui.base.adjustEdgeToEdgeMargins
 
 class PrivacyPolicyFragment : Fragment() {
 
@@ -18,7 +19,9 @@ class PrivacyPolicyFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentPrivacyPolicyBinding.inflate(inflater, container, false)
+        binding = FragmentPrivacyPolicyBinding.inflate(inflater, container, false).apply {
+            root.adjustEdgeToEdgeMargins()
+        }
         return binding.root
     }
 
