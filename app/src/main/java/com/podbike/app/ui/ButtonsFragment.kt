@@ -1,4 +1,4 @@
-package com.podbike.app.ui.tutorial
+package com.podbike.app.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,13 +8,13 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.Navigation
 import com.podbike.app.R
 
-class ShowTutorialFragment : Fragment() {
+class ButtonsFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_show_tutorial, container, false)
+        return inflater.inflate(R.layout.fragment_buttons, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -28,6 +28,11 @@ class ShowTutorialFragment : Fragment() {
         view.findViewById<View>(R.id.show_settings_button)?.setOnClickListener {
             Navigation.findNavController(view)
                 .navigate(R.id.action_showTutorialFragment_to_settingsFragment)
+        }
+
+        view.findViewById<View>(R.id.show_devices_button)?.setOnClickListener {
+            Navigation.findNavController(view)
+                .navigate(R.id.action_showTutorialFragment_to_devicesFragment)
         }
     }
 }

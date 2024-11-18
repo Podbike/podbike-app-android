@@ -6,9 +6,9 @@
 
     <fragment
         android:id="@+id/showTutorialFragment"
-        android:name="com.podbike.app.ui.tutorial.ShowTutorialFragment"
+        android:name="com.podbike.app.ui.ButtonsFragment"
         android:label="fragment_show_tutorial"
-        tools:layout="@layout/fragment_show_tutorial">
+        tools:layout="@layout/fragment_buttons">
         <action
             android:id="@+id/action_showTutorialFragment_to_tutorialFragment"
             app:destination="@id/tutorialFragment" />
@@ -17,6 +17,9 @@
             android:id="@+id/action_showTutorialFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
 
+        <action
+            android:id="@+id/action_showTutorialFragment_to_devicesFragment"
+            app:destination="@id/devicesFragment" />
     </fragment>
 
     <fragment
@@ -44,5 +47,11 @@
         android:name="com.podbike.app.ui.privacy_policy.PrivacyPolicyFragment"
         android:label="fragment_privacy_policy"
         tools:layout="@layout/fragment_privacy_policy" />
+
+    <fragment
+        android:id="@+id/devicesFragment"
+        android:name="com.podbike.app.ui.devices.DevicesFragment"
+        android:label="fragment_devices"
+        tools:layout="@layout/fragment_devices" />
 
 </navigation>
