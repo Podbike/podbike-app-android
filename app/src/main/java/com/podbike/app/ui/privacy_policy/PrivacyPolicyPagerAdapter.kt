@@ -36,11 +36,7 @@ class PrivacyPolicyPagerAdapter :
 
             1 -> {
                 holder.itemView.findViewById<TextView>(R.id.terms_of_conditions_text).run {
-                    text =
-                        Html.fromHtml(
-                            holder.itemView.context.getString(R.string.TermsAndConditionsHtml),
-                            Html.FROM_HTML_MODE_LEGACY
-                        )
+                    text = getTermsAndConditionsText(context)
                     movementMethod = LinkMovementMethod.getInstance()
                 }
             }
@@ -55,8 +51,31 @@ class PrivacyPolicyPagerAdapter :
     class PrivacyPolicyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
     private fun getPrivacyPolicyText(context: Context): SpannableStringBuilder {
-        val privacyPolicyText = context.getString(R.string.PrivacyPolicyHtml)
-        val spannedHtml: Spanned = Html.fromHtml(privacyPolicyText, Html.FROM_HTML_MODE_LEGACY)
+        val htmlText = context.getString(R.string.PrivacyPolicyHtml)
+        val spannedHtml: Spanned = Html.fromHtml(htmlText, Html.FROM_HTML_MODE_LEGACY)
+
+        val additionalText = "For further information on the policy, please click "
+        val hyperlinkText = "here"
+        val hyperlinkUrl = "https://www.podbike.com/privacy-and-cookie-policy/"
+
+        val spannableStringBuilder = SpannableStringBuilder(spannedHtml).apply {
+            append("\n")
+            append(additionalText)
+            val start = length
+            append(hyperlinkText)
+            setSpan(
+                HyperlinkSpan(hyperlinkUrl, context),
+                start,
+                length,
+                Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
+        return spannableStringBuilder
+    }
+
+    private fun getTermsAndConditionsText(context: Context): SpannableStringBuilder {
+        val htmlText = context.getString(R.string.TermsAndConditionsHtml)
+        val spannedHtml: Spanned = Html.fromHtml(htmlText, Html.FROM_HTML_MODE_LEGACY)
 
         val additionalText = "For further information on the terms and conditions, please click "
         val hyperlinkText = "here"
