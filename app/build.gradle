@@ -98,6 +98,9 @@ dependencies {
     implementation libs.navigation.fragment.ktx
     implementation libs.navigation.ui.ktx
     implementation libs.view.pager
+    implementation libs.kotlin.ble.scanner
+    implementation libs.kotlin.ble.client
+    implementation libs.kotlin.ble.advertiser
 
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit
