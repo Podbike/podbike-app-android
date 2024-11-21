@@ -1,5 +1,7 @@
 package com.podbike.app.data.bluetooth.wrapper
 
+import android.Manifest
+import androidx.annotation.RequiresPermission
 import kotlinx.coroutines.flow.Flow
 import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
 import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattServices
@@ -18,47 +20,34 @@ class PodbikeBluetoothDeviceWrapper(private val client: ClientBleGatt) {
         services = client.discoverServices()
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private suspend fun readCharacteristic(
         serviceId: UUID,
         characteristicId: UUID
     ): DataByteArray? {
-        try {
             return services?.findService(serviceId)
                 ?.findCharacteristic(characteristicId)
                 ?.read()
-
-        } catch (e: SecurityException) {
-            println("Error reading characteristic: $e")
-            return null
-        }
     }
 
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private suspend fun writeCharacteristic(
         serviceId: UUID,
         characteristicId: UUID,
         value: DataByteArray
     ) {
-        try {
             services?.findService(serviceId)
                 ?.findCharacteristic(characteristicId)
                 ?.write(value)
-        } catch (e: SecurityException) {
-            println("Error writing characteristic: $e")
-        }
+
     }
 
     private suspend fun getCharacteristicNotifications(
         serviceId: UUID,
         characteristicId: UUID
     ): Flow<DataByteArray>? {
-        try {
             return services?.findService(serviceId)
                 ?.findCharacteristic(characteristicId)
                 ?.getNotifications()
-
-        } catch (e: SecurityException) {
-            println("Error enabling notifications: $e")
-            return null
-        }
     }
 }

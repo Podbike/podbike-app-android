@@ -1,6 +1,8 @@
 package com.podbike.app.data.bluetooth.manager
 
+import android.Manifest
 import android.content.Context
+import androidx.annotation.RequiresPermission
 import com.podbike.app.data.bluetooth.wrapper.PodbikeBluetoothDeviceWrapper
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.map
@@ -14,8 +16,8 @@ import no.nordicsemi.android.kotlin.ble.scanner.aggregator.BleScanResultAggregat
 class BluetoothManagerImpl(val context: Context) : BluetoothManager {
     private val connectedDevices = mutableListOf<PodbikeBluetoothDeviceWrapper>()
 
-    override suspend fun connect(device: ServerDevice): PodbikeBluetoothDeviceWrapper? {
-        try {
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    override suspend fun connect(device: ServerDevice): PodbikeBluetoothDeviceWrapper {
             return coroutineScope {
                 val connection = ClientBleGatt.connect(context, device, this)
 
@@ -24,25 +26,16 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
 
                 return@coroutineScope podbikeDevice.apply { discoverServices() }
             }
-        } catch (e: SecurityException) {
-            println("No permission to scan for bluetooth devices")
-            return null
-        }
     }
 
+    @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT])
     override fun scan(filters: List<BleScanFilter>?): List<ServerDevice> {
-        try {
             var devices: List<ServerDevice> = emptyList()
             val aggregator = BleScanResultAggregator()
+
             BleScanner(context).scan(filters ?: emptyList())
                 .map { aggregator.aggregateDevices(it) }
                 .onEach { devices = it }
-
             return devices
-        } catch (e: SecurityException) {
-            println("No permission to scan for bluetooth devices")
-            return emptyList()
-        }
-
     }
 }
