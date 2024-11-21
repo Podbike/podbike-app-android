@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
+import no.nordicsemi.android.kotlin.ble.core.scanner.BleScanFilter
 import no.nordicsemi.android.kotlin.ble.scanner.BleScanner
 import no.nordicsemi.android.kotlin.ble.scanner.aggregator.BleScanResultAggregator
 
@@ -29,11 +30,11 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
         }
     }
 
-    override fun scan(): List<ServerDevice> {
+    override fun scan(filters: List<BleScanFilter>?): List<ServerDevice> {
         try {
             var devices: List<ServerDevice> = emptyList()
             val aggregator = BleScanResultAggregator()
-            BleScanner(context).scan()
+            BleScanner(context).scan(filters ?: emptyList())
                 .map { aggregator.aggregateDevices(it) }
                 .onEach { devices = it }
 
