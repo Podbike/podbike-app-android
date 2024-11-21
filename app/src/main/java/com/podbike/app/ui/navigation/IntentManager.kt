@@ -23,4 +23,20 @@ class IntentManager @Inject constructor(@ApplicationContext private val context:
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         context.startActivity(intent)
     }
+
+    fun openBluetoothSettings() {
+        val intent = Intent().apply {
+            action = android.provider.Settings.ACTION_BLUETOOTH_SETTINGS
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        context.startActivity(intent)
+    }
+
+    fun openLocationSettings() {
+        val intent = Intent().apply {
+            action = android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        context.startActivity(intent)
+    }
 }

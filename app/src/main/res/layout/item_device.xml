@@ -3,25 +3,29 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="16dp">
 
     <TextView
-        style="@style/TextHeader"
+        android:id="@+id/device_name"
+        style="@style/TextBodyLarge"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         tools:text="0000013-F8-1-00-036" />
 
     <TextView
-        style="@style/TextBody"
+        android:id="@+id/device_address"
+        style="@style/TextBodyDark"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
+        android:ellipsize="middle"
+        android:maxLines="1"
         tools:text="0000013-F8-1-00-036" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginHorizontal="8dp"
         android:background="#FF696969" />
 
 </LinearLayout>
