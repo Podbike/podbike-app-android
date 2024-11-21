@@ -4,7 +4,9 @@ import android.Manifest
 import android.content.Context
 import androidx.annotation.RequiresPermission
 import com.podbike.app.data.bluetooth.wrapper.PodbikeBluetoothDeviceWrapper
+import com.podbike.app.ui.scanning.DeviceInfo
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
@@ -29,13 +31,11 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
     }
 
     @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT])
-    override fun scan(filters: List<BleScanFilter>?): List<ServerDevice> {
-            var devices: List<ServerDevice> = emptyList()
+    override fun scan(filters: List<BleScanFilter>): Flow<List<DeviceInfo>> {
             val aggregator = BleScanResultAggregator()
 
-            BleScanner(context).scan(filters ?: emptyList())
+           return BleScanner(context).scan(filters)
                 .map { aggregator.aggregateDevices(it) }
-                .onEach { devices = it }
-            return devices
+                .map { it -> it.map { DeviceInfo(it.name ?: "Unknown", it.address) } }
     }
 }

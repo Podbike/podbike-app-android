@@ -1,7 +1,6 @@
 package com.podbike.app.di
 
 import android.content.Context
-import com.podbike.app.services.BluetoothManager
 import com.podbike.app.ui.navigation.IntentManager
 import dagger.Module
 import dagger.Provides
@@ -18,11 +17,5 @@ object AppModule {
     @Singleton
     fun provideIntentManager(@ApplicationContext context: Context): IntentManager {
         return IntentManager(context)
-    }
-
-    @Provides
-    @Singleton
-    fun provideBluetoothManager(): BluetoothManager {
-        return BluetoothManager()
     }
 }

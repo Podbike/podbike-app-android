@@ -4,7 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.kfc_polska.ui.base.UiAction
 import com.kfc_polska.ui.base.UiEffect
 import com.kfc_polska.ui.base.UiState
-import com.podbike.app.services.BluetoothManager
+import com.podbike.app.data.bluetooth.manager.BluetoothManager
 import com.podbike.app.ui.base.StateViewModel
 import com.podbike.app.ui.scanning.DevicesViewModel.DevicesAction
 import com.podbike.app.ui.scanning.DevicesViewModel.DevicesEffect
@@ -28,9 +28,8 @@ class DevicesViewModel @Inject constructor(
 
     private fun loadDevices() {
         loadDevicesJob = viewModelScope.launch {
-            bluetoothManager.getBluetoothDevices().collect { device ->
-                val updatedDevices = uiState.value.devices.toMutableList().apply { add(device) }
-                updateState { copy(isLoading = false, devices = updatedDevices) }
+            bluetoothManager.scan().collect { deviceList ->
+                updateState { copy(isLoading = false, devices = deviceList) }
             }
         }
     }
