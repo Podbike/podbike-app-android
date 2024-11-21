@@ -39,11 +39,27 @@
         <item name="fontFamily">@font/poppins_bold</item>
     </style>
 
+    <style name="TextBodyLarge" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:fontFamily">@font/poppins</item>
+        <item name="fontFamily">@font/poppins</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
     <style name="TextBody" parent="TextAppearance.MaterialComponents.Body1">
         <item name="android:fontFamily">@font/poppins</item>
         <item name="fontFamily">@font/poppins</item>
         <item name="android:textSize">16sp</item>
         <item name="android:textColor">@android:color/white</item>
+        <item name="android:textStyle">normal</item>
+    </style>
+
+    <style name="TextBodyDark" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:fontFamily">@font/poppins</item>
+        <item name="fontFamily">@font/poppins</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@android:color/darker_gray</item>
         <item name="android:textStyle">normal</item>
     </style>
 
@@ -58,6 +74,13 @@
     <style name="MaterialButton" parent="Widget.MaterialComponents.Button">
         <item name="android:textSize">12sp</item>
         <item name="android:textColor">@android:color/white</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="MaterialErrorButton" parent="Widget.MaterialComponents.Button">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="backgroundTint">@android:color/holo_red_dark</item>
         <item name="android:textStyle">bold</item>
     </style>
 

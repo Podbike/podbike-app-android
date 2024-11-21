@@ -1,24 +1,88 @@
 package com.podbike.app.ui.scanning
 
+import androidx.lifecycle.viewModelScope
 import com.kfc_polska.ui.base.UiAction
 import com.kfc_polska.ui.base.UiEffect
 import com.kfc_polska.ui.base.UiState
+import com.podbike.app.services.BluetoothManager
 import com.podbike.app.ui.base.StateViewModel
+import com.podbike.app.ui.scanning.DevicesViewModel.DevicesAction
+import com.podbike.app.ui.scanning.DevicesViewModel.DevicesEffect
+import com.podbike.app.ui.scanning.DevicesViewModel.DevicesState
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class DevicesViewModel @Inject constructor() :
-    StateViewModel<DevicesViewModel.DevicesState, DevicesViewModel.DevicesAction, DevicesViewModel.DevicesEffect>(
-        DevicesState()
-    ) {
+@HiltViewModel
+class DevicesViewModel @Inject constructor(
+    private val bluetoothManager: BluetoothManager
+) : StateViewModel<DevicesState, DevicesAction, DevicesEffect>(DevicesState()) {
 
     sealed class ErrorTypeSealed(val error: Throwable) {
         class LoadDevicesTimeoutError(error: Throwable) : ErrorTypeSealed(error)
         class ConnectToDeviceError(error: Throwable) : ErrorTypeSealed(error)
     }
 
+    private var loadDevicesJob: Job? = null
+
+    private fun loadDevices() {
+        loadDevicesJob = viewModelScope.launch {
+            bluetoothManager.getBluetoothDevices().collect { device ->
+                val updatedDevices = uiState.value.devices.toMutableList().apply { add(device) }
+                updateState { copy(isLoading = false, devices = updatedDevices) }
+            }
+        }
+    }
 
     override fun processAction(action: DevicesAction) {
         when (action) {
+            is DevicesAction.ToggleScan -> {
+                if (uiState.value.isScanning) {
+                    loadDevicesJob?.cancel()
+                    updateState { copy(isScanning = false) }
+                } else {
+                    updateState { copy(isScanning = true, devices = listOf()) }
+                    loadDevices()
+                }
+            }
+
+            is DevicesAction.BluetoothPermissions -> {
+                sendEffect(DevicesEffect.NavigateToBluetoothPermissions)
+            }
+
+            is DevicesAction.LocationPermissions -> {
+                sendEffect(DevicesEffect.NavigateToLocationPermissions)
+            }
+
+            is DevicesAction.EnableBluetooth -> {
+                sendEffect(DevicesEffect.NavigateToBluetoothSettings)
+            }
+
+            is DevicesAction.EnableLocation -> {
+                sendEffect(DevicesEffect.NavigateToLocationSettings)
+            }
+
+            is DevicesAction.PermissionsChanged -> {
+                val hasAllPermissions =
+                    action.hasBluetoothPermissions && action.isBluetoothEnabled && action.isLocationEnabled
+
+                updateState {
+                    copy(
+                        hasBluetoothPermissions = action.hasBluetoothPermissions,
+                        isBluetoothEnabled = action.isBluetoothEnabled,
+                        isLocationEnabled = action.isLocationEnabled,
+                        isScanning = hasAllPermissions,
+                        devices = if (hasAllPermissions) devices else emptyList()
+                    )
+                }
+                if (!hasAllPermissions) {
+                    loadDevicesJob?.cancel()
+                } else if (loadDevicesJob?.isActive != true) {
+                    loadDevices()
+                }
+            }
+
             is DevicesAction.Retry -> {
                 updateState { copy(isLoading = true, error = null) }
             }
@@ -30,19 +94,37 @@ class DevicesViewModel @Inject constructor() :
     }
 
     data class DevicesState(
-        val isScanning: Boolean = true,
-
+        val isScanning: Boolean = false,
+        val hasBluetoothPermissions: Boolean = false,
+        val isBluetoothEnabled: Boolean = false,
+        val isLocationEnabled: Boolean = false,
         val isLoading: Boolean = true,
-        val error: DevicesViewModel.ErrorTypeSealed? = null
+        val devices: List<DeviceInfo> = emptyList(),
+        val error: ErrorTypeSealed? = null
     ) : UiState
 
     sealed class DevicesAction : UiAction {
+        data object ToggleScan : DevicesAction()
+        data object BluetoothPermissions : DevicesAction()
+        data object LocationPermissions : DevicesAction()
+        data object EnableBluetooth : DevicesAction()
+        data object EnableLocation : DevicesAction()
+        data class PermissionsChanged(
+            val hasBluetoothPermissions: Boolean = false,
+            val isBluetoothEnabled: Boolean = false,
+            val isLocationEnabled: Boolean = false,
+        ) : DevicesAction()
+
         data object Retry : DevicesAction()
         data object GoBack : DevicesAction()
     }
 
     sealed class DevicesEffect : UiEffect {
         data object NavigateBack : DevicesEffect()
+        data object NavigateToBluetoothPermissions : DevicesEffect()
+        data object NavigateToLocationPermissions : DevicesEffect()
+        data object NavigateToBluetoothSettings : DevicesEffect()
+        data object NavigateToLocationSettings : DevicesEffect()
     }
 
 }
