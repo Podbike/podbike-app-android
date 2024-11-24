@@ -67,17 +67,8 @@ class DevicesViewModel @Inject constructor(
             is DevicesAction.DeviceClick -> {
                 viewModelScope.launch {
                     runWithErrorHandling {
-                        bluetoothManager.getBluetoothDevice(action.name, action.address)
-                            ?.let { device ->
-                                val podbikeDevice =
-                                    bluetoothManager.connect(device as RealServerDevice)
-                                sendEffect(
-                                    DevicesEffect.ConnectToDevice(
-                                        action.name,
-                                        action.address
-                                    )
-                                )
-                            }
+                        //TODO connect to device
+//                        bluetoothManager.connect()
                     }
                 }
             }
