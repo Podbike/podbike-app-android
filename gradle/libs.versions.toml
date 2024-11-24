@@ -23,6 +23,7 @@ viewpager2 = "1.1.0"
 kotlinBleScanner = "1.1.0"
 kotlinBleClient = "1.1.0"
 kotlinBleAdvertiser = "1.1.0"
+timber = "5.0.1"
 
 
 [libraries]
@@ -50,6 +51,7 @@ view-pager = { group = "androidx.viewpager2", name = "viewpager2", version.ref =
 kotlin-ble-scanner = { group = "no.nordicsemi.android.kotlin.ble", name = "scanner", version.ref = "kotlinBleScanner" }
 kotlin-ble-client = { group = "no.nordicsemi.android.kotlin.ble", name = "client", version.ref = "kotlinBleClient" }
 kotlin-ble-advertiser = { group = "no.nordicsemi.android.kotlin.ble", name = "advertiser", version.ref = "kotlinBleAdvertiser" }
+timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

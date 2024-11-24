@@ -101,6 +101,7 @@ dependencies {
     implementation libs.kotlin.ble.scanner
     implementation libs.kotlin.ble.client
     implementation libs.kotlin.ble.advertiser
+    implementation libs.timber
 
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit

@@ -20,21 +20,23 @@ import com.podbike.app.R
 import com.podbike.app.databinding.FragmentDevicesBinding
 import com.podbike.app.ui.base.BaseFragment
 import com.podbike.app.ui.base.adjustEdgeToEdgePaddings
-import com.podbike.app.ui.scanning.DeviceAdapter
+import com.podbike.app.ui.scanning.DevicesAdapter
 import com.podbike.app.ui.scanning.DevicesViewModel
 import com.podbike.app.ui.scanning.DevicesViewModel.DevicesEffect
+import com.podbike.app.ui.scanning.OnDeviceClickListener
 import com.podbike.app.utils.PermissionManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import no.nordicsemi.android.kotlin.ble.core.MockClientDevice
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class DevicesFragment : BaseFragment() {
+class DevicesFragment : BaseFragment(), OnDeviceClickListener {
 
     private lateinit var binding: FragmentDevicesBinding
     val viewModel: DevicesViewModel by viewModels()
-    private lateinit var deviceAdapter: DeviceAdapter
+    private lateinit var deviceAdapter: DevicesAdapter
 
     @Inject
     lateinit var permissionManager: PermissionManager
@@ -89,8 +91,12 @@ class DevicesFragment : BaseFragment() {
         validatePermissions()
     }
 
+    override fun onDeviceClick(name: String, address: String) {
+        viewModel.processAction(DevicesViewModel.DevicesAction.DeviceClick(name, address))
+    }
+
     private fun setupRecyclerView() {
-        deviceAdapter = DeviceAdapter(emptyList())
+        deviceAdapter = DevicesAdapter(this)
         binding.fragmentDevicesLinearLayout.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = deviceAdapter
@@ -146,10 +152,8 @@ class DevicesFragment : BaseFragment() {
                 fragmentDevicesScanningButton.isVisible = true
             }
 
-            state.devices.let { devices ->
-                deviceAdapter = DeviceAdapter(devices)
-                fragmentDevicesLinearLayout.adapter = deviceAdapter
-            }
+            deviceAdapter.submitList(state.devices)
+
             state.isScanning.let { isScanning ->
                 val buttonText = if (isScanning) {
                     getString(R.string.DeviceStopScan)
@@ -170,6 +174,7 @@ class DevicesFragment : BaseFragment() {
             DevicesEffect.NavigateToBluetoothSettings -> enableBluetooth()
             DevicesEffect.NavigateToLocationPermissions -> permissionManager.requestPermissions()
             DevicesEffect.NavigateToLocationSettings -> intentManager.openLocationSettings()
+            is DevicesEffect.ConnectToDevice -> MockClientDevice()
         }
     }
 

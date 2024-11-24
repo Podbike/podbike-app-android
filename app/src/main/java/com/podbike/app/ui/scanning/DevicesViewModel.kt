@@ -9,9 +9,11 @@ import com.podbike.app.ui.base.StateViewModel
 import com.podbike.app.ui.scanning.DevicesViewModel.DevicesAction
 import com.podbike.app.ui.scanning.DevicesViewModel.DevicesEffect
 import com.podbike.app.ui.scanning.DevicesViewModel.DevicesState
+import com.podbike.app.utils.runWithErrorHandling
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import no.nordicsemi.android.kotlin.ble.core.RealServerDevice
 import javax.inject.Inject
 
 @HiltViewModel
@@ -62,6 +64,24 @@ class DevicesViewModel @Inject constructor(
                 sendEffect(DevicesEffect.NavigateToLocationSettings)
             }
 
+            is DevicesAction.DeviceClick -> {
+                viewModelScope.launch {
+                    runWithErrorHandling {
+                        bluetoothManager.getBluetoothDevice(action.name, action.address)
+                            ?.let { device ->
+                                val podbikeDevice =
+                                    bluetoothManager.connect(device as RealServerDevice)
+                                sendEffect(
+                                    DevicesEffect.ConnectToDevice(
+                                        action.name,
+                                        action.address
+                                    )
+                                )
+                            }
+                    }
+                }
+            }
+
             is DevicesAction.PermissionsChanged -> {
                 val hasAllPermissions =
                     action.hasBluetoothPermissions && action.isBluetoothEnabled && action.isLocationEnabled
@@ -108,6 +128,7 @@ class DevicesViewModel @Inject constructor(
         data object LocationPermissions : DevicesAction()
         data object EnableBluetooth : DevicesAction()
         data object EnableLocation : DevicesAction()
+        data class DeviceClick(val name: String, val address: String) : DevicesAction()
         data class PermissionsChanged(
             val hasBluetoothPermissions: Boolean = false,
             val isBluetoothEnabled: Boolean = false,
@@ -124,6 +145,7 @@ class DevicesViewModel @Inject constructor(
         data object NavigateToLocationPermissions : DevicesEffect()
         data object NavigateToBluetoothSettings : DevicesEffect()
         data object NavigateToLocationSettings : DevicesEffect()
+        data class ConnectToDevice(val name: String, val address: String) : DevicesEffect()
     }
 
 }
