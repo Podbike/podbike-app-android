@@ -20,6 +20,10 @@
         <action
             android:id="@+id/action_showTutorialFragment_to_devicesFragment"
             app:destination="@id/devicesFragment" />
+
+        <action
+            android:id="@+id/action_showTutorialFragment_to_autoconnectFragment"
+            app:destination="@id/autoConnectFragment" />
     </fragment>
 
     <fragment
@@ -53,5 +57,11 @@
         android:name="com.podbike.app.ui.devices.DevicesFragment"
         android:label="fragment_devices"
         tools:layout="@layout/fragment_devices" />
+
+    <fragment
+        android:id="@+id/autoConnectFragment"
+        android:name="com.podbike.app.ui.autoconnect.AutoconnectFragment"
+        android:label="fragment_auto_connect"
+        tools:layout="@layout/fragment_autoconnect" />
 
 </navigation>

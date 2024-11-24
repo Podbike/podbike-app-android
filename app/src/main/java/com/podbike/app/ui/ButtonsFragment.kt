@@ -34,5 +34,10 @@ class ButtonsFragment : Fragment() {
             Navigation.findNavController(view)
                 .navigate(R.id.action_showTutorialFragment_to_devicesFragment)
         }
+
+        view.findViewById<View>(R.id.show_autoconnect_button)?.setOnClickListener {
+            Navigation.findNavController(view)
+                .navigate(R.id.action_showTutorialFragment_to_autoconnectFragment)
+        }
     }
 }
