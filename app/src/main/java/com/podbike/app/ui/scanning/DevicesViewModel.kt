@@ -67,9 +67,14 @@ class DevicesViewModel @Inject constructor(
             is DevicesAction.DeviceClick -> {
                 viewModelScope.launch {
                     runWithErrorHandling {
-                        //TODO connect to device
-                        Timber.d("Connecting to device ${action.name} with address ${action.address}")
-                        sendEffect(DevicesEffect.ConnectToDevice)
+                        val result = bluetoothManager.connect(
+                            action.deviceInfo,
+                            viewModelScope = viewModelScope // Feeling bad about this.. not sure how to solve it differently though.
+                        )
+                        Timber.d("Connect result: $result")
+                        result?.let {
+                            sendEffect(DevicesEffect.ConnectToDevice)
+                        }
                     }
                 }
             }
@@ -120,7 +125,7 @@ class DevicesViewModel @Inject constructor(
         data object LocationPermissions : DevicesAction()
         data object EnableBluetooth : DevicesAction()
         data object EnableLocation : DevicesAction()
-        data class DeviceClick(val name: String, val address: String) : DevicesAction()
+        data class DeviceClick(val deviceInfo: DeviceInfo) : DevicesAction()
         data class PermissionsChanged(
             val hasBluetoothPermissions: Boolean = false,
             val isBluetoothEnabled: Boolean = false,

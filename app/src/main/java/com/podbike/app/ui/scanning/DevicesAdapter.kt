@@ -26,7 +26,7 @@ class DevicesAdapter(
             binding.deviceName.text = device.name
             binding.deviceAddress.text = device.address
             binding.root.setOnClickListener {
-                listener.onDeviceClick(device.name, device.address)
+                listener.onDeviceClick(device)
             }
         }
     }

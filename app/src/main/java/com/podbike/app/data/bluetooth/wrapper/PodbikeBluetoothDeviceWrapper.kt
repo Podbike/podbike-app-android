@@ -3,8 +3,10 @@ package com.podbike.app.data.bluetooth.wrapper
 import android.Manifest
 import androidx.annotation.RequiresPermission
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
 import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattServices
+import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
 import java.util.UUID
 
@@ -20,14 +22,17 @@ class PodbikeBluetoothDeviceWrapper(private val client: ClientBleGatt) {
         services = client.discoverServices()
     }
 
+    suspend fun isConnected(): Flow<Boolean> =
+        client.connectionState.map { it == GattConnectionState.STATE_CONNECTED }
+
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private suspend fun readCharacteristic(
         serviceId: UUID,
         characteristicId: UUID
     ): DataByteArray? {
-            return services?.findService(serviceId)
-                ?.findCharacteristic(characteristicId)
-                ?.read()
+        return services?.findService(serviceId)
+            ?.findCharacteristic(characteristicId)
+            ?.read()
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
@@ -36,9 +41,9 @@ class PodbikeBluetoothDeviceWrapper(private val client: ClientBleGatt) {
         characteristicId: UUID,
         value: DataByteArray
     ) {
-            services?.findService(serviceId)
-                ?.findCharacteristic(characteristicId)
-                ?.write(value)
+        services?.findService(serviceId)
+            ?.findCharacteristic(characteristicId)
+            ?.write(value)
 
     }
 
@@ -46,8 +51,8 @@ class PodbikeBluetoothDeviceWrapper(private val client: ClientBleGatt) {
         serviceId: UUID,
         characteristicId: UUID
     ): Flow<DataByteArray>? {
-            return services?.findService(serviceId)
-                ?.findCharacteristic(characteristicId)
-                ?.getNotifications()
+        return services?.findService(serviceId)
+            ?.findCharacteristic(characteristicId)
+            ?.getNotifications()
     }
 }

@@ -6,13 +6,15 @@ import androidx.annotation.RequiresPermission
 import com.podbike.app.data.bluetooth.wrapper.PodbikeBluetoothDeviceWrapper
 import com.podbike.app.ui.dashboard.DeviceStatus
 import com.podbike.app.ui.scanning.DeviceInfo
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
-import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.scanner.BleScanFilter
 import no.nordicsemi.android.kotlin.ble.scanner.BleScanner
 import no.nordicsemi.android.kotlin.ble.scanner.aggregator.BleScanResultAggregator
@@ -22,15 +24,21 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
     private val connectedDevices = mutableListOf<PodbikeBluetoothDeviceWrapper>()
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    override suspend fun connect(device: ServerDevice): PodbikeBluetoothDeviceWrapper {
-        return coroutineScope {
-            val connection = ClientBleGatt.connect(context, device, this)
+    override suspend fun connect(
+        device: DeviceInfo,
+        waitForPairing: Boolean,
+        viewModelScope: CoroutineScope,
+    ): PodbikeBluetoothDeviceWrapper {
+        val connection = ClientBleGatt.connect(context, device.address, viewModelScope)
 
-            val podbikeDevice = PodbikeBluetoothDeviceWrapper(connection)
-            connectedDevices.add(podbikeDevice)
+        if (waitForPairing)
+            connection.waitForBonding()
 
-            return@coroutineScope podbikeDevice.apply { discoverServices() }
-        }
+        val podbikeDevice = PodbikeBluetoothDeviceWrapper(connection)
+        connectedDevices.add(podbikeDevice)
+
+        podbikeDevice.discoverServices()
+        return podbikeDevice
     }
 
     @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT])

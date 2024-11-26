@@ -25,7 +25,6 @@ kotlinBleClient = "1.1.0"
 kotlinBleAdvertiser = "1.1.0"
 timber = "5.0.1"
 
-
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
