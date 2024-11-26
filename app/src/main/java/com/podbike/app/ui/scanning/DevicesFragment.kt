@@ -28,7 +28,6 @@ import com.podbike.app.utils.PermissionManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import no.nordicsemi.android.kotlin.ble.core.MockClientDevice
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -174,7 +173,9 @@ class DevicesFragment : BaseFragment(), OnDeviceClickListener {
             DevicesEffect.NavigateToBluetoothSettings -> enableBluetooth()
             DevicesEffect.NavigateToLocationPermissions -> permissionManager.requestPermissions()
             DevicesEffect.NavigateToLocationSettings -> intentManager.openLocationSettings()
-            is DevicesEffect.ConnectToDevice -> MockClientDevice()
+            DevicesEffect.ConnectToDevice -> findNavController().navigate(
+                R.id.action_devicesFragment_to_dashboardFragment,
+            )
         }
     }
 

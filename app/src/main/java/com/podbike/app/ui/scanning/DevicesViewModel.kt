@@ -13,7 +13,7 @@ import com.podbike.app.utils.runWithErrorHandling
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import no.nordicsemi.android.kotlin.ble.core.RealServerDevice
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -68,7 +68,8 @@ class DevicesViewModel @Inject constructor(
                 viewModelScope.launch {
                     runWithErrorHandling {
                         //TODO connect to device
-//                        bluetoothManager.connect()
+                        Timber.d("Connecting to device ${action.name} with address ${action.address}")
+                        sendEffect(DevicesEffect.ConnectToDevice)
                     }
                 }
             }
@@ -136,7 +137,7 @@ class DevicesViewModel @Inject constructor(
         data object NavigateToLocationPermissions : DevicesEffect()
         data object NavigateToBluetoothSettings : DevicesEffect()
         data object NavigateToLocationSettings : DevicesEffect()
-        data class ConnectToDevice(val name: String, val address: String) : DevicesEffect()
+        data object ConnectToDevice : DevicesEffect()
     }
 
 }

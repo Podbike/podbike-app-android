@@ -24,6 +24,10 @@
         <action
             android:id="@+id/action_showTutorialFragment_to_autoconnectFragment"
             app:destination="@id/autoConnectFragment" />
+
+        <action
+            android:id="@+id/action_showTutorialFragment_to_dashboardFragment"
+            app:destination="@id/dashboardFragment" />
     </fragment>
 
     <fragment
@@ -56,12 +60,32 @@
         android:id="@+id/devicesFragment"
         android:name="com.podbike.app.ui.devices.DevicesFragment"
         android:label="fragment_devices"
-        tools:layout="@layout/fragment_devices" />
+        tools:layout="@layout/fragment_devices">
+
+        <action
+            android:id="@+id/action_devicesFragment_to_dashboardFragment"
+            app:destination="@id/dashboardFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/autoConnectFragment"
         android:name="com.podbike.app.ui.autoconnect.AutoconnectFragment"
         android:label="fragment_auto_connect"
-        tools:layout="@layout/fragment_autoconnect" />
+        tools:layout="@layout/fragment_autoconnect">
+
+        <action
+            android:id="@+id/action_autoconnectFragment_to_devicesFragment"
+            app:destination="@id/devicesFragment" />
+
+        <action
+            android:id="@+id/action_autoconnectFragment_to_dashboardFragment"
+            app:destination="@id/dashboardFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/dashboardFragment"
+        android:name="com.podbike.app.ui.dashboard.DashboardFragment"
+        android:label="fragment_dashboard"
+        tools:layout="@layout/fragment_dashboard" />
 
 </navigation>

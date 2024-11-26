@@ -7,10 +7,9 @@ import com.kfc_polska.ui.base.UiState
 import com.podbike.app.data.bluetooth.manager.BluetoothManager
 import com.podbike.app.ui.autoconnect.AutoconnectViewModel.*
 import com.podbike.app.ui.base.StateViewModel
-import com.podbike.app.ui.scanning.DeviceInfo
-import com.podbike.app.utils.runWithErrorHandling
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -28,8 +27,10 @@ class AutoconnectViewModel @Inject constructor(
 
     private fun autoconnect() {
         autoconnectJob = viewModelScope.launch {
-            bluetoothManager.scan().collect { deviceList ->
-                updateState { copy(isLoading = false, autoconnect = deviceList) }
+            launch {
+                //TODO replace with real autoconnect
+                delay(3000)
+                sendEffect(AutoconnectEffect.AutoconnectToFrikar)
             }
         }
     }
@@ -41,7 +42,7 @@ class AutoconnectViewModel @Inject constructor(
                     autoconnectJob?.cancel()
                     updateState { copy(isLoading = false) }
                 } else {
-                    updateState { copy(isLoading = true, autoconnect = listOf()) }
+                    updateState { copy(isLoading = true) }
                     autoconnect()
                 }
             }
@@ -63,12 +64,8 @@ class AutoconnectViewModel @Inject constructor(
             }
 
             is AutoconnectAction.ScanForFrikarClick -> {
-                viewModelScope.launch {
-                    runWithErrorHandling {
-                        //TODO connect to device
-//                        bluetoothManager.connect()
-                    }
-                }
+                updateState { copy(isLoading = false, error = null) }
+                sendEffect(AutoconnectEffect.NavigateToDevices)
             }
 
             is AutoconnectAction.PermissionsChanged -> {
@@ -80,8 +77,7 @@ class AutoconnectViewModel @Inject constructor(
                         hasBluetoothPermissions = action.hasBluetoothPermissions,
                         isBluetoothEnabled = action.isBluetoothEnabled,
                         isLocationEnabled = action.isLocationEnabled,
-                        isLoading = hasAllPermissions,
-                        autoconnect = if (hasAllPermissions) autoconnect else emptyList()
+                        isLoading = hasAllPermissions
                     )
                 }
                 if (!hasAllPermissions) {
@@ -105,8 +101,7 @@ class AutoconnectViewModel @Inject constructor(
         val hasBluetoothPermissions: Boolean = false,
         val isBluetoothEnabled: Boolean = false,
         val isLocationEnabled: Boolean = false,
-        val isLoading: Boolean = true,
-        val autoconnect: List<DeviceInfo> = emptyList(),
+        val isLoading: Boolean = false,
         val error: ErrorTypeSealed? = null
     ) : UiState
 
@@ -133,7 +128,8 @@ class AutoconnectViewModel @Inject constructor(
         data object NavigateToLocationPermissions : AutoconnectEffect()
         data object NavigateToBluetoothSettings : AutoconnectEffect()
         data object NavigateToLocationSettings : AutoconnectEffect()
-        data class AutoconnectToFrikar(val name: String, val address: String) : AutoconnectEffect()
+        data object NavigateToDevices : AutoconnectEffect()
+        data object AutoconnectToFrikar : AutoconnectEffect()
     }
 
 }

@@ -39,4 +39,11 @@
         android:layout_marginTop="20dp"
         android:text="Show autoconnect" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/show_dashboard_button"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Show dashboard" />
+
 </LinearLayout>

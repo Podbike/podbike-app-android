@@ -1,4 +1,4 @@
-package com.podbike.app.ui.autoconnect
+package com.podbike.app.ui.dashboard
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
@@ -14,23 +14,23 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.podbike.app.R
-import com.podbike.app.databinding.FragmentAutoconnectBinding
-import com.podbike.app.ui.autoconnect.AutoconnectViewModel.AutoconnectAction
-import com.podbike.app.ui.autoconnect.AutoconnectViewModel.AutoconnectEffect
+import com.podbike.app.databinding.FragmentDashboardBinding
 import com.podbike.app.ui.base.BaseFragment
 import com.podbike.app.ui.base.adjustEdgeToEdgeMargins
+import com.podbike.app.ui.dashboard.DashboardViewModel.DashboardAction
+import com.podbike.app.ui.dashboard.DashboardViewModel.DashboardEffect
 import com.podbike.app.utils.PermissionManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
+import kotlin.getValue
 
 @AndroidEntryPoint
-class AutoconnectFragment : BaseFragment() {
+class DashboardFragment : BaseFragment() {
 
-    private lateinit var binding: FragmentAutoconnectBinding
-    val viewModel: AutoconnectViewModel by viewModels()
+    private lateinit var binding: FragmentDashboardBinding
+    val viewModel: DashboardViewModel by viewModels()
 
     @Inject
     lateinit var permissionManager: PermissionManager
@@ -49,7 +49,7 @@ class AutoconnectFragment : BaseFragment() {
         val hasLocationPermission = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
 
         viewModel.processAction(
-            AutoconnectAction.PermissionsChanged(
+            DashboardAction.PermissionsChanged(
                 hasBluetoothPermissions = hasBluetoothPermission,
                 isBluetoothEnabled = permissionManager.isBluetoothEnabled(),
                 isLocationEnabled = permissionManager.isLocationEnabled()
@@ -61,7 +61,7 @@ class AutoconnectFragment : BaseFragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentAutoconnectBinding.inflate(inflater, container, false).apply {
+        binding = FragmentDashboardBinding.inflate(inflater, container, false).apply {
             root.adjustEdgeToEdgeMargins()
         }
         permissionManager.initializePermissionLauncher(requestPermissionsLauncher)
@@ -72,7 +72,6 @@ class AutoconnectFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         subscribeToViewModel()
         setupBindings()
-        binding.fragmentAutoconnectHeader.text = "${getString(R.string.ConnectingTo)} FRIKAR"
     }
 
     override fun onResume() {
@@ -94,38 +93,27 @@ class AutoconnectFragment : BaseFragment() {
 
     private fun setupBindings() {
         with(binding) {
-            fragmentAutoconnectConnectButton.setOnClickListener {
-                viewModel.processAction(AutoconnectAction.ToggleAutoconnect)
-            }
-            fragmentAutoconnectScanButton.setOnClickListener {
-                viewModel.processAction(AutoconnectAction.ScanForFrikarClick)
-            }
+
         }
     }
 
-    private fun processUiState(state: AutoconnectViewModel.AutoconnectState) {
+    private fun processUiState(state: DashboardViewModel.DashboardState) {
         with(binding) {
-            if (state.isLoading) {
-                fragmentAutoconnectProgressBar.visibility = View.VISIBLE
-                fragmentAutoconnectProgressText.text = getString(R.string.FrikarConnecting)
-                fragmentAutoconnectConnectButton.text = getString(R.string.FrikarPause)
-            } else {
-                fragmentAutoconnectProgressBar.visibility = View.INVISIBLE
-                fragmentAutoconnectProgressText.text = getString(R.string.FrikarConnectionLost)
-                fragmentAutoconnectConnectButton.text = getString(R.string.FrikarReconnect)
+            state.deviceStatus?.let {
+                fragmentDashboardSpeed.text = it.speedString
+                fragmentDashboardBatteryIndicator.progress = it.battery
+                fragmentDashboardDistance.text = it.distanceString
             }
         }
     }
 
-    private fun processEffect(effect: AutoconnectEffect) {
+    private fun processEffect(effect: DashboardEffect) {
         when (effect) {
-            AutoconnectEffect.NavigateBack -> findNavController().popBackStack()
-            AutoconnectEffect.NavigateToBluetoothPermissions -> permissionManager.requestPermissions()
-            AutoconnectEffect.NavigateToBluetoothSettings -> enableBluetooth()
-            AutoconnectEffect.NavigateToLocationPermissions -> permissionManager.requestPermissions()
-            AutoconnectEffect.NavigateToLocationSettings -> intentManager.openLocationSettings()
-            AutoconnectEffect.NavigateToDevices -> findNavController().navigate(R.id.action_autoconnectFragment_to_devicesFragment)
-            AutoconnectEffect.AutoconnectToFrikar -> findNavController().navigate(R.id.action_autoconnectFragment_to_dashboardFragment)
+            DashboardEffect.NavigateBack -> findNavController().popBackStack()
+            DashboardEffect.NavigateToBluetoothPermissions -> permissionManager.requestPermissions()
+            DashboardEffect.NavigateToBluetoothSettings -> enableBluetooth()
+            DashboardEffect.NavigateToLocationPermissions -> permissionManager.requestPermissions()
+            DashboardEffect.NavigateToLocationSettings -> intentManager.openLocationSettings()
         }
     }
 
@@ -143,7 +131,7 @@ class AutoconnectFragment : BaseFragment() {
             permissionManager.requestPermissions()
         } else {
             viewModel.processAction(
-                AutoconnectAction.PermissionsChanged(
+                DashboardAction.PermissionsChanged(
                     hasBluetoothPermissions = permissionManager.hasBluetoothPermission(),
                     isBluetoothEnabled = permissionManager.isBluetoothEnabled(),
                     isLocationEnabled = permissionManager.isLocationEnabled()

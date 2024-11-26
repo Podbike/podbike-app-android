@@ -1,23 +1,88 @@
 package com.podbike.app.ui.dashboard
 
+import androidx.lifecycle.viewModelScope
 import com.kfc_polska.ui.base.UiAction
 import com.kfc_polska.ui.base.UiEffect
 import com.kfc_polska.ui.base.UiState
+import com.podbike.app.data.bluetooth.manager.BluetoothManager
 import com.podbike.app.ui.base.StateViewModel
+import com.podbike.app.ui.dashboard.DashboardViewModel.DashboardAction
+import com.podbike.app.ui.dashboard.DashboardViewModel.DashboardEffect
+import com.podbike.app.ui.dashboard.DashboardViewModel.DashboardState
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class DashboardViewModel @Inject constructor() :
-    StateViewModel<DashboardViewModel.DashboardState, DashboardViewModel.DashboardAction, DashboardViewModel.DashboardEffect>(
-        DashboardState()
-    ) {
+@HiltViewModel
+class DashboardViewModel @Inject constructor(
+    private val bluetoothManager: BluetoothManager
+) : StateViewModel<DashboardState, DashboardAction, DashboardEffect>(DashboardState()) {
 
     sealed class ErrorTypeSealed(val error: Throwable) {
-        class LoadInitialData(error: Throwable) : ErrorTypeSealed(error)
+        class DashboardTimeoutError(error: Throwable) : ErrorTypeSealed(error)
+        class ConnectToDeviceError(error: Throwable) : ErrorTypeSealed(error)
     }
 
+    private var dashboardJob: Job? = null
+
+    private fun dashboard() {
+        dashboardJob = viewModelScope.launch {
+            launch {
+                bluetoothManager.streamDeviceStatus().collect { deviceStatus ->
+                    updateState { copy(isLoading = false, deviceStatus = deviceStatus) }
+                }
+            }
+        }
+    }
 
     override fun processAction(action: DashboardAction) {
         when (action) {
+            is DashboardAction.ToggleDashboard -> {
+                if (uiState.value.isLoading) {
+                    dashboardJob?.cancel()
+                    updateState { copy(isLoading = false) }
+                } else {
+                    updateState { copy(isLoading = true) }
+                    dashboard()
+                }
+            }
+
+            is DashboardAction.BluetoothPermissions -> {
+                sendEffect(DashboardEffect.NavigateToBluetoothPermissions)
+            }
+
+            is DashboardAction.LocationPermissions -> {
+                sendEffect(DashboardEffect.NavigateToLocationPermissions)
+            }
+
+            is DashboardAction.EnableBluetooth -> {
+                sendEffect(DashboardEffect.NavigateToBluetoothSettings)
+            }
+
+            is DashboardAction.EnableLocation -> {
+                sendEffect(DashboardEffect.NavigateToLocationSettings)
+            }
+
+            is DashboardAction.PermissionsChanged -> {
+                val hasAllPermissions =
+                    action.hasBluetoothPermissions && action.isBluetoothEnabled && action.isLocationEnabled
+
+                updateState {
+                    copy(
+                        hasBluetoothPermissions = action.hasBluetoothPermissions,
+                        isBluetoothEnabled = action.isBluetoothEnabled,
+                        isLocationEnabled = action.isLocationEnabled,
+                        isLoading = hasAllPermissions
+                    )
+                }
+                if (!hasAllPermissions) {
+                    dashboardJob?.cancel()
+                } else if (dashboardJob?.isActive != true) {
+                    dashboard()
+                }
+            }
+
             is DashboardAction.Retry -> {
                 updateState { copy(isLoading = true, error = null) }
             }
@@ -29,17 +94,36 @@ class DashboardViewModel @Inject constructor() :
     }
 
     data class DashboardState(
+        val hasBluetoothPermissions: Boolean = false,
+        val isBluetoothEnabled: Boolean = false,
+        val isLocationEnabled: Boolean = false,
         val isLoading: Boolean = true,
-        val error: DashboardViewModel.ErrorTypeSealed? = null
+        val deviceStatus: DeviceStatus? = null,
+        val error: ErrorTypeSealed? = null
     ) : UiState
 
     sealed class DashboardAction : UiAction {
+        data object ToggleDashboard : DashboardAction()
+        data object BluetoothPermissions : DashboardAction()
+        data object LocationPermissions : DashboardAction()
+        data object EnableBluetooth : DashboardAction()
+        data object EnableLocation : DashboardAction()
+        data class PermissionsChanged(
+            val hasBluetoothPermissions: Boolean = false,
+            val isBluetoothEnabled: Boolean = false,
+            val isLocationEnabled: Boolean = false,
+        ) : DashboardAction()
+
         data object Retry : DashboardAction()
         data object GoBack : DashboardAction()
     }
 
     sealed class DashboardEffect : UiEffect {
         data object NavigateBack : DashboardEffect()
+        data object NavigateToBluetoothPermissions : DashboardEffect()
+        data object NavigateToLocationPermissions : DashboardEffect()
+        data object NavigateToBluetoothSettings : DashboardEffect()
+        data object NavigateToLocationSettings : DashboardEffect()
     }
 
 }

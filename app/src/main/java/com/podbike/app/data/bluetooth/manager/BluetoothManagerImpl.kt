@@ -4,16 +4,19 @@ import android.Manifest
 import android.content.Context
 import androidx.annotation.RequiresPermission
 import com.podbike.app.data.bluetooth.wrapper.PodbikeBluetoothDeviceWrapper
+import com.podbike.app.ui.dashboard.DeviceStatus
 import com.podbike.app.ui.scanning.DeviceInfo
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
 import no.nordicsemi.android.kotlin.ble.core.ServerDevice
 import no.nordicsemi.android.kotlin.ble.core.scanner.BleScanFilter
 import no.nordicsemi.android.kotlin.ble.scanner.BleScanner
 import no.nordicsemi.android.kotlin.ble.scanner.aggregator.BleScanResultAggregator
+import kotlin.random.Random
 
 class BluetoothManagerImpl(val context: Context) : BluetoothManager {
     private val connectedDevices = mutableListOf<PodbikeBluetoothDeviceWrapper>()
@@ -37,5 +40,18 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
         return BleScanner(context).scan(filters)
             .map { aggregator.aggregateDevices(it) }
             .map { it -> it.map { DeviceInfo(it.name ?: "Unknown", it.address) } }
+    }
+
+    override fun streamDeviceStatus(): Flow<DeviceStatus> = flow {
+        while (true) {
+            val status = DeviceStatus(
+                Random.nextInt(0, 100),
+                Random.nextInt(0, 100),
+                Random.nextInt(0, 100),
+                Random.nextInt(0, 100)
+            )
+            emit(status)
+            delay(2000)
+        }
     }
 }

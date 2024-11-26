@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/fragment_dashboard_logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_launcher_foreground"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/fragment_dashboard_speed"
+        style="@style/TextBody"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0"
+        android:textSize="156dp"
+        android:textStyle="bold"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/fragment_dashboard_logo"
+        app:layout_constraintVertical_bias="0.13" />
+
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/fragment_dashboard_battery_indicator"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:progress="40"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/fragment_dashboard_battery_indicator" />
+
+    <TextView
+        android:id="@+id/fragment_dashboard_distance"
+        style="@style/TextBody"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="0"
+        android:textSize="60dp"
+        android:textStyle="bold"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/fragment_dashboard_battery_indicator"
+        app:layout_constraintVertical_bias="0.13" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
