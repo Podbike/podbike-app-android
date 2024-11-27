@@ -99,7 +99,7 @@ class DashboardFragment : BaseFragment() {
 
     private fun processUiState(state: DashboardViewModel.DashboardState) {
         with(binding) {
-            state.deviceStatus?.let {
+            state.deviceData?.let {
                 fragmentDashboardSpeed.text = it.speedString
                 fragmentDashboardBatteryIndicator.progress = it.battery
                 fragmentDashboardDistance.text = it.distanceString
@@ -139,5 +139,4 @@ class DashboardFragment : BaseFragment() {
             )
         }
     }
-
 }

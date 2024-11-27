@@ -2,6 +2,7 @@ package com.podbike.app.data.bluetooth.wrapper
 
 import android.Manifest
 import androidx.annotation.RequiresPermission
+import com.podbike.app.data.bluetooth.values.HaarekBoardSpec
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
@@ -14,9 +15,11 @@ import java.util.UUID
  * A Wrapper class over ClientBleGatt for easy access to the methods specific for Podbike.
  */
 
-class PodbikeBluetoothDeviceWrapper(private val client: ClientBleGatt) {
+class PodbikeDevice(private val client: ClientBleGatt) {
 
     private var services: ClientBleGattServices? = null
+
+    val data = PodbikeDeviceData(this)
 
     suspend fun discoverServices() {
         services = client.discoverServices()
@@ -26,7 +29,7 @@ class PodbikeBluetoothDeviceWrapper(private val client: ClientBleGatt) {
         client.connectionState.map { it == GattConnectionState.STATE_CONNECTED }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    private suspend fun readCharacteristic(
+    suspend fun readCharacteristic(
         serviceId: UUID,
         characteristicId: UUID
     ): DataByteArray? {
@@ -36,7 +39,7 @@ class PodbikeBluetoothDeviceWrapper(private val client: ClientBleGatt) {
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    private suspend fun writeCharacteristic(
+    suspend fun writeCharacteristic(
         serviceId: UUID,
         characteristicId: UUID,
         value: DataByteArray
@@ -47,12 +50,14 @@ class PodbikeBluetoothDeviceWrapper(private val client: ClientBleGatt) {
 
     }
 
-    private suspend fun getCharacteristicNotifications(
+    suspend fun getCharacteristicNotifications(
         serviceId: UUID,
         characteristicId: UUID
     ): Flow<DataByteArray>? {
-        return services?.findService(serviceId)
+        println("getCharacteristicNotifications")
+        val value = services?.findService(serviceId)
             ?.findCharacteristic(characteristicId)
             ?.getNotifications()
+        return value
     }
 }

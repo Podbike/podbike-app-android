@@ -5,6 +5,7 @@ import com.kfc_polska.ui.base.UiAction
 import com.kfc_polska.ui.base.UiEffect
 import com.kfc_polska.ui.base.UiState
 import com.podbike.app.data.bluetooth.manager.BluetoothManager
+import com.podbike.app.data.bluetooth.wrapper.PodbikeDevice
 import com.podbike.app.ui.base.StateViewModel
 import com.podbike.app.ui.dashboard.DashboardViewModel.DashboardAction
 import com.podbike.app.ui.dashboard.DashboardViewModel.DashboardEffect
@@ -13,6 +14,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.random.Random
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
@@ -28,11 +30,28 @@ class DashboardViewModel @Inject constructor(
 
     private fun dashboard() {
         dashboardJob = viewModelScope.launch {
-            launch {
-                bluetoothManager.streamDeviceStatus().collect { deviceStatus ->
-                    updateState { copy(isLoading = false, deviceStatus = deviceStatus) }
-                }
-            }
+            val device = bluetoothManager.selectedDevice
+            launch { device?.data?.battery?.collect { updateDeviceDataState(battery = it) } }
+            launch { device?.data?.speed?.collect { updateDeviceDataState(speed = it) } }
+            launch { device?.data?.distance?.collect { updateDeviceDataState(distance = it) } }
+        }
+    }
+
+    private fun updateDeviceDataState(
+        speed: Int? = null,
+        battery: Int? = null,
+        distance: Float? = null
+    ) {
+        updateState {
+            copy(
+                isLoading = !isLoading,
+                deviceData = DeviceDataUiModel(
+                    speed = speed ?: this.deviceData?.speed ?: 0,
+                    battery = battery ?: this.deviceData?.battery ?: 0,
+                    distance = distance ?: this.deviceData?.distance ?: 0f,
+                    time = 0,
+                )
+            )
         }
     }
 
@@ -98,7 +117,7 @@ class DashboardViewModel @Inject constructor(
         val isBluetoothEnabled: Boolean = false,
         val isLocationEnabled: Boolean = false,
         val isLoading: Boolean = true,
-        val deviceStatus: DeviceStatus? = null,
+        val deviceData: DeviceDataUiModel? = null,
         val error: ErrorTypeSealed? = null
     ) : UiState
 
