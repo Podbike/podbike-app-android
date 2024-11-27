@@ -72,7 +72,6 @@ class AutoconnectFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         subscribeToViewModel()
         setupBindings()
-        binding.fragmentAutoconnectHeader.text = "${getString(R.string.ConnectingTo)} FRIKAR"
     }
 
     override fun onResume() {
@@ -113,6 +112,12 @@ class AutoconnectFragment : BaseFragment() {
                 fragmentAutoconnectProgressBar.visibility = View.INVISIBLE
                 fragmentAutoconnectProgressText.text = getString(R.string.FrikarConnectionLost)
                 fragmentAutoconnectConnectButton.text = getString(R.string.FrikarReconnect)
+            }
+            if (state.selectedDevice == null) {
+                fragmentAutoconnectHeader.text = "${getString(R.string.ConnectingTo)} FRIKAR"
+            } else {
+                fragmentAutoconnectHeader.text =
+                    "${getString(R.string.ConnectingTo)} ${state.selectedDevice.name}"
             }
         }
     }

@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.kfc_polska.ui.base.UiAction
 import com.kfc_polska.ui.base.UiEffect
 import com.kfc_polska.ui.base.UiState
+import com.podbike.app.data.UserPreferences
 import com.podbike.app.data.bluetooth.manager.BluetoothManager
 import com.podbike.app.ui.base.StateViewModel
 import com.podbike.app.ui.scanning.DevicesViewModel.DevicesAction
@@ -18,7 +19,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DevicesViewModel @Inject constructor(
-    private val bluetoothManager: BluetoothManager
+    private val bluetoothManager: BluetoothManager,
+    private val userPreferences: UserPreferences
 ) : StateViewModel<DevicesState, DevicesAction, DevicesEffect>(DevicesState()) {
 
     sealed class ErrorTypeSealed(val error: Throwable) {
@@ -73,6 +75,7 @@ class DevicesViewModel @Inject constructor(
                         )
                         Timber.d("Connect result: $result")
                         result?.let {
+                            userPreferences.addRecentDevice(action.deviceInfo)
                             sendEffect(DevicesEffect.ConnectToDevice)
                         }
                     }

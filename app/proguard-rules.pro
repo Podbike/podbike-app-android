@@ -19,3 +19,12 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-keep class com.podbike.app.ui.scanning.DeviceInfo {
+    <fields>;
+}
+
+# Preserve the Gson library classes
+-keep class com.google.gson.** { *; }
+-keepattributes Signature
+-keepattributes *Annotation*

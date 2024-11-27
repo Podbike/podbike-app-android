@@ -5,6 +5,10 @@ import android.content.SharedPreferences
 import android.icu.util.LocaleData
 import android.icu.util.ULocale
 import android.os.Build
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.podbike.app.ui.scanning.DeviceInfo
+import timber.log.Timber
 
 class UserPreferencesImpl(context: Context) : UserPreferences {
 
@@ -13,10 +17,12 @@ class UserPreferencesImpl(context: Context) : UserPreferences {
         const val KEY_SPEED_UNIT = "speed_unit"
         const val KEY_DISTANCE_UNIT = "distance_unit"
         const val KEY_TEMPERATURE_UNIT = "temperature_unit"
+        const val KEY_CONNECTED_DEVICES = "connected_devices"
     }
 
     private val sharedPreferences: SharedPreferences =
         context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+    private val gson = Gson()
 
     override fun saveSpeedUnit(speedUnit: SpeedUnit) {
         sharedPreferences.edit().putString(KEY_SPEED_UNIT, speedUnit.name).apply()
@@ -46,6 +52,38 @@ class UserPreferencesImpl(context: Context) : UserPreferences {
         val temperatureUnitName =
             sharedPreferences.getString(KEY_TEMPERATURE_UNIT, getDefaultTemperatureUnit().name)
         return TemperatureUnit.valueOf(temperatureUnitName!!)
+    }
+
+    override fun addRecentDevice(deviceInfo: DeviceInfo) {
+        val devices = getRecentDevices().toMutableList()
+        devices.removeAll { it.address == deviceInfo.address }
+        devices.add(0, deviceInfo)
+        saveRecentDevices(devices)
+    }
+
+    override fun getRecentDevices(): List<DeviceInfo> {
+        val json = sharedPreferences.getString(KEY_CONNECTED_DEVICES, null) ?: return emptyList()
+        return try {
+            val type = object : TypeToken<List<DeviceInfo>>() {}.type
+            gson.fromJson(json, type)
+        } catch (e: Exception) {
+            Timber.e(e)
+            emptyList()
+        }
+    }
+
+    override fun getMostRecentDevice(): DeviceInfo? {
+        return getRecentDevices().firstOrNull()
+    }
+
+    private fun saveRecentDevices(devices: List<DeviceInfo>) {
+        val json = try {
+            gson.toJson(devices)
+        } catch (e: Exception) {
+            Timber.e(e)
+            return
+        }
+        sharedPreferences.edit().putString(KEY_CONNECTED_DEVICES, json).apply()
     }
 
     private fun getDefaultSpeedUnit(): SpeedUnit {
@@ -83,5 +121,4 @@ class UserPreferencesImpl(context: Context) : UserPreferences {
             TemperatureUnit.CELSIUS
         }
     }
-
 }

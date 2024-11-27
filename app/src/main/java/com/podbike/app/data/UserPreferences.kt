@@ -1,5 +1,7 @@
 package com.podbike.app.data
 
+import com.podbike.app.ui.scanning.DeviceInfo
+
 interface UserPreferences {
     fun saveSpeedUnit(speedUnit: SpeedUnit)
     fun getSpeedUnit(): SpeedUnit
@@ -9,4 +11,9 @@ interface UserPreferences {
 
     fun saveTemperatureUnit(temperatureUnit: TemperatureUnit)
     fun getTemperatureUnit(): TemperatureUnit
+
+    fun addRecentDevice(deviceInfo: DeviceInfo)
+    fun getRecentDevices(): List<DeviceInfo>
+    fun getMostRecentDevice(): DeviceInfo?
+
 }

@@ -24,6 +24,7 @@ kotlinBleScanner = "1.1.0"
 kotlinBleClient = "1.1.0"
 kotlinBleAdvertiser = "1.1.0"
 timber = "5.0.1"
+gson = "2.10.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -51,6 +52,7 @@ kotlin-ble-scanner = { group = "no.nordicsemi.android.kotlin.ble", name = "scann
 kotlin-ble-client = { group = "no.nordicsemi.android.kotlin.ble", name = "client", version.ref = "kotlinBleClient" }
 kotlin-ble-advertiser = { group = "no.nordicsemi.android.kotlin.ble", name = "advertiser", version.ref = "kotlinBleAdvertiser" }
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

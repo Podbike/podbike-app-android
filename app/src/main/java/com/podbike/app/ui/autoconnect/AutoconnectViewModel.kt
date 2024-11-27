@@ -4,9 +4,11 @@ import androidx.lifecycle.viewModelScope
 import com.kfc_polska.ui.base.UiAction
 import com.kfc_polska.ui.base.UiEffect
 import com.kfc_polska.ui.base.UiState
+import com.podbike.app.data.UserPreferences
 import com.podbike.app.data.bluetooth.manager.BluetoothManager
 import com.podbike.app.ui.autoconnect.AutoconnectViewModel.*
 import com.podbike.app.ui.base.StateViewModel
+import com.podbike.app.ui.scanning.DeviceInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -15,7 +17,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AutoconnectViewModel @Inject constructor(
-    private val bluetoothManager: BluetoothManager
+    private val bluetoothManager: BluetoothManager,
+    private val userPreferences: UserPreferences
 ) : StateViewModel<AutoconnectState, AutoconnectAction, AutoconnectEffect>(AutoconnectState()) {
 
     sealed class ErrorTypeSealed(val error: Throwable) {
@@ -28,9 +31,29 @@ class AutoconnectViewModel @Inject constructor(
     private fun autoconnect() {
         autoconnectJob = viewModelScope.launch {
             launch {
-                //TODO replace with real autoconnect
-                delay(3000)
-                sendEffect(AutoconnectEffect.AutoconnectToFrikar)
+                val deviceInfo = userPreferences.getMostRecentDevice()
+                if (deviceInfo == null) {
+                    delay(1000)
+                    updateState {
+                        copy(
+                            isLoading = false,
+                            error = ErrorTypeSealed.ConnectToDeviceError(Throwable("No device found"))
+                        )
+                    }
+                    return@launch
+                } else {
+                    updateState {
+                        copy(
+                            selectedDevice = deviceInfo,
+                            isLoading = true,
+                            error = null
+                        )
+                    }
+                    delay(1000)
+                    bluetoothManager.connect(deviceInfo, viewModelScope = viewModelScope)
+                    delay(1000)
+                    sendEffect(AutoconnectEffect.AutoconnectToFrikar)
+                }
             }
         }
     }
@@ -102,7 +125,8 @@ class AutoconnectViewModel @Inject constructor(
         val isBluetoothEnabled: Boolean = false,
         val isLocationEnabled: Boolean = false,
         val isLoading: Boolean = false,
-        val error: ErrorTypeSealed? = null
+        val error: ErrorTypeSealed? = null,
+        val selectedDevice: DeviceInfo? = null
     ) : UiState
 
     sealed class AutoconnectAction : UiAction {
