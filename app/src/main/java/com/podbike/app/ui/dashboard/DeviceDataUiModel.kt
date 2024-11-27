@@ -11,5 +11,5 @@ data class DeviceDataUiModel(
     val batteryString: String
         get() = "$battery"
     val distanceString: String
-        get() = "$distance km"
+        get() = "${distance / 1000} km"
 }
