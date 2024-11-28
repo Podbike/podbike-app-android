@@ -1,4 +1,4 @@
-package com.podbike.app.data.bluetooth.wrapper
+package com.podbike.app.data.bluetooth.model
 
 import android.Manifest
 import androidx.annotation.RequiresPermission
@@ -51,10 +51,9 @@ class PodbikeDevice(private val client: ClientBleGatt) {
     }
 
     suspend fun getCharacteristicNotifications(
-        serviceId: UUID,
-        characteristicId: UUID
+        characteristicId: UUID,
+        serviceId: UUID = HaarekBoardSpec.PODBIKE_SERVICE_UUID,
     ): Flow<DataByteArray>? {
-        println("getCharacteristicNotifications")
         val value = services?.findService(serviceId)
             ?.findCharacteristic(characteristicId)
             ?.getNotifications()

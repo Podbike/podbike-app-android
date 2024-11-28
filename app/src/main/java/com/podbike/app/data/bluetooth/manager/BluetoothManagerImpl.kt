@@ -3,19 +3,15 @@ package com.podbike.app.data.bluetooth.manager
 import android.Manifest
 import android.content.Context
 import androidx.annotation.RequiresPermission
-import com.podbike.app.data.bluetooth.wrapper.PodbikeDevice
-import com.podbike.app.ui.dashboard.DeviceDataUiModel
+import com.podbike.app.data.bluetooth.model.PodbikeDevice
 import com.podbike.app.ui.scanning.DeviceInfo
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
 import no.nordicsemi.android.kotlin.ble.core.scanner.BleScanFilter
 import no.nordicsemi.android.kotlin.ble.scanner.BleScanner
 import no.nordicsemi.android.kotlin.ble.scanner.aggregator.BleScanResultAggregator
-import kotlin.random.Random
 
 class BluetoothManagerImpl(val context: Context) : BluetoothManager {
     private val connectedDevices = mutableListOf<PodbikeDevice>()
