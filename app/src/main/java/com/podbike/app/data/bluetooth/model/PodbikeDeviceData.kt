@@ -28,15 +28,16 @@ data class PodbikeDeviceData(private val device: PodbikeDevice) {
                 HaarekBoardSpec.LIGHT_STATUS_CHARACTERISTIC_UUID
             )?.collect { data ->
                 val bytes = data.value
+                print(bytes[0].toInt().toChar())
                 val status = PodbikeLightStatus(
-                    lowBeam = bytes[0].toInt() != 0,
-                    highBeam = bytes[6].toInt() != 0,
-                    rearLight = bytes[5].toInt() != 0,
-                    brakeLight = bytes[4].toInt() != 0,
-                    indicatorLeft = bytes[3].toInt() != 0,
-                    indicatorRight = bytes[2].toInt() != 0,
-                    reverseLight = bytes[1].toInt() != 0,
-                    runningLight = bytes[7].toInt() != 0
+                    lowBeam = bytes[0].toInt().toChar() != '0',
+                    highBeam = bytes[6].toInt().toChar() != '0',
+                    rearLight = bytes[5].toInt().toChar() != '0',
+                    brakeLight = bytes[4].toInt().toChar() != '0',
+                    indicatorLeft = bytes[3].toInt().toChar() != '0',
+                    indicatorRight = bytes[2].toInt().toChar() != '0',
+                    reverseLight = bytes[1].toInt().toChar() != '0',
+                    runningLight = bytes[7].toInt().toChar() != '0'
                 )
                 emit(status)
             }

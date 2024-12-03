@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
 import no.nordicsemi.android.kotlin.ble.core.scanner.BleScanFilter
+import no.nordicsemi.android.kotlin.ble.core.scanner.BleScannerSettings
 import no.nordicsemi.android.kotlin.ble.scanner.BleScanner
 import no.nordicsemi.android.kotlin.ble.scanner.aggregator.BleScanResultAggregator
 
@@ -40,7 +41,10 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
     override fun scan(filters: List<BleScanFilter>): Flow<List<DeviceInfo>> {
         val aggregator = BleScanResultAggregator()
 
-        return BleScanner(context).scan(filters)
+        return BleScanner(context).scan(
+            filters,
+            settings = BleScannerSettings(includeStoredBondedDevices = false)
+        )
             .map { aggregator.aggregateDevices(it) }
             .map { it -> it.map { DeviceInfo(it.name ?: "Unknown", it.address) } }
     }
