@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "92233413931",
+    "project_id": "podbike-dashboard-dev",
+    "storage_bucket": "podbike-dashboard-dev.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:92233413931:android:8555b0df8b70faacda016e",
+        "android_client_info": {
+          "package_name": "com.podbike.app.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZ0LocsV1kIuTdB42jzwaFG6ZNmKImWKA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
