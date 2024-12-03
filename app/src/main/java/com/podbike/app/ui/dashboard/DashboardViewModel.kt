@@ -47,7 +47,7 @@ class DashboardViewModel @Inject constructor(
                 device?.data?.speed?.collect {
                     updateDeviceDataState(
                         speed = unitConverter.convertSpeed(
-                            it,
+                            it.toFloat(),
                             speedUnit,
                             0
                         )

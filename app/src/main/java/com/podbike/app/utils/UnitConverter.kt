@@ -15,7 +15,7 @@ class UnitConverter() {
     }
 
     fun convertSpeed(
-        metersPerSecond: Int,
+        metersPerSecond: Float,
         speedUnit: SpeedUnit,
         decimalPlaces: Int
     ): String {
