@@ -55,6 +55,11 @@
         <item name="android:textStyle">normal</item>
     </style>
 
+    <style name="CircleShape">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
     <style name="TextBodyDark" parent="TextAppearance.MaterialComponents.Body1">
         <item name="android:fontFamily">@font/poppins</item>
         <item name="fontFamily">@font/poppins</item>

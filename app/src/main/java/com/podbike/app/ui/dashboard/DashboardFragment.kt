@@ -10,10 +10,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.podbike.app.R
 import com.podbike.app.databinding.FragmentDashboardBinding
 import com.podbike.app.ui.base.BaseFragment
 import com.podbike.app.ui.base.adjustEdgeToEdgeMargins
@@ -93,7 +95,12 @@ class DashboardFragment : BaseFragment() {
 
     private fun setupBindings() {
         with(binding) {
-
+            fragmentDashboardSettings.setOnClickListener {
+                viewModel.processAction(DashboardAction.SettingsClicked)
+            }
+            fragmentDashboardHelp.setOnClickListener {
+                viewModel.processAction(DashboardAction.HelpClicked)
+            }
         }
     }
 
@@ -101,8 +108,31 @@ class DashboardFragment : BaseFragment() {
         with(binding) {
             state.deviceData?.let {
                 fragmentDashboardSpeed.text = it.speedString
-                fragmentDashboardBatteryIndicator.progress = it.battery
-                fragmentDashboardDistance.text = it.distanceString
+                fragmentDashboardBatteryIndicator.setProgress(it.battery, "${it.battery} km")
+                fragmentDashboardDistance.text = it.distance.toString()
+                fragmentDashboardAssistance.currentAssistance = it.assist
+                fragmentDashboardCadence.currentCadence = it.cadence
+
+                fragmentDashboardIconsLayout.isVisible = it.speed % 2 == 0
+                fragmentDashboardMenuLayout.isVisible = it.speed % 2 == 1
+
+                fragmentDashboardTurnIndicator.setTurnIndicators(
+                    it.lightStatus.indicatorLeft,
+                    it.lightStatus.indicatorRight
+                )
+                fragmentDashboardHazardIndicator.setHazardIndicator(it.lightStatus.brakeLight)
+
+                if (it.lightStatus.indicatorLeft || it.lightStatus.indicatorRight) {
+                    fragmentDashboardTurnIndicator.isVisible = true
+                    fragmentDashboardLayout.isVisible = false
+                } else if (it.lightStatus.brakeLight) {
+                    fragmentDashboardHazardIndicator.isVisible = true
+                    fragmentDashboardLayout.isVisible = false
+                } else {
+                    fragmentDashboardTurnIndicator.isVisible = false
+                    fragmentDashboardHazardIndicator.isVisible = false
+                    fragmentDashboardLayout.isVisible = true
+                }
             }
         }
     }
@@ -114,6 +144,8 @@ class DashboardFragment : BaseFragment() {
             DashboardEffect.NavigateToBluetoothSettings -> enableBluetooth()
             DashboardEffect.NavigateToLocationPermissions -> permissionManager.requestPermissions()
             DashboardEffect.NavigateToLocationSettings -> intentManager.openLocationSettings()
+            DashboardEffect.NavigateToAppSettings -> findNavController().navigate(R.id.action_dashboardFragment_to_settingsFragment)
+            DashboardEffect.NavigateToHelp -> findNavController().navigate(R.id.action_dashboardFragment_to_showTutorialFragment)
         }
     }
 

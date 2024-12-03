@@ -111,6 +111,14 @@ class DashboardViewModel @Inject constructor(
                 }
             }
 
+            is DashboardAction.SettingsClicked -> {
+                sendEffect(DashboardEffect.NavigateToAppSettings)
+            }
+
+            is DashboardAction.HelpClicked -> {
+                sendEffect(DashboardEffect.NavigateToHelp)
+            }
+
             is DashboardAction.Retry -> {
                 updateState { copy(isLoading = true, error = null) }
             }
@@ -142,6 +150,8 @@ class DashboardViewModel @Inject constructor(
             val isLocationEnabled: Boolean = false,
         ) : DashboardAction()
 
+        data object SettingsClicked : DashboardAction()
+        data object HelpClicked : DashboardAction()
         data object Retry : DashboardAction()
         data object GoBack : DashboardAction()
     }
@@ -152,6 +162,8 @@ class DashboardViewModel @Inject constructor(
         data object NavigateToLocationPermissions : DashboardEffect()
         data object NavigateToBluetoothSettings : DashboardEffect()
         data object NavigateToLocationSettings : DashboardEffect()
+        data object NavigateToAppSettings : DashboardEffect()
+        data object NavigateToHelp : DashboardEffect()
     }
 
 }

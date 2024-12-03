@@ -31,9 +31,13 @@ class DevicesViewModel @Inject constructor(
     private var loadDevicesJob: Job? = null
 
     private fun loadDevices() {
+        userPreferences.getRecentDevices().let { recentDevices ->
+            updateState { copy(devices = recentDevices) }
+        }
         loadDevicesJob = viewModelScope.launch {
             bluetoothManager.scan().collect { deviceList ->
-                updateState { copy(isLoading = false, devices = deviceList) }
+                val updatedDevices = (uiState.value.devices + deviceList).distinctBy { it.address }
+                updateState { copy(isLoading = false, devices = updatedDevices) }
             }
         }
     }

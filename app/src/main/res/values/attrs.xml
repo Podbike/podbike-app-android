@@ -1,0 +1,8 @@
+<resources>
+    <declare-styleable name="AssistanceMeter">
+        <attr name="currentAssistance" format="integer" />
+    </declare-styleable>
+    <declare-styleable name="CadenceMeter">
+        <attr name="currentCadence" format="integer" />
+    </declare-styleable>
+</resources>

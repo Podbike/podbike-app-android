@@ -2,11 +2,14 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="red">#FFFF0000</color>
     <color name="color_primary">#44d62c</color>
     <color name="color_primary_dark">#303F9F</color>
     <color name="color_accent">#44d62c</color>
     <color name="color_background_gradient_start">#353A40</color>
     <color name="color_background_gradient_end">#16171B</color>
+    <color name="color_battery_progress_gradient_start">#44D62C</color>
+    <color name="color_battery_progress_gradient_end">#3BAC28</color>
 
     <color name="text_color_primary">#44d62c</color>
     <color name="text_color_secondary">#F0F0F0</color>

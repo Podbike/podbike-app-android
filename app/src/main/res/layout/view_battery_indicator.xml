@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/batteryMeter"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:progress="20"
+        app:indicatorColor="#46ba35"
+        app:trackColor="#c4c4c4"
+        app:trackStopIndicatorSize="0dp"
+        app:trackThickness="40dp" />
+
+    <TextView
+        android:id="@+id/rangeLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="8dp"
+        android:text="0 km"
+        android:textSize="16sp" />
+
+</merge>

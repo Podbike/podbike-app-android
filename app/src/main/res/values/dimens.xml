@@ -1,0 +1,6 @@
+<resources>
+    <dimen name="padding32">32dp</dimen>
+    <dimen name="padding52">52dp</dimen>
+    <dimen name="turn_indicator_top_margin">52dp</dimen>
+    <dimen name="turn_indicator_bottom_margin">16dp</dimen>
+</resources>
