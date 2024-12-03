@@ -42,14 +42,18 @@ class CustomProgressBar @JvmOverloads constructor(
 
         if (progress <= 30) {
             binding.progressBarIndicatorView.setBackgroundColor(Color.RED)
-            //Logic temporarily hidden
-//            if (progress == 10) {
-//                alertBatteryStatus("Battery Critical")
-//            } else if (progress == 30) {
-//                alertBatteryStatus("Battery Low")
         } else {
             binding.progressBarIndicatorView.setBackgroundResource(R.drawable.gradient_battery_progress)
-            binding.progressBarTextView.text = progressText
+        }
+        binding.progressBarTextView.text = progressText
+    }
+
+    // not used for now
+    private fun showBatteryStatusAlert(progress: Int) {
+        if (progress == 10) {
+            alertBatteryStatus("Battery Critical")
+        } else if (progress == 30) {
+            alertBatteryStatus("Battery Low")
         }
     }
 

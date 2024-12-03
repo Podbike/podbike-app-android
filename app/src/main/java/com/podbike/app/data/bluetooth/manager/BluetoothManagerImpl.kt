@@ -24,17 +24,26 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
         waitForPairing: Boolean,
         viewModelScope: CoroutineScope,
     ): PodbikeDevice {
-        val connection = ClientBleGatt.connect(context, device.address, viewModelScope)
+        try {
+            val connection = ClientBleGatt.connect(context, device.address, viewModelScope)
+            println("Connecting to device: ${device.address}")
 
-        if (waitForPairing)
-            connection.waitForBonding()
+            if (waitForPairing) {
+                connection.waitForBonding()
+                println("Waiting for bonding with device: ${device.address}")
+            }
 
-        val podbikeDevice = PodbikeDevice(connection)
-        connectedDevices.add(podbikeDevice)
+            val podbikeDevice = PodbikeDevice(connection)
+            connectedDevices.add(podbikeDevice)
 
-        podbikeDevice.discoverServices()
-        selectedDevice = podbikeDevice
-        return podbikeDevice
+            podbikeDevice.discoverServices()
+            println("Services discovered for device: ${device.address}")
+            selectedDevice = podbikeDevice
+            return podbikeDevice
+        } catch (e: Exception) {
+            println("Failed to connect to device: ${device.address}, error: ${e.message}")
+            throw e
+        }
     }
 
     @RequiresPermission(allOf = [Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT])

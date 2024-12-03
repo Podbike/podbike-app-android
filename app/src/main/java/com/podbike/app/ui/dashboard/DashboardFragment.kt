@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 import kotlin.getValue
+import kotlin.random.Random
 
 @AndroidEntryPoint
 class DashboardFragment : BaseFragment() {
@@ -107,26 +108,33 @@ class DashboardFragment : BaseFragment() {
     private fun processUiState(state: DashboardViewModel.DashboardState) {
         with(binding) {
             state.deviceData?.let {
-                fragmentDashboardSpeed.text = it.speedString
-                fragmentDashboardBatteryIndicator.setProgress(it.battery, "${it.battery} km")
+                fragmentDashboardSpeed.text = it.speed
+                fragmentDashboardBatteryIndicator.setProgress(
+                    it.battery,
+                    "${it.battery} ${state.deviceData.distanceAbbreviation}"
+                )
                 fragmentDashboardDistance.text = it.distance.toString()
+                fragmentDashboardDistanceUnit.text = it.distanceAbbreviation
                 fragmentDashboardAssistance.currentAssistance = it.assist
                 fragmentDashboardCadence.currentCadence = it.cadence
 
-                fragmentDashboardIconsLayout.isVisible = it.speed % 2 == 0
-                fragmentDashboardMenuLayout.isVisible = it.speed % 2 == 1
+                //TODO remove this mock eventually
+                val randomBoolean = Random.nextBoolean()
+                fragmentDashboardIconsLayout.isVisible = randomBoolean
+                fragmentDashboardMenuLayout.isVisible = !randomBoolean
 
                 fragmentDashboardTurnIndicator.setTurnIndicators(
                     it.lightStatus.indicatorLeft,
                     it.lightStatus.indicatorRight
                 )
+
                 fragmentDashboardHazardIndicator.setHazardIndicator(it.lightStatus.brakeLight)
 
-                if (it.lightStatus.indicatorLeft || it.lightStatus.indicatorRight) {
-                    fragmentDashboardTurnIndicator.isVisible = true
-                    fragmentDashboardLayout.isVisible = false
-                } else if (it.lightStatus.brakeLight) {
+                if (it.lightStatus.indicatorLeft && it.lightStatus.indicatorRight) {
                     fragmentDashboardHazardIndicator.isVisible = true
+                    fragmentDashboardLayout.isVisible = false
+                } else if (it.lightStatus.indicatorLeft || it.lightStatus.indicatorRight) {
+                    fragmentDashboardTurnIndicator.isVisible = true
                     fragmentDashboardLayout.isVisible = false
                 } else {
                     fragmentDashboardTurnIndicator.isVisible = false

@@ -33,10 +33,12 @@ class AssistanceMeter @JvmOverloads constructor(
     }
 
     private fun adjustAssistanceLevel(level: Int) {
-        for (i in 0 until level) {
+        val stages = listOf(0, 20, 40, 60, 80, 100)
+        val activeStages = stages.indexOfFirst { it > level }
+        for (i in 0 until activeStages) {
             binding.assistanceRow.getChildAt(i)?.setBackgroundColor(Color.parseColor("#44D62C"))
         }
-        for (j in level until 5) {
+        for (j in activeStages until stages.size) {
             binding.assistanceRow.getChildAt(j)?.setBackgroundColor(Color.parseColor("#C4C4C4"))
         }
     }

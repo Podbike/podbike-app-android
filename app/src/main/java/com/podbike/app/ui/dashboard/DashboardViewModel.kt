@@ -4,12 +4,16 @@ import androidx.lifecycle.viewModelScope
 import com.kfc_polska.ui.base.UiAction
 import com.kfc_polska.ui.base.UiEffect
 import com.kfc_polska.ui.base.UiState
+import com.podbike.app.data.DistanceUnit
+import com.podbike.app.data.SpeedUnit
+import com.podbike.app.data.UserPreferences
 import com.podbike.app.data.bluetooth.manager.BluetoothManager
 import com.podbike.app.data.bluetooth.model.PodbikeLightStatus
 import com.podbike.app.ui.base.StateViewModel
 import com.podbike.app.ui.dashboard.DashboardViewModel.DashboardAction
 import com.podbike.app.ui.dashboard.DashboardViewModel.DashboardEffect
 import com.podbike.app.ui.dashboard.DashboardViewModel.DashboardState
+import com.podbike.app.utils.UnitConverter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -17,7 +21,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
-    private val bluetoothManager: BluetoothManager
+    private val bluetoothManager: BluetoothManager,
+    private val userPreferences: UserPreferences,
+    private val unitConverter: UnitConverter
 ) : StateViewModel<DashboardState, DashboardAction, DashboardEffect>(DashboardState()) {
 
     sealed class ErrorTypeSealed(val error: Throwable) {
@@ -27,12 +33,38 @@ class DashboardViewModel @Inject constructor(
 
     private var dashboardJob: Job? = null
 
+    private val distanceUnit: DistanceUnit
+        get() = userPreferences.getDistanceUnit()
+
+    private val speedUnit: SpeedUnit
+        get() = userPreferences.getSpeedUnit()
+
     private fun dashboard() {
         dashboardJob = viewModelScope.launch {
             val device = bluetoothManager.selectedDevice
             launch { device?.data?.battery?.collect { updateDeviceDataState(battery = it) } }
-            launch { device?.data?.speed?.collect { updateDeviceDataState(speed = it) } }
-            launch { device?.data?.distance?.collect { updateDeviceDataState(distance = it) } }
+            launch {
+                device?.data?.speed?.collect {
+                    updateDeviceDataState(
+                        speed = unitConverter.convertSpeed(
+                            it,
+                            speedUnit,
+                            0
+                        )
+                    )
+                }
+            }
+            launch {
+                device?.data?.distance?.collect {
+                    updateDeviceDataState(
+                        distance = unitConverter.convertDistance(
+                            it,
+                            distanceUnit,
+                            1
+                        ),
+                    )
+                }
+            }
             launch { device?.data?.assist?.collect { updateDeviceDataState(assist = it) } }
             launch { device?.data?.cadence?.collect { updateDeviceDataState(cadence = it) } }
             launch { device?.data?.lightStatus?.collect { updateDeviceDataState(lightStatus = it) } }
@@ -40,9 +72,9 @@ class DashboardViewModel @Inject constructor(
     }
 
     private fun updateDeviceDataState(
-        speed: Int? = null,
+        speed: String? = null,
         battery: Int? = null,
-        distance: Float? = null,
+        distance: String? = null,
         assist: Int? = null,
         cadence: Int? = null,
         lightStatus: PodbikeLightStatus? = null
@@ -51,14 +83,15 @@ class DashboardViewModel @Inject constructor(
             copy(
                 isLoading = !isLoading,
                 deviceData = DeviceDataUiModel(
-                    speed = speed ?: this.deviceData?.speed ?: 0,
+                    speed = speed ?: this.deviceData?.speed ?: "0",
                     battery = battery ?: this.deviceData?.battery ?: 0,
-                    distance = distance ?: this.deviceData?.distance ?: 0f,
+                    distance = distance ?: this.deviceData?.distance ?: "0",
                     assist = assist ?: this.deviceData?.assist ?: 0,
                     cadence = cadence ?: this.deviceData?.cadence ?: 0,
                     lightStatus = lightStatus ?: this.deviceData?.lightStatus
                     ?: PodbikeLightStatus(),
                     time = 0,
+                    distanceAbbreviation = unitConverter.getDistanceUnitAbbreviation(distanceUnit)
                 )
             )
         }
