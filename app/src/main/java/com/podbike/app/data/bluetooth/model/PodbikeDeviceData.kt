@@ -1,11 +1,13 @@
 package com.podbike.app.data.bluetooth.model
 
 import com.podbike.app.data.bluetooth.values.HaarekBoardSpec
+import com.podbike.app.ui.scanning.DeviceInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.util.UUID
 
-data class PodbikeDeviceData(private val device: PodbikeDevice) {
+data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: DeviceInfo) {
+
     val speed: Flow<Int>
         get() = getStringCharacteristicData(HaarekBoardSpec.SPEED_CHARACTERISTIC_UUID)
 

@@ -3,6 +3,7 @@ package com.podbike.app.data.bluetooth.model
 import android.Manifest
 import androidx.annotation.RequiresPermission
 import com.podbike.app.data.bluetooth.values.HaarekBoardSpec
+import com.podbike.app.ui.scanning.DeviceInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
@@ -15,11 +16,11 @@ import java.util.UUID
  * A Wrapper class over ClientBleGatt for easy access to the methods specific for Podbike.
  */
 
-class PodbikeDevice(private val client: ClientBleGatt) {
+class PodbikeDevice(private val client: ClientBleGatt, val device: DeviceInfo) {
 
     private var services: ClientBleGattServices? = null
 
-    val data = PodbikeDeviceData(this)
+    val data = PodbikeDeviceData(this, device)
 
     suspend fun discoverServices() {
         services = client.discoverServices()

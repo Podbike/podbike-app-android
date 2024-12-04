@@ -20,7 +20,7 @@ import com.podbike.app.R
 import com.podbike.app.databinding.FragmentDevicesBinding
 import com.podbike.app.ui.base.BaseFragment
 import com.podbike.app.ui.base.adjustEdgeToEdgePaddings
-import com.podbike.app.ui.scanning.DeviceInfo
+import com.podbike.app.ui.scanning.DeviceItem
 import com.podbike.app.ui.scanning.DevicesAdapter
 import com.podbike.app.ui.scanning.DevicesViewModel
 import com.podbike.app.ui.scanning.DevicesViewModel.DevicesEffect
@@ -91,8 +91,8 @@ class DevicesFragment : BaseFragment(), OnDeviceClickListener {
         validatePermissions()
     }
 
-    override fun onDeviceClick(deviceInfo: DeviceInfo) {
-        viewModel.processAction(DevicesViewModel.DevicesAction.DeviceClick(deviceInfo))
+    override fun onDeviceClick(deviceItem: DeviceItem) {
+        viewModel.processAction(DevicesViewModel.DevicesAction.DeviceClick(deviceItem))
     }
 
     private fun setupRecyclerView() {

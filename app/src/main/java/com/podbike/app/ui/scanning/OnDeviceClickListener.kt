@@ -1,5 +1,5 @@
 package com.podbike.app.ui.scanning
 
 interface OnDeviceClickListener {
-    fun onDeviceClick(deviceInfo: DeviceInfo)
+    fun onDeviceClick(deviceInfo: DeviceItem)
 }

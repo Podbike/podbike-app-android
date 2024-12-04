@@ -29,14 +29,17 @@ class DevicesViewModel @Inject constructor(
     }
 
     private var loadDevicesJob: Job? = null
+    private var currentlyConnectedDevice: DeviceInfo? = null
+        get() = bluetoothManager.selectedDevice?.device
 
     private fun loadDevices() {
         userPreferences.getRecentDevices().let { recentDevices ->
-            updateState { copy(devices = recentDevices) }
+            updateState { copy(devices = recentDevices.map { it.toDeviceItem(it.address == currentlyConnectedDevice?.address) }) }
         }
         loadDevicesJob = viewModelScope.launch {
             bluetoothManager.scan().collect { deviceList ->
-                val updatedDevices = (uiState.value.devices + deviceList).distinctBy { it.address }
+                val updatedDevices =
+                    (uiState.value.devices + deviceList.map { it.toDeviceItem(it.address == currentlyConnectedDevice?.address) }).distinctBy { it.address }
                 updateState { copy(isLoading = false, devices = updatedDevices) }
             }
         }
@@ -73,13 +76,15 @@ class DevicesViewModel @Inject constructor(
             is DevicesAction.DeviceClick -> {
                 viewModelScope.launch {
                     runWithErrorHandling {
+                        val deviceInfo =
+                            DeviceInfo(action.deviceItem.name, action.deviceItem.address)
                         val result = bluetoothManager.connect(
-                            action.deviceInfo,
+                            deviceInfo,
                             viewModelScope = viewModelScope // Feeling bad about this.. not sure how to solve it differently though.
                         )
                         Timber.d("Connect result: $result")
                         result?.let {
-                            userPreferences.addRecentDevice(action.deviceInfo)
+                            userPreferences.addRecentDevice(deviceInfo)
                             sendEffect(DevicesEffect.ConnectToDevice)
                         }
                     }
@@ -122,7 +127,7 @@ class DevicesViewModel @Inject constructor(
         val isBluetoothEnabled: Boolean = false,
         val isLocationEnabled: Boolean = false,
         val isLoading: Boolean = true,
-        val devices: List<DeviceInfo> = emptyList(),
+        val devices: List<DeviceItem> = emptyList(),
         val error: ErrorTypeSealed? = null
     ) : UiState
 
@@ -132,7 +137,7 @@ class DevicesViewModel @Inject constructor(
         data object LocationPermissions : DevicesAction()
         data object EnableBluetooth : DevicesAction()
         data object EnableLocation : DevicesAction()
-        data class DeviceClick(val deviceInfo: DeviceInfo) : DevicesAction()
+        data class DeviceClick(val deviceItem: DeviceItem) : DevicesAction()
         data class PermissionsChanged(
             val hasBluetoothPermissions: Boolean = false,
             val isBluetoothEnabled: Boolean = false,

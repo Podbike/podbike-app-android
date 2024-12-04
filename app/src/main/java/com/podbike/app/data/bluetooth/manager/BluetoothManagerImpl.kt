@@ -33,7 +33,7 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
                 println("Waiting for bonding with device: ${device.address}")
             }
 
-            val podbikeDevice = PodbikeDevice(connection)
+            val podbikeDevice = PodbikeDevice(connection, device)
             connectedDevices.add(podbikeDevice)
 
             podbikeDevice.discoverServices()
