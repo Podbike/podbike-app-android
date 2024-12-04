@@ -120,6 +120,12 @@ class DashboardFragment : BaseFragment() {
                 fragmentDashboardIconsLayout.isVisible = it.isMoving
                 fragmentDashboardMenuLayout.isVisible = !it.isMoving
 
+                if (it.isFreezing) {
+                    fragmentDashboardIcon1.setColorFilter(requireContext().getColor(R.color.white))
+                } else {
+                    fragmentDashboardIcon1.setColorFilter(requireContext().getColor(R.color.gray))
+                }
+
                 fragmentDashboardTurnIndicator.setTurnIndicators(
                     it.lightStatus.indicatorLeft,
                     it.lightStatus.indicatorRight

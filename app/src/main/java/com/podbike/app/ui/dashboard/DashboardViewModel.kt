@@ -90,6 +90,7 @@ class DashboardViewModel @Inject constructor(
         } else {
             uiState.value.deviceData?.isMoving == true
         }
+        val temperature = 2 //TODO replace with real data
         updateState {
             copy(
                 isLoading = !isLoading,
@@ -99,12 +100,13 @@ class DashboardViewModel @Inject constructor(
                     distance = distance ?: this.deviceData?.distance ?: "0",
                     assist = assist ?: this.deviceData?.assist ?: 0,
                     cadence = cadence,
+                    isFreezing = temperature < 4,
                     lightStatus = lightStatus ?: this.deviceData?.lightStatus
                     ?: PodbikeLightStatus(),
                     time = 0,
                     distanceAbbreviation = unitConverter.getDistanceUnitAbbreviation(distanceUnit),
                     range = range ?: this.deviceData?.range ?: 0,
-                    isMoving = isMoving
+                    isMoving = isMoving,
                 )
             )
         }
