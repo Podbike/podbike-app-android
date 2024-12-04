@@ -15,14 +15,14 @@ class UnitConverter() {
     }
 
     fun convertSpeed(
-        metersPerSecond: Float,
+        kilometersPerHour: Float,
         speedUnit: SpeedUnit,
         decimalPlaces: Int
     ): String {
         val result = when (speedUnit) {
-            SpeedUnit.KILOMETERS_PER_HOUR -> metersPerSecond * METERS_PER_SECOND_TO_KMH
-            SpeedUnit.MILES_PER_HOUR -> metersPerSecond * METERS_PER_SECOND_TO_MPH
-            SpeedUnit.METERS_PER_SECOND -> metersPerSecond
+            SpeedUnit.KILOMETERS_PER_HOUR -> kilometersPerHour
+            SpeedUnit.MILES_PER_HOUR -> KILOMETERS_PER_HOUR_TO_MPH * kilometersPerHour
+            SpeedUnit.METERS_PER_SECOND -> KILOMETERS_PER_HOUR_TO_MPS * kilometersPerHour
         }
         return String.format("%.${decimalPlaces}f", result)
     }
@@ -46,8 +46,8 @@ class UnitConverter() {
     companion object {
         private const val METERS_IN_MILE = 1609.344
         private const val METERS_IN_KILOMETER = 1000
-        private const val METERS_PER_SECOND_TO_KMH = 3.6
-        private const val METERS_PER_SECOND_TO_MPH = 2.23694
+        private const val KILOMETERS_PER_HOUR_TO_MPH = 0.62137
+        private const val KILOMETERS_PER_HOUR_TO_MPS = 0.2778
     }
 
 }
