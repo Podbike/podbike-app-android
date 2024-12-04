@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 import kotlin.getValue
-import kotlin.random.Random
 
 @AndroidEntryPoint
 class DashboardFragment : BaseFragment() {
@@ -118,10 +117,8 @@ class DashboardFragment : BaseFragment() {
                 fragmentDashboardAssistance.currentAssistance = it.assist
                 fragmentDashboardCadence.currentCadence = it.cadence
 
-                //TODO remove this mock eventually
-                val randomBoolean = Random.nextBoolean()
-                fragmentDashboardIconsLayout.isVisible = randomBoolean
-                fragmentDashboardMenuLayout.isVisible = !randomBoolean
+                fragmentDashboardIconsLayout.isVisible = it.isMoving
+                fragmentDashboardMenuLayout.isVisible = !it.isMoving
 
                 fragmentDashboardTurnIndicator.setTurnIndicators(
                     it.lightStatus.indicatorLeft,

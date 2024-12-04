@@ -81,6 +81,15 @@ class DashboardViewModel @Inject constructor(
         lightStatus: PodbikeLightStatus? = null,
         range: Int? = null
     ) {
+        //TODO replace cadence with speed eventually
+        val cadence = cadence ?: uiState.value.deviceData?.cadence ?: 0
+        val isMoving = if (cadence >= 3) {
+            true
+        } else if (cadence <= 1) {
+            false
+        } else {
+            uiState.value.deviceData?.isMoving == true
+        }
         updateState {
             copy(
                 isLoading = !isLoading,
@@ -89,12 +98,13 @@ class DashboardViewModel @Inject constructor(
                     battery = battery ?: this.deviceData?.battery ?: 0,
                     distance = distance ?: this.deviceData?.distance ?: "0",
                     assist = assist ?: this.deviceData?.assist ?: 0,
-                    cadence = cadence ?: this.deviceData?.cadence ?: 0,
+                    cadence = cadence,
                     lightStatus = lightStatus ?: this.deviceData?.lightStatus
                     ?: PodbikeLightStatus(),
                     time = 0,
                     distanceAbbreviation = unitConverter.getDistanceUnitAbbreviation(distanceUnit),
                     range = range ?: this.deviceData?.range ?: 0,
+                    isMoving = isMoving
                 )
             )
         }
