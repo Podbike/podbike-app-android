@@ -14,6 +14,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navOptions
 import com.podbike.app.R
 import com.podbike.app.databinding.FragmentAutoconnectBinding
 import com.podbike.app.ui.autoconnect.AutoconnectViewModel.AutoconnectAction
@@ -129,8 +130,27 @@ class AutoconnectFragment : BaseFragment() {
             AutoconnectEffect.NavigateToBluetoothSettings -> enableBluetooth()
             AutoconnectEffect.NavigateToLocationPermissions -> permissionManager.requestPermissions()
             AutoconnectEffect.NavigateToLocationSettings -> intentManager.openLocationSettings()
-            AutoconnectEffect.NavigateToDevices -> findNavController().navigate(R.id.action_autoconnectFragment_to_devicesFragment)
-            AutoconnectEffect.AutoconnectToFrikar -> findNavController().navigate(R.id.action_autoconnectFragment_to_dashboardFragment)
+            AutoconnectEffect.NavigateToDevices -> {
+                val navOptions = navOptions {
+                    popUpTo(R.id.nav_graph) { inclusive = true }
+                }
+                findNavController().navigate(
+                    R.id.action_autoconnectFragment_to_devicesFragment,
+                    null,
+                    navOptions
+                )
+            }
+
+            AutoconnectEffect.AutoconnectToFrikar -> {
+                val navOptions = navOptions {
+                    popUpTo(R.id.nav_graph) { inclusive = true }
+                }
+                findNavController().navigate(
+                    R.id.action_autoconnectFragment_to_dashboardFragment,
+                    null,
+                    navOptions
+                )
+            }
         }
     }
 
