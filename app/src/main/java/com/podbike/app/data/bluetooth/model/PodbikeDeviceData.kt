@@ -21,6 +21,9 @@ data class PodbikeDeviceData(private val device: PodbikeDevice) {
     val assist: Flow<Int>
         get() = getStringCharacteristicData(HaarekBoardSpec.ASSIST_SETTING_CHARACTERISTIC_UUID)
 
+    val range: Flow<Int>
+        get() = getStringCharacteristicData(HaarekBoardSpec.RANGE_CHARACTERISTIC_UUID)
+
 
     val lightStatus: Flow<PodbikeLightStatus>
         get() = flow {

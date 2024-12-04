@@ -68,6 +68,7 @@ class DashboardViewModel @Inject constructor(
             launch { device?.data?.assist?.collect { updateDeviceDataState(assist = it) } }
             launch { device?.data?.cadence?.collect { updateDeviceDataState(cadence = it) } }
             launch { device?.data?.lightStatus?.collect { updateDeviceDataState(lightStatus = it) } }
+            launch { device?.data?.range?.collect { updateDeviceDataState(range = it) } }
         }
     }
 
@@ -77,7 +78,8 @@ class DashboardViewModel @Inject constructor(
         distance: String? = null,
         assist: Int? = null,
         cadence: Int? = null,
-        lightStatus: PodbikeLightStatus? = null
+        lightStatus: PodbikeLightStatus? = null,
+        range: Int? = null
     ) {
         updateState {
             copy(
@@ -91,7 +93,8 @@ class DashboardViewModel @Inject constructor(
                     lightStatus = lightStatus ?: this.deviceData?.lightStatus
                     ?: PodbikeLightStatus(),
                     time = 0,
-                    distanceAbbreviation = unitConverter.getDistanceUnitAbbreviation(distanceUnit)
+                    distanceAbbreviation = unitConverter.getDistanceUnitAbbreviation(distanceUnit),
+                    range = range ?: this.deviceData?.range ?: 0,
                 )
             )
         }
