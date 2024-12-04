@@ -198,6 +198,7 @@
             android:id="@+id/fragment_dashboard_assistance"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
             app:layout_constraintBottom_toTopOf="@id/fragment_dashboard_cadence"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
