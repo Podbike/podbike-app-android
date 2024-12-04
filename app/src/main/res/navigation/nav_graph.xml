@@ -55,6 +55,13 @@
     </fragment>
 
     <fragment
+        android:id="@+id/statisticsFragment"
+        android:name="com.podbike.app.ui.statistics.StatisticsFragment"
+        android:label="fragment_statistics"
+        tools:layout="@layout/fragment_statistics">
+    </fragment>
+
+    <fragment
         android:id="@+id/privacyPolicyFragment"
         android:name="com.podbike.app.ui.privacy_policy.PrivacyPolicyFragment"
         android:label="fragment_privacy_policy"
@@ -95,6 +102,10 @@
         <action
             android:id="@+id/action_dashboardFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
+
+        <action
+            android:id="@+id/action_dashboardFragment_to_statisticsFragment"
+            app:destination="@id/statisticsFragment" />
 
         <action
             android:id="@+id/action_dashboardFragment_to_showTutorialFragment"

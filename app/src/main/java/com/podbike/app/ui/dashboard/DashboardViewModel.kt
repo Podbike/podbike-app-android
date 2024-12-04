@@ -163,6 +163,10 @@ class DashboardViewModel @Inject constructor(
                 sendEffect(DashboardEffect.NavigateToAppSettings)
             }
 
+            is DashboardAction.StatisticsClicked -> {
+                sendEffect(DashboardEffect.NavigateToStatistics)
+            }
+
             is DashboardAction.HelpClicked -> {
                 sendEffect(DashboardEffect.NavigateToHelp)
             }
@@ -198,6 +202,7 @@ class DashboardViewModel @Inject constructor(
             val isLocationEnabled: Boolean = false,
         ) : DashboardAction()
 
+        data object StatisticsClicked : DashboardAction()
         data object SettingsClicked : DashboardAction()
         data object HelpClicked : DashboardAction()
         data object Retry : DashboardAction()
@@ -212,6 +217,7 @@ class DashboardViewModel @Inject constructor(
         data object NavigateToLocationSettings : DashboardEffect()
         data object NavigateToAppSettings : DashboardEffect()
         data object NavigateToHelp : DashboardEffect()
+        data object NavigateToStatistics : DashboardEffect()
     }
 
 }

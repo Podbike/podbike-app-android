@@ -95,6 +95,9 @@ class DashboardFragment : BaseFragment() {
 
     private fun setupBindings() {
         with(binding) {
+            fragmentDashboardLogo.setOnClickListener {
+                viewModel.processAction(DashboardAction.StatisticsClicked)
+            }
             fragmentDashboardSettings.setOnClickListener {
                 viewModel.processAction(DashboardAction.SettingsClicked)
             }
@@ -157,6 +160,7 @@ class DashboardFragment : BaseFragment() {
             DashboardEffect.NavigateToLocationSettings -> intentManager.openLocationSettings()
             DashboardEffect.NavigateToAppSettings -> findNavController().navigate(R.id.action_dashboardFragment_to_settingsFragment)
             DashboardEffect.NavigateToHelp -> findNavController().navigate(R.id.action_dashboardFragment_to_showTutorialFragment)
+            DashboardEffect.NavigateToStatistics -> findNavController().navigate(R.id.action_dashboardFragment_to_statisticsFragment)
         }
     }
 
