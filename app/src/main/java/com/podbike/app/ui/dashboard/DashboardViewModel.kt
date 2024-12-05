@@ -170,8 +170,7 @@ class DashboardViewModel @Inject constructor(
                     copy(
                         hasBluetoothPermissions = action.hasBluetoothPermissions,
                         isBluetoothEnabled = action.isBluetoothEnabled,
-                        isLocationEnabled = action.isLocationEnabled,
-                        isLoading = hasAllPermissions
+                        isLocationEnabled = action.isLocationEnabled
                     )
                 }
                 if (!hasAllPermissions) {
