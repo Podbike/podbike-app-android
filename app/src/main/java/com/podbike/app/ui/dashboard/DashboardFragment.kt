@@ -1,6 +1,7 @@
 package com.podbike.app.ui.dashboard
 
 import android.Manifest
+import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
 import android.os.Build
@@ -8,6 +9,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.view.isVisible
@@ -36,6 +38,8 @@ class DashboardFragment : BaseFragment() {
 
     @Inject
     lateinit var permissionManager: PermissionManager
+
+    private var connectingDialog: AlertDialog? = null
 
     //TODO export to permission manager
     private val requestPermissionsLauncher = registerForActivityResult(
@@ -126,6 +130,12 @@ class DashboardFragment : BaseFragment() {
                     fragmentDashboardIcon1.setColorFilter(requireContext().getColor(R.color.gray))
                 }
 
+                if (state.isLoading) {
+                    showConnectingDialog()
+                } else {
+                    hideConnectingDialog()
+                }
+
                 fragmentDashboardTurnIndicator.setTurnIndicators(
                     it.lightStatus.indicatorLeft,
                     it.lightStatus.indicatorRight
@@ -182,4 +192,27 @@ class DashboardFragment : BaseFragment() {
             )
         }
     }
+
+    private fun showConnectingDialog() {
+        if (connectingDialog == null) {
+            val dialogView = LayoutInflater.from(requireContext())
+                .inflate(R.layout.dialog_connecting_to_frikar, null)
+            connectingDialog = AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .setCancelable(false)
+                .create()
+
+            dialogView.findViewById<Button>(R.id.dialog_cancel_button).setOnClickListener {
+                findNavController().navigate(R.id.action_dashboardFragment_to_devicesFragment)
+                connectingDialog?.dismiss()
+            }
+        }
+        connectingDialog?.show()
+    }
+
+    private fun hideConnectingDialog() {
+        connectingDialog?.dismiss()
+        connectingDialog = null
+    }
+
 }

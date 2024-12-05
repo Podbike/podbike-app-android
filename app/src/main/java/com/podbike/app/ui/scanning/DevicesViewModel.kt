@@ -6,6 +6,7 @@ import com.kfc_polska.ui.base.UiEffect
 import com.kfc_polska.ui.base.UiState
 import com.podbike.app.data.UserPreferences
 import com.podbike.app.data.bluetooth.manager.BluetoothManager
+import com.podbike.app.data.bluetooth.manager.ConnectionManager
 import com.podbike.app.ui.base.StateViewModel
 import com.podbike.app.ui.scanning.DevicesViewModel.DevicesAction
 import com.podbike.app.ui.scanning.DevicesViewModel.DevicesEffect
@@ -80,7 +81,7 @@ class DevicesViewModel @Inject constructor(
                             DeviceInfo(action.deviceItem.name, action.deviceItem.address)
                         val result = bluetoothManager.connect(
                             deviceInfo,
-                            viewModelScope = viewModelScope // Feeling bad about this.. not sure how to solve it differently though.
+                            coroutineScope = ConnectionManager.connectionScope
                         )
                         Timber.d("Connect result: $result")
                         result?.let {

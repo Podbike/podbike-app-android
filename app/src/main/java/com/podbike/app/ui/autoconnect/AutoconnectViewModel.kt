@@ -6,6 +6,7 @@ import com.kfc_polska.ui.base.UiEffect
 import com.kfc_polska.ui.base.UiState
 import com.podbike.app.data.UserPreferences
 import com.podbike.app.data.bluetooth.manager.BluetoothManager
+import com.podbike.app.data.bluetooth.manager.ConnectionManager
 import com.podbike.app.ui.autoconnect.AutoconnectViewModel.*
 import com.podbike.app.ui.base.StateViewModel
 import com.podbike.app.ui.scanning.DeviceInfo
@@ -50,7 +51,10 @@ class AutoconnectViewModel @Inject constructor(
                         )
                     }
                     delay(1000)
-                    bluetoothManager.connect(deviceInfo, viewModelScope = viewModelScope)
+                    bluetoothManager.connect(
+                        deviceInfo,
+                        coroutineScope = ConnectionManager.connectionScope
+                    )
                     delay(1000)
                     sendEffect(AutoconnectEffect.AutoconnectToFrikar)
                 }

@@ -15,7 +15,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.navOptions
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.podbike.app.R
 import com.podbike.app.databinding.FragmentDevicesBinding
@@ -175,16 +174,9 @@ class DevicesFragment : BaseFragment(), OnDeviceClickListener {
             DevicesEffect.NavigateToBluetoothSettings -> enableBluetooth()
             DevicesEffect.NavigateToLocationPermissions -> permissionManager.requestPermissions()
             DevicesEffect.NavigateToLocationSettings -> intentManager.openLocationSettings()
-            DevicesEffect.ConnectToDevice -> {
-                val navOptions = navOptions {
-                    popUpTo(R.id.nav_graph) { inclusive = true }
-                }
-                findNavController().navigate(
-                    R.id.action_devicesFragment_to_dashboardFragment,
-                    null,
-                    navOptions
-                )
-            }
+            DevicesEffect.ConnectToDevice ->
+                findNavController().navigate(R.id.action_devicesFragment_to_dashboardFragment)
+
         }
     }
 

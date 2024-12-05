@@ -6,6 +6,7 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.podbike.app.R
 import com.podbike.app.data.UserPreferences
+import com.podbike.app.data.bluetooth.manager.ConnectionManager
 import com.podbike.app.ui.base.BaseActivity
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -23,6 +24,11 @@ class MainActivity : BaseActivity() {
 
         setupNavController()
         setupOnBackPressedDispatcher()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        ConnectionManager.cancelConnection()
     }
 
     override fun onSupportNavigateUp(): Boolean {

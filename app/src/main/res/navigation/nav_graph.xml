@@ -28,7 +28,10 @@
 
         <action
             android:id="@+id/action_showTutorialFragment_to_dashboardFragment"
-            app:destination="@id/dashboardFragment" />
+            app:destination="@id/dashboardFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
@@ -69,7 +72,10 @@
 
         <action
             android:id="@+id/action_devicesFragment_to_dashboardFragment"
-            app:destination="@id/dashboardFragment" />
+            app:destination="@id/dashboardFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
@@ -80,11 +86,17 @@
 
         <action
             android:id="@+id/action_autoconnectFragment_to_devicesFragment"
-            app:destination="@id/devicesFragment" />
+            app:destination="@id/devicesFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
 
         <action
             android:id="@+id/action_autoconnectFragment_to_dashboardFragment"
-            app:destination="@id/dashboardFragment" />
+            app:destination="@id/dashboardFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <fragment
@@ -100,6 +112,13 @@
         <action
             android:id="@+id/action_dashboardFragment_to_showTutorialFragment"
             app:destination="@id/showTutorialFragment" />
+
+        <action
+            android:id="@+id/action_dashboardFragment_to_devicesFragment"
+            app:destination="@id/devicesFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/nav_graph"
+            app:popUpToInclusive="true" />
     </fragment>
 
 </navigation>

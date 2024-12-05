@@ -8,6 +8,7 @@ import com.podbike.app.data.DistanceUnit
 import com.podbike.app.data.SpeedUnit
 import com.podbike.app.data.UserPreferences
 import com.podbike.app.data.bluetooth.manager.BluetoothManager
+import com.podbike.app.data.bluetooth.manager.ConnectionManager
 import com.podbike.app.data.bluetooth.model.PodbikeLightStatus
 import com.podbike.app.ui.base.StateViewModel
 import com.podbike.app.ui.dashboard.DashboardViewModel.DashboardAction
@@ -16,6 +17,7 @@ import com.podbike.app.ui.dashboard.DashboardViewModel.DashboardState
 import com.podbike.app.utils.UnitConverter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,7 +34,7 @@ class DashboardViewModel @Inject constructor(
     }
 
     private var dashboardJob: Job? = null
-
+    private var reconnectJob: Job? = null
     private val distanceUnit: DistanceUnit
         get() = userPreferences.getDistanceUnit()
 
@@ -69,6 +71,25 @@ class DashboardViewModel @Inject constructor(
             launch { device?.data?.cadence?.collect { updateDeviceDataState(cadence = it) } }
             launch { device?.data?.lightStatus?.collect { updateDeviceDataState(lightStatus = it) } }
             launch { device?.data?.range?.collect { updateDeviceDataState(range = it) } }
+            launch {
+                device?.isConnected()?.collect { isConnected ->
+                    updateState { copy(isLoading = !isConnected) }
+                    if (!isConnected) {
+                        reconnectJob = viewModelScope.launch {
+                            while (true) {
+                                bluetoothManager.connect(
+                                    device.device,
+                                    coroutineScope = ConnectionManager.connectionScope
+                                )
+                                dashboard()
+                                delay(5000)
+                            }
+                        }
+                    } else {
+                        reconnectJob?.cancel()
+                    }
+                }
+            }
         }
     }
 
@@ -93,7 +114,6 @@ class DashboardViewModel @Inject constructor(
         val temperature = 2 //TODO replace with real data
         updateState {
             copy(
-                isLoading = !isLoading,
                 deviceData = DeviceDataUiModel(
                     speed = speed ?: this.deviceData?.speed ?: "0",
                     battery = battery ?: this.deviceData?.battery ?: 0,
