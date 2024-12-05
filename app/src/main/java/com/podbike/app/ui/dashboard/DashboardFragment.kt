@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.view.isVisible
@@ -114,7 +115,7 @@ class DashboardFragment : BaseFragment() {
                 fragmentDashboardSpeed.text = it.speed
                 fragmentDashboardBatteryIndicator.setProgress(
                     it.battery,
-                    "${it.battery} ${state.deviceData.distanceAbbreviation}"
+                    "${it.range} ${state.deviceData.distanceAbbreviation}"
                 )
                 fragmentDashboardDistance.text = it.distance.toString()
                 fragmentDashboardDistanceUnit.text = it.distanceAbbreviation
@@ -201,6 +202,10 @@ class DashboardFragment : BaseFragment() {
                 .setView(dialogView)
                 .setCancelable(false)
                 .create()
+
+            val deviceName = viewModel.uiState.value.deviceData?.name ?: "FRIKAR"
+            dialogView.findViewById<TextView>(R.id.dialog_connecting_to_frikar_title).text =
+                "${getString(R.string.ConnectingTo)} $deviceName"
 
             dialogView.findViewById<Button>(R.id.dialog_cancel_button).setOnClickListener {
                 findNavController().navigate(R.id.action_dashboardFragment_to_devicesFragment)

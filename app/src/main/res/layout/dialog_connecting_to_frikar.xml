@@ -6,10 +6,12 @@
     android:padding="16dp">
 
     <TextView
+        android:id="@+id/dialog_connecting_to_frikar_title"
         style="@style/TextHeader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:gravity="center"
         android:text="Connecting to FRIKAR"
         android:textAppearance="?attr/textAppearanceHeadline6" />
 

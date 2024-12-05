@@ -70,7 +70,17 @@ class DashboardViewModel @Inject constructor(
             launch { device?.data?.assist?.collect { updateDeviceDataState(assist = it) } }
             launch { device?.data?.cadence?.collect { updateDeviceDataState(cadence = it) } }
             launch { device?.data?.lightStatus?.collect { updateDeviceDataState(lightStatus = it) } }
-            launch { device?.data?.range?.collect { updateDeviceDataState(range = it) } }
+            launch {
+                device?.data?.range?.collect {
+                    updateDeviceDataState(
+                        range = unitConverter.convertDistance(
+                            it * 1000f,
+                            distanceUnit,
+                            0
+                        )
+                    )
+                }
+            }
             launch { device?.data?.temperature?.collect { updateDeviceDataState(temperature = it) } }
             launch {
                 device?.isConnected()?.collect { isConnected ->
@@ -101,7 +111,7 @@ class DashboardViewModel @Inject constructor(
         assist: Int? = null,
         cadence: Int? = null,
         lightStatus: PodbikeLightStatus? = null,
-        range: Int? = null,
+        range: String? = null,
         temperature: Int? = null,
     ) {
         //TODO replace cadence with speed eventually
@@ -126,9 +136,10 @@ class DashboardViewModel @Inject constructor(
                     ?: PodbikeLightStatus(),
                     time = 0,
                     distanceAbbreviation = unitConverter.getDistanceUnitAbbreviation(distanceUnit),
-                    range = range ?: this.deviceData?.range ?: 0,
+                    range = range ?: this.deviceData?.range ?: "0",
                     temperature = temperature ?: this.deviceData?.temperature ?: 0,
                     isMoving = isMoving,
+                    name = bluetoothManager.selectedDevice?.device?.name
                 )
             )
         }
