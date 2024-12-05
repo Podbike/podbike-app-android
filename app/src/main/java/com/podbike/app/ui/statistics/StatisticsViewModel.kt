@@ -34,7 +34,7 @@ class StatisticsViewModel @Inject constructor(
         get() = userPreferences.getSpeedUnit()
 
 
-    private fun statistics() {
+    fun statistics() {
         statisticsJob = viewModelScope.launch {
             val device = bluetoothManager.selectedDevice
             launch { device?.data?.temperature?.collect { updateStatisticsState(temperature = it) } }
