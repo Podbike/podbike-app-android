@@ -38,6 +38,18 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
     val temperature: Flow<Int>
         get() = getStringCharacteristicData(HaarekBoardSpec.TEMPERATURE_CHARACTERISTIC_UUID)
 
+    @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    val averageSpeed: Flow<Int>
+        get() = getStringCharacteristicData(HaarekBoardSpec.AVERAGE_SPEED_CHARACTERISTIC_UUID)
+
+    @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    val averageRpm: Flow<Int>
+        get() = getStringCharacteristicData(HaarekBoardSpec.AVERAGE_CADENCE_CHARACTERISTIC_UUID)
+
+    @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    val powerGenerated: Flow<Int>
+        get() = getStringCharacteristicData(HaarekBoardSpec.GENERATED_POWER_CHARACTERISTIC_UUID)
+
 
     val lightStatus: Flow<PodbikeLightStatus>
         get() = flow {

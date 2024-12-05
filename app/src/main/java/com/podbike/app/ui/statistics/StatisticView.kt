@@ -13,14 +13,14 @@ class StatisticView : ConstraintLayout {
         context: Context,
         name: String,
         unit: String,
-        value: String,
+        value: String?,
     ) : super(context) {
         init(context, name, unit, value)
 
     }
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
-        init(context, null, null, null)
+        init(context, null, null)
     }
 
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(
@@ -28,10 +28,10 @@ class StatisticView : ConstraintLayout {
         attrs,
         defStyleAttr
     ) {
-        init(context, null, null, null)
+        init(context, null, null)
     }
 
-    private fun init(context: Context, name: String?, unit: String?, value: String?) {
+    private fun init(context: Context, name: String?, unit: String?, value: String? = "N/A") {
         LayoutInflater.from(context).inflate(R.layout.item_statistic, this, true)
         name?.let { setStatisticName(it) }
         unit?.let { setStatisticUnit(it) }
