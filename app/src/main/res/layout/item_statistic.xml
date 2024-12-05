@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/fragment_statistics_item"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:padding="16dp">
 
     <TextView
         android:id="@+id/statistic_value"
@@ -12,7 +13,7 @@
         android:layout_height="wrap_content"
         android:fontFamily="@font/poppins_bold"
         android:textColor="@android:color/white"
-        android:textSize="16sp"
+        android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@+id/statistic_name"
         app:layout_constraintEnd_toStartOf="@+id/statistic_unit"
         app:layout_constraintHorizontal_bias="0.5"
@@ -27,7 +28,7 @@
         android:layout_marginStart="4dp"
         android:fontFamily="@font/poppins"
         android:textColor="@android:color/white"
-        android:textSize="16sp"
+        android:textSize="18sp"
         app:layout_constraintBottom_toTopOf="@+id/statistic_name"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
@@ -41,7 +42,7 @@
         android:fontFamily="@font/poppins"
         android:textAlignment="center"
         android:textColor="@android:color/white"
-        android:textSize="11sp"
+        android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

@@ -44,12 +44,72 @@ class StatisticsFragment : BaseFragment() {
             // fill with dummy data
             val tableLayout = view.findViewById<ViewGroup>(R.id.fragment_statistics_table_layout)
 
-            val tableRow = TableRow(requireContext())
-            val temperatureView = StatisticView(requireContext(), "Temperature", "°C", "25")
+            val temperatureCo2Row = TableRow(requireContext())
+            val distanceTripTimeRow = TableRow(requireContext())
+            val averageSpeedRpmRow = TableRow(requireContext())
+            val powerBatteryRow = TableRow(requireContext())
 
-            tableRow.addView(temperatureView)
+            val temperatureView =
+                StatisticView(
+                    requireContext(),
+                    getString(R.string.StatisticTemperature),
+                    "°C",
+                    "25"
+                )
+            val co2View =
+                StatisticView(requireContext(), getString(R.string.StatisticCO2), "kg", "4")
+            val distanceView = StatisticView(
+                requireContext(),
+                getString(R.string.StatisticTotalDistance),
+                "km",
+                "12"
+            )
+            val tripTime =
+                StatisticView(requireContext(), getString(R.string.StatisticTime), "min", "30")
+            val averageSpeed = StatisticView(
+                requireContext(),
+                getString(R.string.StatisticAverageSpeed),
+                "km/h",
+                "20"
+            )
+            val averageRpm = StatisticView(
+                requireContext(),
+                getString(R.string.StatisticAverageCadence),
+                "rpm",
+                "60"
+            )
+            val powerGenerated =
+                StatisticView(requireContext(), getString(R.string.StatisticPower), "W", "100")
+            val batteryRemaining =
+                StatisticView(requireContext(), getString(R.string.StatisticBattery), "%", "50")
 
-            tableLayout.addView(tableRow)
+
+            temperatureCo2Row.run {
+                addView(temperatureView)
+                addView(co2View)
+            }
+
+            distanceTripTimeRow.run {
+                addView(distanceView)
+                addView(tripTime)
+            }
+
+            averageSpeedRpmRow.run {
+                addView(averageSpeed)
+                addView(averageRpm)
+            }
+
+            powerBatteryRow.run {
+                addView(powerGenerated)
+                addView(batteryRemaining)
+            }
+
+            tableLayout.run {
+                addView(temperatureCo2Row)
+                addView(distanceTripTimeRow)
+                addView(averageSpeedRpmRow)
+                addView(powerBatteryRow)
+            }
         } catch (e: Exception) {
             println(e)
         }
