@@ -11,10 +11,12 @@ import com.podbike.app.data.bluetooth.manager.BluetoothManager
 import com.podbike.app.data.bluetooth.manager.ConnectionManager
 import com.podbike.app.data.bluetooth.model.PodbikeLightStatus
 import com.podbike.app.ui.base.StateViewModel
+import com.podbike.app.ui.base.collectWithErrorHandling
 import com.podbike.app.ui.dashboard.DashboardViewModel.DashboardAction
 import com.podbike.app.ui.dashboard.DashboardViewModel.DashboardEffect
 import com.podbike.app.ui.dashboard.DashboardViewModel.DashboardState
 import com.podbike.app.utils.UnitConverter
+import com.podbike.app.utils.runWithErrorHandling
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -44,9 +46,9 @@ class DashboardViewModel @Inject constructor(
     private fun dashboard() {
         dashboardJob = viewModelScope.launch {
             val device = bluetoothManager.selectedDevice
-            launch { device?.data?.battery?.collect { updateDeviceDataState(battery = it) } }
+            launch { device?.data?.battery?.collectWithErrorHandling { updateDeviceDataState(battery = it) } }
             launch {
-                device?.data?.speed?.collect {
+                device?.data?.speed?.collectWithErrorHandling {
                     updateDeviceDataState(
                         speed = unitConverter.convertSpeed(
                             it.toFloat(),
@@ -57,7 +59,7 @@ class DashboardViewModel @Inject constructor(
                 }
             }
             launch {
-                device?.data?.distance?.collect {
+                device?.data?.distance?.collectWithErrorHandling {
                     updateDeviceDataState(
                         distance = unitConverter.convertDistance(
                             it,
@@ -67,11 +69,17 @@ class DashboardViewModel @Inject constructor(
                     )
                 }
             }
-            launch { device?.data?.assist?.collect { updateDeviceDataState(assist = it) } }
-            launch { device?.data?.cadence?.collect { updateDeviceDataState(cadence = it) } }
-            launch { device?.data?.lightStatus?.collect { updateDeviceDataState(lightStatus = it) } }
+            launch { device?.data?.assist?.collectWithErrorHandling { updateDeviceDataState(assist = it) } }
+            launch { device?.data?.cadence?.collectWithErrorHandling { updateDeviceDataState(cadence = it) } }
             launch {
-                device?.data?.range?.collect {
+                device?.data?.lightStatus?.collectWithErrorHandling {
+                    updateDeviceDataState(
+                        lightStatus = it
+                    )
+                }
+            }
+            launch {
+                device?.data?.range?.collectWithErrorHandling {
                     updateDeviceDataState(
                         range = unitConverter.convertDistance(
                             it * 1000f,
@@ -81,17 +89,25 @@ class DashboardViewModel @Inject constructor(
                     )
                 }
             }
-            launch { device?.data?.temperature?.collect { updateDeviceDataState(temperature = it) } }
             launch {
-                device?.isConnected()?.collect { isConnected ->
+                device?.data?.temperature?.collectWithErrorHandling {
+                    updateDeviceDataState(
+                        temperature = it
+                    )
+                }
+            }
+            launch {
+                device?.isConnected()?.collectWithErrorHandling { isConnected ->
                     updateState { copy(isLoading = !isConnected) }
                     if (!isConnected) {
                         reconnectJob = viewModelScope.launch {
                             while (true) {
-                                bluetoothManager.connect(
-                                    device.device,
-                                    coroutineScope = ConnectionManager.connectionScope
-                                )
+                                runWithErrorHandling {
+                                    bluetoothManager.connect(
+                                        device.device,
+                                        coroutineScope = ConnectionManager.connectionScope
+                                    )
+                                }
                                 dashboard()
                                 delay(5000)
                             }

@@ -8,6 +8,7 @@ import com.podbike.app.data.UserPreferences
 import com.podbike.app.data.bluetooth.manager.BluetoothManager
 import com.podbike.app.data.bluetooth.manager.ConnectionManager
 import com.podbike.app.ui.base.StateViewModel
+import com.podbike.app.ui.base.collectWithErrorHandling
 import com.podbike.app.ui.scanning.DevicesViewModel.DevicesAction
 import com.podbike.app.ui.scanning.DevicesViewModel.DevicesEffect
 import com.podbike.app.ui.scanning.DevicesViewModel.DevicesState
@@ -38,7 +39,7 @@ class DevicesViewModel @Inject constructor(
             updateState { copy(devices = recentDevices.map { it.toDeviceItem(it.address == currentlyConnectedDevice?.address) }) }
         }
         loadDevicesJob = viewModelScope.launch {
-            bluetoothManager.scan().collect { deviceList ->
+            bluetoothManager.scan().collectWithErrorHandling { deviceList ->
                 val updatedDevices =
                     (uiState.value.devices + deviceList.map { it.toDeviceItem(it.address == currentlyConnectedDevice?.address) }).distinctBy { it.address }
                 updateState { copy(isLoading = false, devices = updatedDevices) }

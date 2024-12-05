@@ -158,6 +158,19 @@ class DashboardFragment : BaseFragment() {
                     fragmentDashboardHazardIndicator.isVisible = false
                     fragmentDashboardLayout.isVisible = true
                 }
+
+                fragmentDashboardLights.setImageResource(
+                    if (state.isLoading) {
+                        R.drawable.ic_baseline_bluetooth_disabled_24
+                    } else if (it.lightStatus.lowBeam) {
+                        R.drawable.ic_material_car_light_dimmed
+                    } else if (it.lightStatus.highBeam) {
+                        R.drawable.ic_material_car_light_high
+                    } else {
+                        0
+                    }
+                )
+
             }
         }
     }
