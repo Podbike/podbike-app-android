@@ -16,4 +16,7 @@ interface UserPreferences {
     fun getRecentDevices(): List<DeviceInfo>
     fun getMostRecentDevice(): DeviceInfo?
 
+    fun setTutorialCompleted(completed: Boolean)
+    fun isTutorialCompleted(): Boolean
+
 }

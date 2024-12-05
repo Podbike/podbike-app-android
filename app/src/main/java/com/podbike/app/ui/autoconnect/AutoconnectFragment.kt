@@ -129,8 +129,15 @@ class AutoconnectFragment : BaseFragment() {
             AutoconnectEffect.NavigateToBluetoothSettings -> enableBluetooth()
             AutoconnectEffect.NavigateToLocationPermissions -> permissionManager.requestPermissions()
             AutoconnectEffect.NavigateToLocationSettings -> intentManager.openLocationSettings()
-            AutoconnectEffect.NavigateToDevices -> findNavController().navigate(R.id.action_autoconnectFragment_to_devicesFragment)
-            AutoconnectEffect.AutoconnectToFrikar -> findNavController().navigate(R.id.action_autoconnectFragment_to_dashboardFragment)
+            AutoconnectEffect.NavigateToDevices ->
+                findNavController().navigate(
+                    R.id.action_autoconnectFragment_to_devicesFragment
+                )
+
+            AutoconnectEffect.AutoconnectToFrikar ->
+                findNavController().navigate(
+                    R.id.action_autoconnectFragment_to_dashboardFragment
+                )
         }
     }
 

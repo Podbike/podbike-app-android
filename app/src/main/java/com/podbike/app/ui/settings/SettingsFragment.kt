@@ -39,11 +39,7 @@ class SettingsFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        binding.appBar.appBarBack.setOnClickListener {
-            requireActivity().onBackPressedDispatcher.onBackPressed()
-        }
-        binding.appBar.appBarTitle.text = getString(R.string.SettingsPageTitle)
+        bindNavigation(R.string.SettingsPageTitle, binding.appBar)
         buildSettings(view)
     }
 

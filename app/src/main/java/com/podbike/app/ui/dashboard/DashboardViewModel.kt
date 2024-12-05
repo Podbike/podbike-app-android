@@ -8,6 +8,7 @@ import com.podbike.app.data.DistanceUnit
 import com.podbike.app.data.SpeedUnit
 import com.podbike.app.data.UserPreferences
 import com.podbike.app.data.bluetooth.manager.BluetoothManager
+import com.podbike.app.data.bluetooth.manager.ConnectionManager
 import com.podbike.app.data.bluetooth.model.PodbikeLightStatus
 import com.podbike.app.ui.base.StateViewModel
 import com.podbike.app.ui.dashboard.DashboardViewModel.DashboardAction
@@ -16,6 +17,7 @@ import com.podbike.app.ui.dashboard.DashboardViewModel.DashboardState
 import com.podbike.app.utils.UnitConverter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,7 +34,7 @@ class DashboardViewModel @Inject constructor(
     }
 
     private var dashboardJob: Job? = null
-
+    private var reconnectJob: Job? = null
     private val distanceUnit: DistanceUnit
         get() = userPreferences.getDistanceUnit()
 
@@ -68,7 +70,37 @@ class DashboardViewModel @Inject constructor(
             launch { device?.data?.assist?.collect { updateDeviceDataState(assist = it) } }
             launch { device?.data?.cadence?.collect { updateDeviceDataState(cadence = it) } }
             launch { device?.data?.lightStatus?.collect { updateDeviceDataState(lightStatus = it) } }
-            launch { device?.data?.range?.collect { updateDeviceDataState(range = it) } }
+            launch {
+                device?.data?.range?.collect {
+                    updateDeviceDataState(
+                        range = unitConverter.convertDistance(
+                            it * 1000f,
+                            distanceUnit,
+                            0
+                        )
+                    )
+                }
+            }
+            launch { device?.data?.temperature?.collect { updateDeviceDataState(temperature = it) } }
+            launch {
+                device?.isConnected()?.collect { isConnected ->
+                    updateState { copy(isLoading = !isConnected) }
+                    if (!isConnected) {
+                        reconnectJob = viewModelScope.launch {
+                            while (true) {
+                                bluetoothManager.connect(
+                                    device.device,
+                                    coroutineScope = ConnectionManager.connectionScope
+                                )
+                                dashboard()
+                                delay(5000)
+                            }
+                        }
+                    } else {
+                        reconnectJob?.cancel()
+                    }
+                }
+            }
         }
     }
 
@@ -79,7 +111,8 @@ class DashboardViewModel @Inject constructor(
         assist: Int? = null,
         cadence: Int? = null,
         lightStatus: PodbikeLightStatus? = null,
-        range: Int? = null
+        range: String? = null,
+        temperature: Int? = null,
     ) {
         //TODO replace cadence with speed eventually
         val cadence = cadence ?: uiState.value.deviceData?.cadence ?: 0
@@ -90,23 +123,23 @@ class DashboardViewModel @Inject constructor(
         } else {
             uiState.value.deviceData?.isMoving == true
         }
-        val temperature = 2 //TODO replace with real data
         updateState {
             copy(
-                isLoading = !isLoading,
                 deviceData = DeviceDataUiModel(
                     speed = speed ?: this.deviceData?.speed ?: "0",
                     battery = battery ?: this.deviceData?.battery ?: 0,
                     distance = distance ?: this.deviceData?.distance ?: "0",
                     assist = assist ?: this.deviceData?.assist ?: 0,
                     cadence = cadence,
-                    isFreezing = temperature < 4,
+                    isFreezing = (temperature ?: this.deviceData?.temperature ?: 0) < 4,
                     lightStatus = lightStatus ?: this.deviceData?.lightStatus
                     ?: PodbikeLightStatus(),
                     time = 0,
                     distanceAbbreviation = unitConverter.getDistanceUnitAbbreviation(distanceUnit),
-                    range = range ?: this.deviceData?.range ?: 0,
+                    range = range ?: this.deviceData?.range ?: "0",
+                    temperature = temperature ?: this.deviceData?.temperature ?: 0,
                     isMoving = isMoving,
+                    name = bluetoothManager.selectedDevice?.device?.name
                 )
             )
         }
@@ -148,8 +181,7 @@ class DashboardViewModel @Inject constructor(
                     copy(
                         hasBluetoothPermissions = action.hasBluetoothPermissions,
                         isBluetoothEnabled = action.isBluetoothEnabled,
-                        isLocationEnabled = action.isLocationEnabled,
-                        isLoading = hasAllPermissions
+                        isLocationEnabled = action.isLocationEnabled
                     )
                 }
                 if (!hasAllPermissions) {

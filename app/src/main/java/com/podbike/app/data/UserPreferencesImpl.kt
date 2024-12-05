@@ -18,6 +18,7 @@ class UserPreferencesImpl(context: Context) : UserPreferences {
         const val KEY_DISTANCE_UNIT = "distance_unit"
         const val KEY_TEMPERATURE_UNIT = "temperature_unit"
         const val KEY_CONNECTED_DEVICES = "connected_devices"
+        const val KEY_TUTORIAL_COMPLETED = "tutorial_completed"
     }
 
     private val sharedPreferences: SharedPreferences =
@@ -70,6 +71,14 @@ class UserPreferencesImpl(context: Context) : UserPreferences {
             Timber.e(e)
             emptyList()
         }
+    }
+
+    override fun setTutorialCompleted(completed: Boolean) {
+        sharedPreferences.edit().putBoolean(KEY_TUTORIAL_COMPLETED, completed).apply()
+    }
+
+    override fun isTutorialCompleted(): Boolean {
+        return sharedPreferences.getBoolean(KEY_TUTORIAL_COMPLETED, false)
     }
 
     override fun getMostRecentDevice(): DeviceInfo? {

@@ -22,10 +22,10 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
     override suspend fun connect(
         device: DeviceInfo,
         waitForPairing: Boolean,
-        viewModelScope: CoroutineScope,
+        coroutineScope: CoroutineScope,
     ): PodbikeDevice {
         try {
-            val connection = ClientBleGatt.connect(context, device.address, viewModelScope)
+            val connection = ClientBleGatt.connect(context, device.address, coroutineScope)
             println("Connecting to device: ${device.address}")
 
             if (waitForPairing) {
