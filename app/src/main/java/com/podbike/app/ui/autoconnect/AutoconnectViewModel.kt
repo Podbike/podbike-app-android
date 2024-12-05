@@ -10,6 +10,7 @@ import com.podbike.app.data.bluetooth.manager.ConnectionManager
 import com.podbike.app.ui.autoconnect.AutoconnectViewModel.*
 import com.podbike.app.ui.base.StateViewModel
 import com.podbike.app.ui.scanning.DeviceInfo
+import com.podbike.app.utils.runWithErrorHandling
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -51,10 +52,12 @@ class AutoconnectViewModel @Inject constructor(
                         )
                     }
                     delay(1000)
-                    bluetoothManager.connect(
-                        deviceInfo,
-                        coroutineScope = ConnectionManager.connectionScope
-                    )
+                    runWithErrorHandling {
+                        bluetoothManager.connect(
+                            deviceInfo,
+                            coroutineScope = ConnectionManager.connectionScope
+                        )
+                    }
                     delay(1000)
                     sendEffect(AutoconnectEffect.AutoconnectToFrikar)
                 }
