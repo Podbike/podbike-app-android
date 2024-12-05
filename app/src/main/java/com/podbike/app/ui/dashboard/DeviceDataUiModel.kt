@@ -13,5 +13,6 @@ data class DeviceDataUiModel(
     val lightStatus: PodbikeLightStatus,
     val distanceAbbreviation: String,
     val range: Int,
+    val temperature: Int,
     val isMoving: Boolean
 )

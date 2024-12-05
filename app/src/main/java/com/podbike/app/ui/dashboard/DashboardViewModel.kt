@@ -71,6 +71,7 @@ class DashboardViewModel @Inject constructor(
             launch { device?.data?.cadence?.collect { updateDeviceDataState(cadence = it) } }
             launch { device?.data?.lightStatus?.collect { updateDeviceDataState(lightStatus = it) } }
             launch { device?.data?.range?.collect { updateDeviceDataState(range = it) } }
+            launch { device?.data?.temperature?.collect { updateDeviceDataState(temperature = it) } }
             launch {
                 device?.isConnected()?.collect { isConnected ->
                     updateState { copy(isLoading = !isConnected) }
@@ -100,7 +101,8 @@ class DashboardViewModel @Inject constructor(
         assist: Int? = null,
         cadence: Int? = null,
         lightStatus: PodbikeLightStatus? = null,
-        range: Int? = null
+        range: Int? = null,
+        temperature: Int? = null,
     ) {
         //TODO replace cadence with speed eventually
         val cadence = cadence ?: uiState.value.deviceData?.cadence ?: 0
@@ -111,7 +113,6 @@ class DashboardViewModel @Inject constructor(
         } else {
             uiState.value.deviceData?.isMoving == true
         }
-        val temperature = 2 //TODO replace with real data
         updateState {
             copy(
                 deviceData = DeviceDataUiModel(
@@ -120,12 +121,13 @@ class DashboardViewModel @Inject constructor(
                     distance = distance ?: this.deviceData?.distance ?: "0",
                     assist = assist ?: this.deviceData?.assist ?: 0,
                     cadence = cadence,
-                    isFreezing = temperature < 4,
+                    isFreezing = (temperature ?: this.deviceData?.temperature ?: 0) < 4,
                     lightStatus = lightStatus ?: this.deviceData?.lightStatus
                     ?: PodbikeLightStatus(),
                     time = 0,
                     distanceAbbreviation = unitConverter.getDistanceUnitAbbreviation(distanceUnit),
                     range = range ?: this.deviceData?.range ?: 0,
+                    temperature = temperature ?: this.deviceData?.temperature ?: 0,
                     isMoving = isMoving,
                 )
             )

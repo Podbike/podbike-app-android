@@ -31,8 +31,8 @@ class PodbikeDevice(private val client: ClientBleGatt, val device: DeviceInfo) {
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     suspend fun readCharacteristic(
-        serviceId: UUID,
-        characteristicId: UUID
+        characteristicId: UUID,
+        serviceId: UUID = HaarekBoardSpec.PODBIKE_SERVICE_UUID,
     ): DataByteArray? {
         return services?.findService(serviceId)
             ?.findCharacteristic(characteristicId)
