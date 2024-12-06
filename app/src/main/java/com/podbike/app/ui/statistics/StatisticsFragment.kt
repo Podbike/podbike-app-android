@@ -71,7 +71,7 @@ class StatisticsFragment : BaseFragment() {
                             requireContext(),
                             getString(R.string.StatisticTemperature),
                             it.temperatureUnit,
-                            it.interiorTemperature.toString(),
+                            it.interiorTemperature,
                         )
                     val co2View =
                         StatisticView(

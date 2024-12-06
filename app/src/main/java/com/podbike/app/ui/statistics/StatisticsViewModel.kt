@@ -20,6 +20,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@Suppress("NAME_SHADOWING")
 @HiltViewModel
 class StatisticsViewModel @Inject constructor(
     private val bluetoothManager: BluetoothManager,
@@ -68,42 +69,38 @@ class StatisticsViewModel @Inject constructor(
 
     private fun updateStatisticsState(
         distance: Float? = null,
-        temperature: Int? = null,
+        temperature: Float? = null,
         averageSpeed: Float? = null,
         averageRpm: Int? = null,
         powerGenerated: Int? = null,
         battery: Int? = null
     ) {
-        try {
-            val co2Saved = distance?.div(5)
-            val averageSpeed =
-                averageSpeed?.let { unitConverter.convertSpeed(it, speedUnit, 1) }
-            val distance =
-                distance?.let { unitConverter.convertDistance(it, distanceUnit, 1) }
-            val temperature =
-                temperature?.let { unitConverter.convertTemperature(it, temperatureUnit) }
-            updateState {
-                copy(
-                    data = StatisticsDataUiModel(
-                        interiorTemperature = temperature ?: uiState.value.data?.interiorTemperature
-                        ?: 0,
-                        co2Saved = co2Saved ?: uiState.value.data?.co2Saved ?: 0f,
-                        totalDistance = distance ?: uiState.value.data?.totalDistance ?: "0",
-                        currentTripTime = 0,
-                        averageSpeed = averageSpeed ?: uiState.value.data?.averageSpeed ?: "0",
-                        averageRpm = averageRpm ?: uiState.value.data?.averageRpm ?: 0,
-                        powerGenerated = powerGenerated ?: uiState.value.data?.powerGenerated ?: 0,
-                        batteryRemaining = battery ?: uiState.value.data?.batteryRemaining ?: 0,
-                        distanceUnit = unitConverter.getDistanceUnitAbbreviation(distanceUnit),
-                        averageSpeedUnit = unitConverter.getSpeedUnitAbbreviation(speedUnit),
-                        temperatureUnit = unitConverter.getTemperatureUnitAbbreviation(
-                            temperatureUnit
-                        )
+        val co2Saved = distance?.div(5)
+        val averageSpeed =
+            averageSpeed?.let { unitConverter.convertSpeed(it, speedUnit, 1) }
+        val distance =
+            distance?.let { unitConverter.convertDistance(it, distanceUnit, 1) }
+        val temperature =
+            temperature?.let { unitConverter.convertTemperature(it, temperatureUnit) }
+        updateState {
+            copy(
+                data = StatisticsDataUiModel(
+                    interiorTemperature = temperature ?: uiState.value.data?.interiorTemperature
+                    ?: "0",
+                    co2Saved = co2Saved ?: uiState.value.data?.co2Saved ?: 0f,
+                    totalDistance = distance ?: uiState.value.data?.totalDistance ?: "0",
+                    currentTripTime = 0,
+                    averageSpeed = averageSpeed ?: uiState.value.data?.averageSpeed ?: "0",
+                    averageRpm = averageRpm ?: uiState.value.data?.averageRpm ?: 0,
+                    powerGenerated = powerGenerated ?: uiState.value.data?.powerGenerated ?: 0,
+                    batteryRemaining = battery ?: uiState.value.data?.batteryRemaining ?: 0,
+                    distanceUnit = unitConverter.getDistanceUnitAbbreviation(distanceUnit),
+                    averageSpeedUnit = unitConverter.getSpeedUnitAbbreviation(speedUnit),
+                    temperatureUnit = unitConverter.getTemperatureUnitAbbreviation(
+                        temperatureUnit
                     )
                 )
-            }
-        } catch (e: Exception) {
-            println("Error updating statistics state: $e")
+            )
         }
     }
 

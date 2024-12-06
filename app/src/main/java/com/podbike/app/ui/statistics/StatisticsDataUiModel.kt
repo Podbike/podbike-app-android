@@ -1,7 +1,7 @@
 package com.podbike.app.ui.statistics
 
 data class StatisticsDataUiModel(
-    val interiorTemperature: Int,
+    val interiorTemperature: String,
     val temperatureUnit: String,
     val co2Saved: Float,
     val totalDistance: String,

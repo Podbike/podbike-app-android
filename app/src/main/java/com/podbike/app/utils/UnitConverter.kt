@@ -28,11 +28,17 @@ class UnitConverter() {
         return String.format("%.${decimalPlaces}f", result)
     }
 
-    fun convertTemperature(celsius: Int, temperatureUnit: TemperatureUnit): Int {
-        return when (temperatureUnit) {
+    fun convertTemperature(
+        celsius: Float,
+        temperatureUnit: TemperatureUnit,
+        decimalPlaces: Int = 1
+    ): String {
+        val result = when (temperatureUnit) {
             TemperatureUnit.CELSIUS -> celsius
             TemperatureUnit.FAHRENHEIT -> celsius * 9 / 5 + 32
         }
+
+        return String.format("%.${decimalPlaces}f", result)
     }
 
     fun getTemperatureUnitAbbreviation(temperatureUnit: TemperatureUnit): String {

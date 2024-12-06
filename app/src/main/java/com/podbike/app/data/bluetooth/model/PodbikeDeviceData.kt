@@ -36,7 +36,7 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
         get() = getStringCharacteristicData(HaarekBoardSpec.RANGE_CHARACTERISTIC_UUID)
 
     @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    val temperature: Flow<Int>
+    val temperature: Flow<Float>
         get() = getStringCharacteristicData(HaarekBoardSpec.TEMPERATURE_CHARACTERISTIC_UUID)
 
     @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)

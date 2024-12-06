@@ -26,11 +26,8 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
         coroutineScope: CoroutineScope,
     ): PodbikeDevice {
         try {
-
-
             val connection = ClientBleGatt.connect(
                 context, device.address, coroutineScope, options = BleGattConnectOptions(
-
                 )
             )
             println("Connecting to device: ${device.address}")
