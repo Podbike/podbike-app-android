@@ -142,13 +142,17 @@ class DashboardFragment : BaseFragment() {
                     it.lightStatus.indicatorRight
                 )
 
-                fragmentDashboardHazardIndicator.setHazardIndicator(it.lightStatus.brakeLight)
 
-                if (it.lightStatus.indicatorLeft && it.lightStatus.indicatorRight) {
+                val bothTurnIndicatorsOn =
+                    it.lightStatus.indicatorLeft && it.lightStatus.indicatorRight
+                fragmentDashboardHazardIndicator.setHazardIndicator(bothTurnIndicatorsOn)
+                if (bothTurnIndicatorsOn) {
+                    fragmentDashboardTurnIndicator.isVisible = false
                     fragmentDashboardHazardIndicator.isVisible = true
                     fragmentDashboardLayout.isVisible = false
                 } else if (it.lightStatus.indicatorLeft || it.lightStatus.indicatorRight) {
                     fragmentDashboardTurnIndicator.isVisible = true
+                    fragmentDashboardHazardIndicator.isVisible = false
                     fragmentDashboardLayout.isVisible = false
                 } else {
                     fragmentDashboardTurnIndicator.isVisible = false
