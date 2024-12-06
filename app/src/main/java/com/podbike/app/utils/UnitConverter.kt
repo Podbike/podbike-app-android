@@ -2,6 +2,7 @@ package com.podbike.app.utils
 
 import com.podbike.app.data.DistanceUnit
 import com.podbike.app.data.SpeedUnit
+import com.podbike.app.data.TemperatureUnit
 
 class UnitConverter() {
 
@@ -25,6 +26,20 @@ class UnitConverter() {
             SpeedUnit.METERS_PER_SECOND -> KILOMETERS_PER_HOUR_TO_MPS * kilometersPerHour
         }
         return String.format("%.${decimalPlaces}f", result)
+    }
+
+    fun convertTemperature(celsius: Int, temperatureUnit: TemperatureUnit): Int {
+        return when (temperatureUnit) {
+            TemperatureUnit.CELSIUS -> celsius
+            TemperatureUnit.FAHRENHEIT -> celsius * 9 / 5 + 32
+        }
+    }
+
+    fun getTemperatureUnitAbbreviation(temperatureUnit: TemperatureUnit): String {
+        return when (temperatureUnit) {
+            TemperatureUnit.CELSIUS -> "°C"
+            TemperatureUnit.FAHRENHEIT -> "°F"
+        }
     }
 
     fun getDistanceUnitAbbreviation(distanceUnit: DistanceUnit): String {

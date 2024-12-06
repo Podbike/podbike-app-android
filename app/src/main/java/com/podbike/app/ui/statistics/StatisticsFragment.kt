@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TableRow
-import android.widget.TextView
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
@@ -13,11 +12,11 @@ import com.podbike.app.R
 import com.podbike.app.databinding.FragmentStatisticsBinding
 import com.podbike.app.ui.base.BaseFragment
 import com.podbike.app.ui.base.adjustEdgeToEdgePaddings
-import com.podbike.app.ui.dashboard.DashboardViewModel
-import com.podbike.app.ui.settings.SettingView
+import com.podbike.app.utils.UnitConverter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class StatisticsFragment : BaseFragment() {
@@ -60,94 +59,102 @@ class StatisticsFragment : BaseFragment() {
     private fun buildStatistics(state: StatisticsViewModel.StatisticsState) {
         with(binding) {
             state.data?.let {
-                println("BUILDING STATISTICS")
 
                 val temperatureCo2Row = TableRow(requireContext())
                 val distanceTripTimeRow = TableRow(requireContext())
                 val averageSpeedRpmRow = TableRow(requireContext())
                 val powerBatteryRow = TableRow(requireContext())
 
-                val temperatureView =
-                    StatisticView(
+                try {
+                    val temperatureView =
+                        StatisticView(
+                            requireContext(),
+                            getString(R.string.StatisticTemperature),
+                            it.temperatureUnit,
+                            it.interiorTemperature.toString(),
+                        )
+                    val co2View =
+                        StatisticView(
+                            requireContext(),
+                            getString(R.string.StatisticCO2),
+                            "kg",
+                            it.co2Saved.toString()
+                        )
+                    val distanceView = StatisticView(
                         requireContext(),
-                        getString(R.string.StatisticTemperature),
-                        "°C",
-                        it.interiorTemperature.toString(),
+                        getString(R.string.StatisticTotalDistance),
+                        it.distanceUnit,
+                        it.totalDistance,
                     )
-                val co2View =
-                    StatisticView(
+                    val tripTime =
+                        StatisticView(
+                            requireContext(),
+                            getString(R.string.StatisticTime),
+                            "min",
+                            "30" //@TODO: get from data
+                        )
+                    val averageSpeed = StatisticView(
                         requireContext(),
-                        getString(R.string.StatisticCO2),
-                        "kg",
-                        it.co2Saved.toString()
+                        getString(R.string.StatisticAverageSpeed),
+                        it.averageSpeedUnit,
+                        it.averageSpeed,
                     )
-                val distanceView = StatisticView(
-                    requireContext(),
-                    getString(R.string.StatisticTotalDistance),
-                    "km",
-                    it.totalDistance.toString(),
-                )
-                val tripTime =
-                    StatisticView(requireContext(), getString(R.string.StatisticTime), "min", "30")
-                val averageSpeed = StatisticView(
-                    requireContext(),
-                    getString(R.string.StatisticAverageSpeed),
-                    "km/h",
-                    it.averageSpeed.toString(),
-                )
-                val averageRpm = StatisticView(
-                    requireContext(),
-                    getString(R.string.StatisticAverageCadence),
-                    "rpm",
-                    it.averageRpm.toString(),
-                )
-                val powerGenerated =
-                    StatisticView(
+                    val averageRpm = StatisticView(
                         requireContext(),
-                        getString(R.string.StatisticPower),
-                        "W",
-                        it.powerGenerated.toString(),
+                        getString(R.string.StatisticAverageCadence),
+                        "rpm",
+                        it.averageRpm.toString(),
                     )
-                val batteryRemaining =
-                    StatisticView(
-                        requireContext(),
-                        getString(R.string.StatisticBattery),
-                        "%",
-                        it.batteryRemaining.toString(),
-                    )
+                    val powerGenerated =
+                        StatisticView(
+                            requireContext(),
+                            getString(R.string.StatisticPower),
+                            "W",
+                            it.powerGenerated.toString(),
+                        )
+                    val batteryRemaining =
+                        StatisticView(
+                            requireContext(),
+                            getString(R.string.StatisticBattery),
+                            "%",
+                            it.batteryRemaining.toString(),
+                        )
 
-                temperatureCo2Row.removeAllViews()
-                distanceTripTimeRow.removeAllViews()
-                averageSpeedRpmRow.removeAllViews()
-                powerBatteryRow.removeAllViews()
+                    temperatureCo2Row.removeAllViews()
+                    distanceTripTimeRow.removeAllViews()
+                    averageSpeedRpmRow.removeAllViews()
+                    powerBatteryRow.removeAllViews()
 
-                temperatureCo2Row.run {
-                    addView(temperatureView)
-                    addView(co2View)
-                }
+                    temperatureCo2Row.run {
+                        addView(temperatureView)
+                        addView(co2View)
+                    }
 
-                distanceTripTimeRow.run {
-                    addView(distanceView)
-                    addView(tripTime)
-                }
+                    distanceTripTimeRow.run {
+                        addView(distanceView)
+                        addView(tripTime)
+                    }
 
-                averageSpeedRpmRow.run {
-                    addView(averageSpeed)
-                    addView(averageRpm)
-                }
+                    averageSpeedRpmRow.run {
+                        addView(averageSpeed)
+                        addView(averageRpm)
+                    }
 
-                powerBatteryRow.run {
-                    addView(powerGenerated)
-                    addView(batteryRemaining)
-                }
+                    powerBatteryRow.run {
+                        addView(powerGenerated)
+                        addView(batteryRemaining)
+                    }
 
-                fragmentStatisticsTableLayout.removeAllViews()
+                    fragmentStatisticsTableLayout.removeAllViews()
 
-                fragmentStatisticsTableLayout.run {
-                    addView(temperatureCo2Row)
-                    addView(distanceTripTimeRow)
-                    addView(averageSpeedRpmRow)
-                    addView(powerBatteryRow)
+                    fragmentStatisticsTableLayout.run {
+                        addView(temperatureCo2Row)
+                        addView(distanceTripTimeRow)
+                        addView(averageSpeedRpmRow)
+                        addView(powerBatteryRow)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
             }
 

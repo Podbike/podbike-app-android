@@ -6,6 +6,7 @@ import com.kfc_polska.ui.base.UiEffect
 import com.kfc_polska.ui.base.UiState
 import com.podbike.app.data.DistanceUnit
 import com.podbike.app.data.SpeedUnit
+import com.podbike.app.data.TemperatureUnit
 import com.podbike.app.data.UserPreferences
 import com.podbike.app.data.bluetooth.manager.BluetoothManager
 import com.podbike.app.ui.base.StateViewModel
@@ -33,16 +34,29 @@ class StatisticsViewModel @Inject constructor(
     private val speedUnit: SpeedUnit
         get() = userPreferences.getSpeedUnit()
 
+    private val temperatureUnit: TemperatureUnit
+        get() = userPreferences.getTemperatureUnit()
+
 
     fun statistics() {
-        statisticsJob = viewModelScope.launch {
-            val device = bluetoothManager.selectedDevice
-            launch { device?.data?.temperature?.collect { updateStatisticsState(temperature = it) } }
-            launch { device?.data?.distance?.collect { updateStatisticsState(distance = it) } }
-            launch { device?.data?.averageSpeed?.collect { updateStatisticsState(averageSpeed = it) } }
-            launch { device?.data?.averageRpm?.collect { updateStatisticsState(averageRpm = it) } }
-            launch { device?.data?.powerGenerated?.collect { updateStatisticsState(powerGenerated = it) } }
-            launch { device?.data?.battery?.collect { updateStatisticsState(battery = it) } }
+        try {
+            statisticsJob = viewModelScope.launch {
+                val device = bluetoothManager.selectedDevice
+                launch { device?.data?.temperature?.collect { updateStatisticsState(temperature = it) } }
+                launch { device?.data?.distance?.collect { updateStatisticsState(distance = it) } }
+                launch { device?.data?.averageSpeed?.collect { updateStatisticsState(averageSpeed = it) } }
+                launch { device?.data?.averageRpm?.collect { updateStatisticsState(averageRpm = it) } }
+                launch {
+                    device?.data?.powerGenerated?.collect {
+                        updateStatisticsState(
+                            powerGenerated = it
+                        )
+                    }
+                }
+                launch { device?.data?.battery?.collect { updateStatisticsState(battery = it) } }
+            }
+        } catch (e: Exception) {
+            println("Error fetching statistics: $e")
         }
     }
 
@@ -55,26 +69,41 @@ class StatisticsViewModel @Inject constructor(
     private fun updateStatisticsState(
         distance: Float? = null,
         temperature: Int? = null,
-        averageSpeed: Int? = null,
+        averageSpeed: Float? = null,
         averageRpm: Int? = null,
         powerGenerated: Int? = null,
         battery: Int? = null
     ) {
-        val co2Saved = distance?.div(5)
-        updateState {
-            copy(
-                data = StatisticsDataUiModel(
-                    interiorTemperature = temperature ?: uiState.value.data?.interiorTemperature
-                    ?: 0,
-                    co2Saved = co2Saved ?: uiState.value.data?.co2Saved ?: 0f,
-                    totalDistance = distance ?: uiState.value.data?.totalDistance ?: 0f,
-                    currentTripTime = 0,
-                    averageSpeed = averageSpeed ?: uiState.value.data?.averageSpeed ?: 0,
-                    averageRpm = averageRpm ?: uiState.value.data?.averageRpm ?: 0,
-                    powerGenerated = powerGenerated ?: uiState.value.data?.powerGenerated ?: 0,
-                    batteryRemaining = battery ?: uiState.value.data?.batteryRemaining ?: 0
+        try {
+            val co2Saved = distance?.div(5)
+            val averageSpeed =
+                averageSpeed?.let { unitConverter.convertSpeed(it, speedUnit, 1) }
+            val distance =
+                distance?.let { unitConverter.convertDistance(it, distanceUnit, 1) }
+            val temperature =
+                temperature?.let { unitConverter.convertTemperature(it, temperatureUnit) }
+            updateState {
+                copy(
+                    data = StatisticsDataUiModel(
+                        interiorTemperature = temperature ?: uiState.value.data?.interiorTemperature
+                        ?: 0,
+                        co2Saved = co2Saved ?: uiState.value.data?.co2Saved ?: 0f,
+                        totalDistance = distance ?: uiState.value.data?.totalDistance ?: "0",
+                        currentTripTime = 0,
+                        averageSpeed = averageSpeed ?: uiState.value.data?.averageSpeed ?: "0",
+                        averageRpm = averageRpm ?: uiState.value.data?.averageRpm ?: 0,
+                        powerGenerated = powerGenerated ?: uiState.value.data?.powerGenerated ?: 0,
+                        batteryRemaining = battery ?: uiState.value.data?.batteryRemaining ?: 0,
+                        distanceUnit = unitConverter.getDistanceUnitAbbreviation(distanceUnit),
+                        averageSpeedUnit = unitConverter.getSpeedUnitAbbreviation(speedUnit),
+                        temperatureUnit = unitConverter.getTemperatureUnitAbbreviation(
+                            temperatureUnit
+                        )
+                    )
                 )
-            )
+            }
+        } catch (e: Exception) {
+            println("Error updating statistics state: $e")
         }
     }
 
