@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.firebase.crashlytics)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.kotlin.serialization)
     id 'kotlin-kapt'
 }
 
@@ -103,6 +104,8 @@ dependencies {
     implementation libs.kotlin.ble.advertiser
     implementation libs.timber
     implementation libs.gson
+    implementation libs.ymodem
+    implementation libs.kotlin.serialization
 
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit

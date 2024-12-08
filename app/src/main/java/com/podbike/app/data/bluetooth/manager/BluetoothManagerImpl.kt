@@ -15,6 +15,7 @@ import no.nordicsemi.android.kotlin.ble.core.scanner.BleScannerSettings
 import no.nordicsemi.android.kotlin.ble.scanner.BleScanner
 import no.nordicsemi.android.kotlin.ble.scanner.aggregator.BleScanResultAggregator
 
+
 class BluetoothManagerImpl(val context: Context) : BluetoothManager {
     private val connectedDevices = mutableListOf<PodbikeDevice>()
     override var selectedDevice: PodbikeDevice? = null
@@ -61,4 +62,5 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
             .map { aggregator.aggregateDevices(it) }
             .map { it -> it.map { DeviceInfo(it.name ?: "Unknown", it.address) } }
     }
+    
 }
