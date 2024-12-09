@@ -1,8 +1,10 @@
 package com.podbike.app.data.repository
 
+import com.podbike.app.data.api.model.FirmwareFilesData
+
 interface FirmwareRepository {
     suspend fun checkIsUpToDate(frameNumber: String): Boolean
-    suspend fun getFirmwareFilesList(frameNumber: String): List<String>
+    suspend fun getFirmwareFilesList(frameNumber: String): FirmwareFilesData?
     suspend fun getLicence(): String
-    suspend fun getFirmwareFile(frameNumber: String, fileName: String): ByteArray?
+    suspend fun getFirmwareFile(fileName: String): ByteArray?
 }

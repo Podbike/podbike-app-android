@@ -11,6 +11,7 @@ import com.podbike.app.data.UserPreferences
 import com.podbike.app.data.bluetooth.manager.BluetoothManager
 import com.podbike.app.data.bluetooth.manager.ConnectionManager
 import com.podbike.app.data.bluetooth.model.PodbikeLightStatus
+import com.podbike.app.data.repository.FirmwareRepository
 import com.podbike.app.ui.base.StateViewModel
 import com.podbike.app.ui.base.collectWithErrorHandling
 import com.podbike.app.ui.dashboard.DashboardViewModel.DashboardAction
@@ -26,6 +27,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
+    private val firmwareRepository: FirmwareRepository,
     private val bluetoothManager: BluetoothManager,
     private val userPreferences: UserPreferences,
     private val unitConverter: UnitConverter
@@ -48,7 +50,25 @@ class DashboardViewModel @Inject constructor(
     private fun dashboard() {
         dashboardJob = viewModelScope.launch {
             val device = bluetoothManager.selectedDevice
-            launch { println("PARSED DATA: ${device?.data?.getDeviceMetadata()}") }
+            launch {
+                val data = device?.data?.getDeviceMetadata()
+                println("data: $data")
+                val isUpToDate = data?.frameNumber?.let { firmwareRepository.checkIsUpToDate(it) }
+                println("isUpToDate: $isUpToDate")
+                val firmwareFilesData = data?.frameNumber?.let {
+                    firmwareRepository.getFirmwareFilesList(it)
+                }
+                println("firmwareFilesData: $firmwareFilesData")
+                val fileBytes =
+                    firmwareFilesData?.firmwareModuleByUpdateId?.get(2)?.fileName?.let {
+                        firmwareRepository.getFirmwareFile(
+                            it
+                        )
+                    }
+                if (fileBytes != null) {
+                    println("fileBytes: ${fileBytes.size}")
+                }
+            }
             launch { device?.data?.battery?.collectWithErrorHandling { updateDeviceDataState(battery = it) } }
             launch {
                 device?.data?.speed?.collectWithErrorHandling {
