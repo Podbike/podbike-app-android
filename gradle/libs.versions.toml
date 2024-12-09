@@ -10,7 +10,8 @@ material = "1.12.0"
 activity = "1.9.3"
 constraintlayout = "2.2.0"
 hilt = "2.51.1"
-okhttp = "4.12.0"
+okhttp = "5.0.0-alpha.14"
+okhttpLogging = "5.0.0-alpha.14"
 retrofit = "2.11.0"
 coroutines = "1.7.3"
 viewmodel = "2.8.7"
@@ -28,6 +29,7 @@ gson = "2.10.1"
 ymodem = "2.0.3"
 serializationPlugin = "2.1.0"
 serializationLibrary = "1.7.3"
+retrofitKotlinxSerialization = "2.11.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -58,6 +60,8 @@ timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "tim
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 ymodem = { group = "com.github.ArdWang", name = "YModemLib", version.ref = "ymodem" }
 kotlin-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serializationLibrary" }
+retrofit-kotilinx-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofitKotlinxSerialization" }
+okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttpLogging" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
