@@ -100,6 +100,9 @@ class DashboardFragment : BaseFragment() {
 
     private fun setupBindings() {
         with(binding) {
+            fragmentDashboardLogo.setOnClickListener {
+                viewModel.processAction(DashboardAction.StatisticsClicked)
+            }
             fragmentDashboardSettings.setOnClickListener {
                 viewModel.processAction(DashboardAction.SettingsClicked)
             }
@@ -122,8 +125,8 @@ class DashboardFragment : BaseFragment() {
                 fragmentDashboardAssistance.currentAssistance = it.assist
                 fragmentDashboardCadence.currentCadence = it.cadence
 
-                fragmentDashboardIconsLayout.isVisible = it.isMoving
-                fragmentDashboardMenuLayout.isVisible = !it.isMoving
+                fragmentDashboardIconsLayout.isVisible = !it.isMoving
+                fragmentDashboardMenuLayout.isVisible = it.isMoving
 
                 if (it.isFreezing) {
                     fragmentDashboardIcon1.setColorFilter(requireContext().getColor(R.color.white))
@@ -185,6 +188,7 @@ class DashboardFragment : BaseFragment() {
             DashboardEffect.NavigateToLocationSettings -> intentManager.openLocationSettings()
             DashboardEffect.NavigateToAppSettings -> findNavController().navigate(R.id.action_dashboardFragment_to_settingsFragment)
             DashboardEffect.NavigateToHelp -> findNavController().navigate(R.id.action_dashboardFragment_to_showTutorialFragment)
+            DashboardEffect.NavigateToStatistics -> findNavController().navigate(R.id.action_dashboardFragment_to_statisticsFragment)
         }
     }
 

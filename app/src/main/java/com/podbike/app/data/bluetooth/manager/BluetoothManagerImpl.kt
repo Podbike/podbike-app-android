@@ -9,6 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
+import no.nordicsemi.android.kotlin.ble.core.data.BleGattConnectOptions
 import no.nordicsemi.android.kotlin.ble.core.scanner.BleScanFilter
 import no.nordicsemi.android.kotlin.ble.core.scanner.BleScannerSettings
 import no.nordicsemi.android.kotlin.ble.scanner.BleScanner
@@ -25,7 +26,10 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
         coroutineScope: CoroutineScope,
     ): PodbikeDevice {
         try {
-            val connection = ClientBleGatt.connect(context, device.address, coroutineScope)
+            val connection = ClientBleGatt.connect(
+                context, device.address, coroutineScope, options = BleGattConnectOptions(
+                )
+            )
             println("Connecting to device: ${device.address}")
 
             if (waitForPairing) {

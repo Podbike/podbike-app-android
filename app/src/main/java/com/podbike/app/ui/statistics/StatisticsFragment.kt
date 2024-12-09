@@ -1,0 +1,164 @@
+package com.podbike.app.ui.statistics
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TableRow
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.flowWithLifecycle
+import androidx.lifecycle.lifecycleScope
+import com.podbike.app.R
+import com.podbike.app.databinding.FragmentStatisticsBinding
+import com.podbike.app.ui.base.BaseFragment
+import com.podbike.app.ui.base.adjustEdgeToEdgePaddings
+import com.podbike.app.utils.UnitConverter
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import javax.inject.Inject
+
+@AndroidEntryPoint
+class StatisticsFragment : BaseFragment() {
+
+    private lateinit var binding: FragmentStatisticsBinding
+    private val viewModel: StatisticsViewModel by viewModels()
+
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        binding = FragmentStatisticsBinding.inflate(inflater, container, false).apply {
+            root.adjustEdgeToEdgePaddings()
+        }
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        subscribeToViewModel()
+
+        binding.appBar.appBarBack.setOnClickListener {
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
+        binding.appBar.appBarTitle.text = getString(R.string.StatisticsTitle)
+        //buildStatistics(view)
+    }
+
+    private fun subscribeToViewModel() {
+        viewModel.statistics()
+        viewModel.uiState
+            .flowWithLifecycle(viewLifecycleOwner.lifecycle)
+            .onEach(::buildStatistics)
+            .launchIn(viewLifecycleOwner.lifecycleScope)
+
+
+    }
+
+
+    private fun buildStatistics(state: StatisticsViewModel.StatisticsState) {
+        with(binding) {
+            state.data?.let {
+
+                val temperatureCo2Row = TableRow(requireContext())
+                val distanceTripTimeRow = TableRow(requireContext())
+                val averageSpeedRpmRow = TableRow(requireContext())
+                val powerBatteryRow = TableRow(requireContext())
+
+                try {
+                    val temperatureView =
+                        StatisticView(
+                            requireContext(),
+                            getString(R.string.StatisticTemperature),
+                            it.temperatureUnit,
+                            it.interiorTemperature,
+                        )
+                    val co2View =
+                        StatisticView(
+                            requireContext(),
+                            getString(R.string.StatisticCO2),
+                            "kg",
+                            it.co2Saved.toString()
+                        )
+                    val distanceView = StatisticView(
+                        requireContext(),
+                        getString(R.string.StatisticTotalDistance),
+                        it.distanceUnit,
+                        it.totalDistance,
+                    )
+                    val tripTime =
+                        StatisticView(
+                            requireContext(),
+                            getString(R.string.StatisticTime),
+                            "min",
+                            "30" //@TODO: get from data
+                        )
+                    val averageSpeed = StatisticView(
+                        requireContext(),
+                        getString(R.string.StatisticAverageSpeed),
+                        it.averageSpeedUnit,
+                        it.averageSpeed,
+                    )
+                    val averageRpm = StatisticView(
+                        requireContext(),
+                        getString(R.string.StatisticAverageCadence),
+                        "rpm",
+                        it.averageRpm.toString(),
+                    )
+                    val powerGenerated =
+                        StatisticView(
+                            requireContext(),
+                            getString(R.string.StatisticPower),
+                            "W",
+                            it.powerGenerated.toString(),
+                        )
+                    val batteryRemaining =
+                        StatisticView(
+                            requireContext(),
+                            getString(R.string.StatisticBattery),
+                            "%",
+                            it.batteryRemaining.toString(),
+                        )
+
+                    temperatureCo2Row.removeAllViews()
+                    distanceTripTimeRow.removeAllViews()
+                    averageSpeedRpmRow.removeAllViews()
+                    powerBatteryRow.removeAllViews()
+
+                    temperatureCo2Row.run {
+                        addView(temperatureView)
+                        addView(co2View)
+                    }
+
+                    distanceTripTimeRow.run {
+                        addView(distanceView)
+                        addView(tripTime)
+                    }
+
+                    averageSpeedRpmRow.run {
+                        addView(averageSpeed)
+                        addView(averageRpm)
+                    }
+
+                    powerBatteryRow.run {
+                        addView(powerGenerated)
+                        addView(batteryRemaining)
+                    }
+
+                    fragmentStatisticsTableLayout.removeAllViews()
+
+                    fragmentStatisticsTableLayout.run {
+                        addView(temperatureCo2Row)
+                        addView(distanceTripTimeRow)
+                        addView(averageSpeedRpmRow)
+                        addView(powerBatteryRow)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+
+        }
+
+    }
+}

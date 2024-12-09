@@ -152,4 +152,5 @@
     <string name="UpdateUpgradeInfo1">"Stellen Sie sicher, dass der Frikar stationär ist und sich in Bluetooth-Reichweite Ihres Telefons befindet."</string>
     <string name="UpdateUpgradeInfo2">"Sie können diese Seite nicht verlassen, bis dieser Vorgang abgeschlossen ist."</string>
     <string name="UpdateVersion">"Aktuelle Firmware-Version:"</string>
+    <string name="StatisticsTitle">Statistik</string>
 </resources>

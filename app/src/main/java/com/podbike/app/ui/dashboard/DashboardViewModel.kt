@@ -128,7 +128,7 @@ class DashboardViewModel @Inject constructor(
         cadence: Int? = null,
         lightStatus: PodbikeLightStatus? = null,
         range: String? = null,
-        temperature: Int? = null,
+        temperature: Float? = null,
     ) {
         //TODO replace cadence with speed eventually
         val cadence = cadence ?: uiState.value.deviceData?.cadence ?: 0
@@ -147,13 +147,13 @@ class DashboardViewModel @Inject constructor(
                     distance = distance ?: this.deviceData?.distance ?: "0",
                     assist = assist ?: this.deviceData?.assist ?: 0,
                     cadence = cadence,
-                    isFreezing = (temperature ?: this.deviceData?.temperature ?: 0) < 4,
+                    isFreezing = (temperature ?: this.deviceData?.temperature ?: 0f) < 4f,
                     lightStatus = lightStatus ?: this.deviceData?.lightStatus
                     ?: PodbikeLightStatus(),
                     time = 0,
                     distanceAbbreviation = unitConverter.getDistanceUnitAbbreviation(distanceUnit),
                     range = range ?: this.deviceData?.range ?: "0",
-                    temperature = temperature ?: this.deviceData?.temperature ?: 0,
+                    temperature = temperature ?: this.deviceData?.temperature ?: 0f,
                     isMoving = isMoving,
                     name = bluetoothManager.selectedDevice?.device?.name
                 )
@@ -211,6 +211,10 @@ class DashboardViewModel @Inject constructor(
                 sendEffect(DashboardEffect.NavigateToAppSettings)
             }
 
+            is DashboardAction.StatisticsClicked -> {
+                sendEffect(DashboardEffect.NavigateToStatistics)
+            }
+
             is DashboardAction.HelpClicked -> {
                 sendEffect(DashboardEffect.NavigateToHelp)
             }
@@ -246,6 +250,7 @@ class DashboardViewModel @Inject constructor(
             val isLocationEnabled: Boolean = false,
         ) : DashboardAction()
 
+        data object StatisticsClicked : DashboardAction()
         data object SettingsClicked : DashboardAction()
         data object HelpClicked : DashboardAction()
         data object Retry : DashboardAction()
@@ -260,6 +265,7 @@ class DashboardViewModel @Inject constructor(
         data object NavigateToLocationSettings : DashboardEffect()
         data object NavigateToAppSettings : DashboardEffect()
         data object NavigateToHelp : DashboardEffect()
+        data object NavigateToStatistics : DashboardEffect()
     }
 
 }
