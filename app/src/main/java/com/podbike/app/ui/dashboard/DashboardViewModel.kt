@@ -59,14 +59,14 @@ class DashboardViewModel @Inject constructor(
                     firmwareRepository.getFirmwareFilesList(it)
                 }
                 println("firmwareFilesData: $firmwareFilesData")
-                val fileBytes =
+                val file =
                     firmwareFilesData?.firmwareModuleByUpdateId?.get(2)?.fileName?.let {
                         firmwareRepository.getFirmwareFile(
                             it
                         )
                     }
-                if (fileBytes != null) {
-                    println("fileBytes: ${fileBytes.size}")
+                if (file != null) {
+                    println("fileBytes: ${file.bytes.size}")
                 }
             }
             launch { device?.data?.battery?.collectWithErrorHandling { updateDeviceDataState(battery = it) } }

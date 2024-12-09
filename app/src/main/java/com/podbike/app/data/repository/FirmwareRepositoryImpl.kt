@@ -1,6 +1,7 @@
 package com.podbike.app.data.repository
 
 import com.podbike.app.data.api.FirmwareApi
+import com.podbike.app.data.api.model.FirmwareFile
 import com.podbike.app.data.api.model.FirmwareFilesData
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
@@ -82,18 +83,20 @@ class FirmwareRepositoryImpl : FirmwareRepository {
         }
     }
 
-    override suspend fun getFirmwareFile(fileName: String): ByteArray? {
+    override suspend fun getFirmwareFile(fileName: String): FirmwareFile? {
         return try {
             val response = firmwareApi.getFirmwareFile(fileName).awaitResponse()
             if (response.isSuccessful) {
                 val bytes = response.body()?.byteStream()?.readBytes()
-                bytes
+                bytes?.let {
+                    FirmwareFile(fileName, it)
+                }
             } else {
-                ByteArray(0)
+                null
             }
         } catch (exception: Exception) {
             println("Failed to get firmware file: ${exception.message}")
-            ByteArray(0)
+            null
         }
     }
 }
