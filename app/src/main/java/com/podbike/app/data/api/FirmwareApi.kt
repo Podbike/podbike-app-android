@@ -1,9 +1,7 @@
 package com.podbike.app.data.api
 
-import com.podbike.app.data.api.model.FirmwareFilesData
 import com.podbike.app.data.api.model.GetFirmwareFilesResponse
 import okhttp3.ResponseBody
-import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
@@ -11,15 +9,15 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface FirmwareApi {
-    @POST("/app/firmware_UpToDateCheck?returns=bit")
-    fun getUpdateStatus(@Body frameNumber: Map<String, String>): Call<Int>
+    @POST("firmware_UpToDateCheck?returns=bit")
+    suspend fun getUpdateStatus(@Body frameNumber: Map<String, String>): Int
 
-    @GET("/app/firmware_update")
-    fun getFirmwareFilesList(@Query("frameNumber") frameNumber: String): Call<GetFirmwareFilesResponse>
+    @GET("firmware_update")
+    suspend fun getFirmwareFilesList(@Query("frameNumber") frameNumber: String): GetFirmwareFilesResponse
 
-    @GET("/app/licenses/get_license")
-    fun getLicense(): Call<ResponseBody>
+    @GET("licenses/get_license")
+    suspend fun getLicence(): ResponseBody
 
-    @GET("/app/firmware/{fileName}")
-    fun getFirmwareFile(@Path("fileName") fileName: String): Call<ResponseBody>
+    @GET("firmware/{fileName}")
+    suspend fun getFirmwareFile(@Path("fileName") fileName: String): ResponseBody
 }

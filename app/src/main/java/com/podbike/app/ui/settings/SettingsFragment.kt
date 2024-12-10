@@ -57,7 +57,10 @@ class SettingsFragment : BaseFragment() {
                 Navigation.findNavController(view)
                     .navigate(R.id.action_settingsFragment_to_devicesFragment)
             }
-        val frikarUpdateView = SettingView(requireContext(), getString(R.string.SettingsUpdate))
+        val frikarUpdateView = SettingView(requireContext(), getString(R.string.SettingsUpdate)) {
+            Navigation.findNavController(view)
+                .navigate(R.id.action_settingsFragment_to_firmwareUpdateFragment)
+        }
 
         val unitsGroupView = SettingGroupView(requireContext(), getString(R.string.SettingsUnits))
         val speedUnitView = SettingView(requireContext(), getString(R.string.SettingsSpeedUnit)) {

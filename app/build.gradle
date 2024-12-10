@@ -51,6 +51,7 @@ android {
 
     buildFeatures {
         viewBinding true
+        buildConfig true
     }
 
     androidResources {
@@ -66,6 +67,15 @@ android {
         }
         prod {
             dimension 'environment'
+        }
+    }
+
+    buildTypes {
+        debug {
+            buildConfigField 'boolean', 'DEBUG', 'true'
+        }
+        release {
+            buildConfigField 'boolean', 'DEBUG', 'false'
         }
     }
     compileOptions {
