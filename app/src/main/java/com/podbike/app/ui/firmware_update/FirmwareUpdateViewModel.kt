@@ -1,0 +1,267 @@
+package com.podbike.app.ui.firmware_update
+
+import android.util.Log
+import androidx.lifecycle.viewModelScope
+import com.kfc_polska.ui.base.UiAction
+import com.kfc_polska.ui.base.UiEffect
+import com.kfc_polska.ui.base.UiState
+import com.podbike.app.data.api.model.FirmwareFilesData
+import com.podbike.app.data.bluetooth.manager.BluetoothManager
+import com.podbike.app.data.repository.FirmwareRepository
+import com.podbike.app.ui.base.StateViewModel
+import com.podbike.app.ui.firmware_update.FirmwareUpdateViewModel.ErrorTypeSealed.CheckForUpdatesError
+import com.podbike.app.ui.firmware_update.FirmwareUpdateViewModel.ErrorTypeSealed.GetLicenceError
+import com.podbike.app.ui.firmware_update.FirmwareUpdateViewModel.ErrorTypeSealed.LoadFirmwareFilesError
+import com.podbike.app.ui.firmware_update.FirmwareUpdateViewModel.FirmwareUpdateAction
+import com.podbike.app.ui.firmware_update.FirmwareUpdateViewModel.FirmwareUpdateEffect
+import com.podbike.app.ui.firmware_update.FirmwareUpdateViewModel.FirmwareUpdateState
+import com.podbike.app.ui.firmware_update.FirmwareVersion.*
+import com.podbike.app.utils.Result
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import timber.log.Timber.Forest.i
+import javax.inject.Inject
+
+@HiltViewModel
+class FirmwareUpdateViewModel @Inject constructor(
+    private val bluetoothManager: BluetoothManager,
+    private val firmwareRepository: FirmwareRepository
+) : StateViewModel<FirmwareUpdateState, FirmwareUpdateAction, FirmwareUpdateEffect>(
+    FirmwareUpdateState()
+) {
+
+    sealed class ErrorTypeSealed(val error: Throwable) {
+        class CheckForUpdatesError(error: Throwable) : ErrorTypeSealed(error)
+        class GetLicenceError(error: Throwable) : ErrorTypeSealed(error)
+        class LoadFirmwareFilesError(error: Throwable) : ErrorTypeSealed(error)
+    }
+
+    private fun checkForUpdates() {
+        viewModelScope.launch {
+            val frameNumber = getFrameNumber()
+            if (frameNumber == null) {
+                setErrorState(CheckForUpdatesError(Throwable("No frame number")))
+                return@launch
+            }
+            val isUpToDate = firmwareRepository.checkIsUpToDate(frameNumber)
+            i("isUpToDate: $isUpToDate")
+
+            when (isUpToDate) {
+                is Result.Error -> setErrorState(CheckForUpdatesError(isUpToDate.error))
+                is Result.Success -> {
+                    when (isUpToDate.data) {
+                        true -> setFirmwareVersionState(UP_TO_DATE)
+                        false -> setFirmwareVersionState(UPDATE_AVAILABLE)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun setErrorState(error: ErrorTypeSealed) {
+        updateState { copy(firmwareVersion = FirmwareVersion.ERROR, error = error) }
+    }
+
+    private fun getAndTransferFirmwareFiles() {
+        viewModelScope.launch {
+            val frameNumber = getFrameNumber()
+            if (frameNumber == null) {
+                setErrorState(CheckForUpdatesError(Throwable("No frame number")))
+                return@launch
+            }
+            val firmwareFilesData = firmwareRepository.getFirmwareFilesList(frameNumber)
+            i("firmwareFilesData: $firmwareFilesData")
+            when (firmwareFilesData) {
+                is Result.Error -> setErrorState(LoadFirmwareFilesError(firmwareFilesData.error))
+                is Result.Success -> {
+                    transferFirmwareFiles(firmwareFilesData.data)
+                }
+            }
+        }
+    }
+
+    private suspend fun transferFirmwareFiles(firmwareFilesData: FirmwareFilesData?) {
+        val firmwareFileName = firmwareFilesData?.firmwareModuleByUpdateId?.get(2)?.fileName
+        if (firmwareFileName == null) {
+            setErrorState(LoadFirmwareFilesError(Throwable("No firmware file name")))
+            return
+        }
+        val firmwareUpdateFile = firmwareRepository.getFirmwareFile(firmwareFileName)
+
+        when (firmwareUpdateFile) {
+            is Result.Error -> setErrorState(
+                LoadFirmwareFilesError(
+                    firmwareUpdateFile.error
+                )
+            )
+
+            is Result.Success -> {
+                //TODO remove delay
+                delay(3000)
+                setFirmwareVersionState(TRANSFER_COMPLETED)
+                i("fileBytes: ${firmwareUpdateFile.data?.bytes?.size}")
+            }
+        }
+    }
+
+    override fun processAction(action: FirmwareUpdateAction) {
+        when (action) {
+            is FirmwareUpdateAction.ForwardAction -> {
+                when (uiState.value.firmwareVersion) {
+                    UNKNOWN -> {
+                        setFirmwareVersionState(ERROR)
+                    }
+
+                    UP_TO_DATE -> {
+                        checkForUpdates()
+                    }
+
+                    UPDATE_AVAILABLE -> {
+                        viewModelScope.launch {
+                            val license = firmwareRepository.getLicense()
+                            when (license) {
+                                is Result.Error -> {
+                                    setErrorState(GetLicenceError(license.error))
+                                }
+
+                                is Result.Success -> {
+                                    updateState {
+                                        copy(
+                                            firmwareVersion = LICENSE_AGREEMENT,
+                                            firmwareLicense = license.data,
+                                            isLoading = false,
+                                            error = null
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    LICENSE_AGREEMENT -> {
+                        setFirmwareVersionState(TRANSFER_STARTED)
+                        getAndTransferFirmwareFiles()
+                    }
+
+                    TRANSFER_STARTED -> {
+                        setFirmwareVersionState(TRANSFER_COMPLETED)
+                    }
+
+                    TRANSFER_COMPLETED -> {
+                        setFirmwareVersionState(UPGRADE)
+                        viewModelScope.launch() {
+                            delay(3000)
+                            setFirmwareVersionState(UP_TO_DATE)
+                        }
+                    }
+
+                    UPGRADE -> {
+                        //no action
+                    }
+
+                    ERROR -> {
+                        //no action
+                    }
+                }
+            }
+
+            is FirmwareUpdateAction.BluetoothPermissions -> {
+                sendEffect(FirmwareUpdateEffect.NavigateToBluetoothPermissions)
+            }
+
+            is FirmwareUpdateAction.LocationPermissions -> {
+                sendEffect(FirmwareUpdateEffect.NavigateToLocationPermissions)
+            }
+
+            is FirmwareUpdateAction.EnableBluetooth -> {
+                sendEffect(FirmwareUpdateEffect.NavigateToBluetoothSettings)
+            }
+
+            is FirmwareUpdateAction.EnableLocation -> {
+                sendEffect(FirmwareUpdateEffect.NavigateToLocationSettings)
+            }
+
+            is FirmwareUpdateAction.PermissionsChanged -> {
+                val hasAllPermissions =
+                    action.hasBluetoothPermissions && action.isBluetoothEnabled && action.isLocationEnabled
+                val hasStartedFirmwareUpdate = uiState.value.firmwareVersion != UNKNOWN
+                Log.d(
+                    "FirmwareUpdateViewModel",
+                    "PermissionsChanged: $action" + " firmwareVersion: ${uiState.value.firmwareVersion}"
+                )
+                updateState {
+                    copy(
+                        hasBluetoothPermissions = action.hasBluetoothPermissions,
+                        isBluetoothEnabled = action.isBluetoothEnabled,
+                        isLocationEnabled = action.isLocationEnabled,
+                        isLoading = hasAllPermissions,
+                    )
+                }
+                if (hasAllPermissions && !hasStartedFirmwareUpdate) {
+                    Log.d("FirmwareUpdateViewModel", "checkForUpdates")
+                    checkForUpdates()
+                }
+            }
+
+            is FirmwareUpdateAction.Retry -> {
+                updateState { copy(isLoading = true, error = null) }
+            }
+
+            is FirmwareUpdateAction.GoBack -> {
+                sendEffect(FirmwareUpdateEffect.NavigateBack)
+            }
+        }
+    }
+
+    private fun setFirmwareVersionState(firmwareVersion: FirmwareVersion) {
+        updateState {
+            copy(
+                firmwareVersion = firmwareVersion,
+                isLoading = false,
+                error = null
+            )
+        }
+    }
+
+    private suspend fun getFrameNumber(): String? {
+        //TODO remove mock
+        return "000000-F8-1-00-000"
+        return bluetoothManager.selectedDevice?.data?.getDeviceMetadata()?.frameNumber
+    }
+
+    data class FirmwareUpdateState(
+        val hasBluetoothPermissions: Boolean = false,
+        val isBluetoothEnabled: Boolean = false,
+        val isLocationEnabled: Boolean = false,
+        val isLoading: Boolean = true,
+        val firmwareVersion: FirmwareVersion = FirmwareVersion.UNKNOWN,
+        val firmwareLicense: String? = null,
+        val error: ErrorTypeSealed? = null
+    ) : UiState
+
+    sealed class FirmwareUpdateAction : UiAction {
+        data object ForwardAction : FirmwareUpdateAction()
+        data object BluetoothPermissions : FirmwareUpdateAction()
+        data object LocationPermissions : FirmwareUpdateAction()
+        data object EnableBluetooth : FirmwareUpdateAction()
+        data object EnableLocation : FirmwareUpdateAction()
+        data class PermissionsChanged(
+            val hasBluetoothPermissions: Boolean = false,
+            val isBluetoothEnabled: Boolean = false,
+            val isLocationEnabled: Boolean = false,
+        ) : FirmwareUpdateAction()
+
+        data object Retry : FirmwareUpdateAction()
+        data object GoBack : FirmwareUpdateAction()
+    }
+
+    sealed class FirmwareUpdateEffect : UiEffect {
+        data object NavigateBack : FirmwareUpdateEffect()
+        data object NavigateToBluetoothPermissions : FirmwareUpdateEffect()
+        data object NavigateToLocationPermissions : FirmwareUpdateEffect()
+        data object NavigateToBluetoothSettings : FirmwareUpdateEffect()
+        data object NavigateToLocationSettings : FirmwareUpdateEffect()
+    }
+
+}

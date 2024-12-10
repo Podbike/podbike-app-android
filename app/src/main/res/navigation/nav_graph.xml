@@ -56,6 +56,10 @@
         <action
             android:id="@+id/action_settingsFragment_to_devicesFragment"
             app:destination="@id/devicesFragment" />
+
+        <action
+            android:id="@+id/action_settingsFragment_to_firmwareUpdateFragment"
+            app:destination="@id/firmwareUpdateFragment" />
     </fragment>
 
     <fragment
@@ -131,5 +135,11 @@
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
     </fragment>
+
+    <fragment
+        android:id="@+id/firmwareUpdateFragment"
+        android:name="com.podbike.app.ui.firmware_update.FirmwareUpdateFragment"
+        android:label="fragment_firmware_update"
+        tools:layout="@layout/fragment_firmware_update" />
 
 </navigation>

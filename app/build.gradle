@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.firebase.crashlytics)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.kotlin.serialization)
     id 'kotlin-kapt'
 }
 
@@ -50,6 +51,7 @@ android {
 
     buildFeatures {
         viewBinding true
+        buildConfig true
     }
 
     androidResources {
@@ -65,6 +67,15 @@ android {
         }
         prod {
             dimension 'environment'
+        }
+    }
+
+    buildTypes {
+        debug {
+            buildConfigField 'boolean', 'DEBUG', 'true'
+        }
+        release {
+            buildConfigField 'boolean', 'DEBUG', 'false'
         }
     }
     compileOptions {
@@ -103,6 +114,10 @@ dependencies {
     implementation libs.kotlin.ble.advertiser
     implementation libs.timber
     implementation libs.gson
+    implementation libs.ymodem
+    implementation libs.kotlin.serialization
+    implementation libs.retrofit.kotilinx.serialization
+    implementation libs.okhttp.logging.interceptor
 
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit

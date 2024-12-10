@@ -2,6 +2,7 @@ package com.podbike.app.data.bluetooth.model
 
 import android.Manifest
 import androidx.annotation.RequiresPermission
+import com.podbike.app.data.bluetooth.utils.YModem
 import com.podbike.app.data.bluetooth.values.HaarekBoardSpec
 import com.podbike.app.ui.base.collectWithErrorHandling
 import com.podbike.app.ui.scanning.DeviceInfo
@@ -50,6 +51,16 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
     @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     val powerGenerated: Flow<Int>
         get() = getStringCharacteristicData(HaarekBoardSpec.GENERATED_POWER_CHARACTERISTIC_UUID)
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    suspend fun getDeviceMetadata(): PodbikeDeviceMetadata? {
+        try {
+            return YModem.getDeviceMetadata(device)
+        } catch (e: Exception) {
+            println("Failed to get device metadata: ${deviceInfo.address}, error: ${e.message}")
+            return null
+        }
+    }
 
 
     val lightStatus: Flow<PodbikeLightStatus>

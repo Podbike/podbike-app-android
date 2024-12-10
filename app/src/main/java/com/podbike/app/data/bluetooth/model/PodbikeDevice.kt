@@ -2,6 +2,7 @@ package com.podbike.app.data.bluetooth.model
 
 import android.Manifest
 import androidx.annotation.RequiresPermission
+import com.bw.yml.YModem
 import com.podbike.app.data.bluetooth.values.HaarekBoardSpec
 import com.podbike.app.ui.scanning.DeviceInfo
 import kotlinx.coroutines.flow.Flow
@@ -41,8 +42,8 @@ class PodbikeDevice(private val client: ClientBleGatt, val device: DeviceInfo) {
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     suspend fun writeCharacteristic(
-        serviceId: UUID,
         characteristicId: UUID,
+        serviceId: UUID = HaarekBoardSpec.PODBIKE_SERVICE_UUID,
         value: DataByteArray
     ) {
         services?.findService(serviceId)

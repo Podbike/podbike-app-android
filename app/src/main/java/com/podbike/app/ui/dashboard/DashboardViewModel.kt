@@ -1,5 +1,6 @@
 package com.podbike.app.ui.dashboard
 
+import android.annotation.SuppressLint
 import androidx.lifecycle.viewModelScope
 import com.kfc_polska.ui.base.UiAction
 import com.kfc_polska.ui.base.UiEffect
@@ -43,6 +44,7 @@ class DashboardViewModel @Inject constructor(
     private val speedUnit: SpeedUnit
         get() = userPreferences.getSpeedUnit()
 
+    @SuppressLint("MissingPermission")
     private fun dashboard() {
         dashboardJob = viewModelScope.launch {
             val device = bluetoothManager.selectedDevice
