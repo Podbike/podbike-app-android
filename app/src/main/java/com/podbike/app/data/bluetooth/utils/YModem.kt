@@ -2,6 +2,8 @@ package com.podbike.app.data.bluetooth.utils
 
 import android.Manifest
 import androidx.annotation.RequiresPermission
+import com.podbike.app.data.bluetooth.model.AudioFile
+import com.podbike.app.data.bluetooth.model.EcuModule
 import com.podbike.app.data.bluetooth.model.PodbikeDevice
 import com.podbike.app.data.bluetooth.model.PodbikeDeviceMetadata
 import com.podbike.app.data.bluetooth.values.HaarekBoardSpec
@@ -85,8 +87,51 @@ class YModem {
             val metadata = Json.decodeFromString<PodbikeDeviceMetadata>(data)
             return metadata.copy(fileName = fileName)
         }
+
+        // Mocked data for testing purposes
+        suspend fun getMockedDeviceMetadata(device: PodbikeDevice): PodbikeDeviceMetadata {
+            return PodbikeDeviceMetadata(
+                fileName = "device_metadata.json",
+                productName = "Podbike Frikar",
+                releaseId = "1.0.0",
+                productId = "FRK-2024",
+                frameNumber = "FRK123456789",
+                ecuModules = listOf(
+                    EcuModule(
+                        boardName = "Main Control Board",
+                        boardId = "MCB-001",
+                        serialNumber = "SN123456789",
+                        boardPosition = "Front",
+                        fwVersion = "v1.2.3"
+                    ),
+                    EcuModule(
+                        boardName = "Battery Management System",
+                        boardId = "BMS-002",
+                        serialNumber = "SN987654321",
+                        boardPosition = "Rear",
+                        fwVersion = "v2.3.4"
+                    ),
+                    EcuModule(
+                        boardName = "Motor Controller",
+                        boardId = "MTC-003",
+                        serialNumber = "SN456789123",
+                        boardPosition = "Rear",
+                        fwVersion = "v3.4.5"
+                    ),
+                    EcuModule(
+                        boardName = "Display Controller",
+                        boardId = "DC-004",
+                        serialNumber = "SN789123456",
+                        boardPosition = "Front",
+                        fwVersion = "v4.5.6"
+                    )
+                ),
+                audioFiles = listOf(
+                    AudioFile(filename = "startup_sound.mp3"),
+                    AudioFile(filename = "shutdown_sound.mp3")
+                )
+            )
+        }
     }
-
-
 }
 

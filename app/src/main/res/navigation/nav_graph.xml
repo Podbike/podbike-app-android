@@ -60,14 +60,17 @@
         <action
             android:id="@+id/action_settingsFragment_to_firmwareUpdateFragment"
             app:destination="@id/firmwareUpdateFragment" />
+
+        <action
+            android:id="@+id/action_settingsFragment_to_aboutDeviceFragment"
+            app:destination="@id/aboutDeviceFragment" />
     </fragment>
 
     <fragment
         android:id="@+id/statisticsFragment"
         android:name="com.podbike.app.ui.statistics.StatisticsFragment"
         android:label="fragment_statistics"
-        tools:layout="@layout/fragment_statistics">
-    </fragment>
+        tools:layout="@layout/fragment_statistics" />
 
     <fragment
         android:id="@+id/privacyPolicyFragment"
@@ -141,5 +144,11 @@
         android:name="com.podbike.app.ui.firmware_update.FirmwareUpdateFragment"
         android:label="fragment_firmware_update"
         tools:layout="@layout/fragment_firmware_update" />
+
+    <fragment
+        android:id="@+id/aboutDeviceFragment"
+        android:name="com.podbike.app.ui.about_device.AboutDeviceFragment"
+        android:label="fragment_about_device"
+        tools:layout="@layout/fragment_about_device" />
 
 </navigation>
