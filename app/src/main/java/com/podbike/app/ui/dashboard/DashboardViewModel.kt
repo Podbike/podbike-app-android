@@ -55,6 +55,8 @@ class DashboardViewModel @Inject constructor(
                 println("data: $data")
                 val isUpToDate = data?.frameNumber?.let { firmwareRepository.checkIsUpToDate(it) }
                 println("isUpToDate: $isUpToDate")
+                val license = firmwareRepository.getLicense()
+                println("license: $license")
                 val firmwareFilesData = data?.frameNumber?.let {
                     firmwareRepository.getFirmwareFilesList(it)
                 }

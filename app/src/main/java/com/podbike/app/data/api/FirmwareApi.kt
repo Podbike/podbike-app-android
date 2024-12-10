@@ -18,7 +18,7 @@ interface FirmwareApi {
     fun getFirmwareFilesList(@Query("frameNumber") frameNumber: String): Call<GetFirmwareFilesResponse>
 
     @GET("/app/licenses/get_license")
-    fun getLicence(): Call<String>
+    fun getLicense(): Call<ResponseBody>
 
     @GET("/app/firmware/{fileName}")
     fun getFirmwareFile(@Path("fileName") fileName: String): Call<ResponseBody>

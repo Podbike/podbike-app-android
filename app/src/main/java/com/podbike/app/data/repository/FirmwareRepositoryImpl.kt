@@ -69,11 +69,11 @@ class FirmwareRepositoryImpl : FirmwareRepository {
         }
     }
 
-    override suspend fun getLicence(): String {
+    override suspend fun getLicense(): String {
         return try {
-            val response = firmwareApi.getLicence().awaitResponse()
+            val response = firmwareApi.getLicense().awaitResponse()
             if (response.isSuccessful) {
-                response.body() ?: ""
+                response.body()?.string() ?: ""
             } else {
                 ""
             }
