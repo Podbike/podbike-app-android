@@ -1,5 +1,6 @@
 package com.podbike.app.ui.about_device
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -56,12 +57,10 @@ class AboutDeviceFragment : Fragment() {
         binding.recyclerView.adapter = AboutDeviceAdapter(emptyList())
     }
 
-    private suspend fun loadDeviceMetadata() {
-        val device = bluetoothManager.selectedDevice
-        if (device == null) {
-            return
-        }
-        val deviceMetadata = YModemHelper.getMockedDeviceMetadata(device)
+    @SuppressLint("MissingPermission")
+    private fun loadDeviceMetadata() {
+        val device = bluetoothManager.selectedDevice ?: return
+        val deviceMetadata = device.data.deviceMetadata ?: return
 
         val items = mutableListOf<AboutDeviceItem>()
 

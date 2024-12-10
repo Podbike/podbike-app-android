@@ -43,6 +43,10 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
 
             podbikeDevice.discoverServices()
             println("Services discovered for device: ${device.address}")
+
+            podbikeDevice.data.initDeviceMetadata()
+            println("Device metadata initialized for device: ${device.address}")
+
             selectedDevice = podbikeDevice
             return podbikeDevice
         } catch (e: Exception) {
@@ -62,5 +66,5 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
             .map { aggregator.aggregateDevices(it) }
             .map { it -> it.map { DeviceInfo(it.name ?: "Unknown", it.address) } }
     }
-    
+
 }

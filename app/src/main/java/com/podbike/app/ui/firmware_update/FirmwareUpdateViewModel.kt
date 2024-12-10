@@ -20,6 +20,7 @@ import com.podbike.app.utils.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import timber.log.Timber.Forest.i
 import javax.inject.Inject
 
@@ -186,10 +187,8 @@ class FirmwareUpdateViewModel @Inject constructor(
                 val hasAllPermissions =
                     action.hasBluetoothPermissions && action.isBluetoothEnabled && action.isLocationEnabled
                 val hasStartedFirmwareUpdate = uiState.value.firmwareVersion != UNKNOWN
-                Log.d(
-                    "FirmwareUpdateViewModel",
-                    "PermissionsChanged: $action" + " firmwareVersion: ${uiState.value.firmwareVersion}"
-                )
+                Timber.tag("FirmwareUpdateViewModel")
+                    .d("PermissionsChanged: $action" + " firmwareVersion: ${uiState.value.firmwareVersion}")
                 updateState {
                     copy(
                         hasBluetoothPermissions = action.hasBluetoothPermissions,
@@ -199,7 +198,7 @@ class FirmwareUpdateViewModel @Inject constructor(
                     )
                 }
                 if (hasAllPermissions && !hasStartedFirmwareUpdate) {
-                    Log.d("FirmwareUpdateViewModel", "checkForUpdates")
+                    Timber.tag("FirmwareUpdateViewModel").d("checkForUpdates")
                     checkForUpdates()
                 }
             }
@@ -224,10 +223,10 @@ class FirmwareUpdateViewModel @Inject constructor(
         }
     }
 
-    private suspend fun getFrameNumber(): String? {
-        //TODO remove mock
-        return "000000-F8-1-00-000"
-        return bluetoothManager.selectedDevice?.data?.getDeviceMetadata()?.frameNumber
+    private fun getFrameNumber(): String? {
+//        //TODO remove mock
+//        return "000000-F8-1-00-000"
+        return bluetoothManager.selectedDevice?.data?.deviceMetadata?.frameNumber
     }
 
     data class FirmwareUpdateState(

@@ -12,6 +12,9 @@ import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
 import java.util.UUID
 
 data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: DeviceInfo) {
+
+    var deviceMetadata: PodbikeDeviceMetadata? = null
+
     @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     val speed: Flow<Int>
         get() = getStringCharacteristicData(HaarekBoardSpec.SPEED_CHARACTERISTIC_UUID)
@@ -53,12 +56,11 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
         get() = getStringCharacteristicData(HaarekBoardSpec.GENERATED_POWER_CHARACTERISTIC_UUID)
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    suspend fun getDeviceMetadata(): PodbikeDeviceMetadata? {
+    suspend fun initDeviceMetadata() {
         try {
-            return YModem.getDeviceMetadata(device)
+            deviceMetadata = YModem.getDeviceMetadata(device)
         } catch (e: Exception) {
             println("Failed to get device metadata: ${deviceInfo.address}, error: ${e.message}")
-            return null
         }
     }
 
