@@ -1,6 +1,7 @@
 package com.podbike.app.data.bluetooth.manager
 
 import android.os.ParcelUuid
+import com.podbike.app.data.api.model.FirmwareFile
 import com.podbike.app.data.bluetooth.model.PodbikeDevice
 import com.podbike.app.data.bluetooth.values.HaarekBoardSpec
 import com.podbike.app.ui.scanning.DeviceInfo
@@ -25,6 +26,8 @@ interface BluetoothManager {
                 )
             )
     ): Flow<List<DeviceInfo>>
+
+    suspend fun transferFileToDevice(file: FirmwareFile)
 
     var selectedDevice: PodbikeDevice?
 }

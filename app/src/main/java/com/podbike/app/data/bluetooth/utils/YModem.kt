@@ -1,15 +1,22 @@
 package com.podbike.app.data.bluetooth.utils
 
 import android.Manifest
+import android.content.Context
 import androidx.annotation.RequiresPermission
+import com.bw.yml.YModem
+import com.bw.yml.YModemListener
+import com.podbike.app.data.api.model.FirmwareFile
 import com.podbike.app.data.bluetooth.model.AudioFile
 import com.podbike.app.data.bluetooth.model.EcuModule
 import com.podbike.app.data.bluetooth.model.PodbikeDevice
 import com.podbike.app.data.bluetooth.model.PodbikeDeviceMetadata
 import com.podbike.app.data.bluetooth.values.HaarekBoardSpec
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.takeWhile
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
+import java.io.File
 
 // YModem related consts
 const val SOH = 0x01
@@ -131,6 +138,66 @@ class YModem {
                     AudioFile(filename = "shutdown_sound.mp3")
                 )
             )
+        }
+
+
+        suspend fun sendFileToDevice(context: Context, file: FirmwareFile, device: PodbikeDevice) {
+//            var tempFile: File? = null
+//            println("Trying to make temp ")
+//            try {
+//                // save byte array as temp file
+//                tempFile = withContext(Dispatchers.IO) {
+//                    File.createTempFile(file.name.split(".").first(), file.name.split(".").last())
+//                        .apply { writeBytes(file.bytes) }
+//                }
+//            } catch (e: Exception) {
+//                println("Failed to create temp file: ${e.message}")
+//            }
+
+
+            var yModem: YModem? = null
+            try {
+                // send file to device
+                yModem = YModem.Builder()
+                    .with(context)
+//                    .fileName(tempFile?.name)
+//                    .filePath(tempFile?.absolutePath)
+                    .sendSize(128)
+                    .callback(object : YModemListener {
+                        @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+                        override fun onDataReady(data: ByteArray) {
+                            println("Data ready: $data")
+                            device.writeCharacteristic(
+                                HaarekBoardSpec.FTP_DATA_CHARACTERISTIC_UUID,
+                                value = DataByteArray(value = data)
+                            )
+                        }
+
+                        override fun onProgress(currentSent: Int, total: Int) {
+                            // handle progress
+                            println("Progress: $currentSent / $total")
+                        }
+
+                        override fun onSuccess() {
+                            // handle success
+                            println("Success")
+                        }
+
+                        override fun onFailed(reason: String) {
+                            // handle failure
+                            println("Failed: $reason")
+                        }
+                    })
+                    .build()
+            } catch (e: Exception) {
+                println("Failed to initialize YModem: ${e.message}")
+            }
+
+            try {
+                yModem?.start(file.bytes.toString())
+            } catch (e: Exception) {
+                println("Failed to send file to device: ${device.device.address}, error: ${e.message}")
+            }
         }
     }
 }
