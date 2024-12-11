@@ -21,6 +21,7 @@ import com.podbike.app.ui.firmware_update.FirmwareVersion.*
 import com.podbike.app.utils.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import timber.log.Timber.Forest.i
@@ -78,11 +79,13 @@ class FirmwareUpdateViewModel @Inject constructor(
             when (firmwareFilesData) {
                 is Result.Error -> setErrorState(LoadFirmwareFilesError(firmwareFilesData.error))
                 is Result.Success -> {
-                    for (firmwareModule in firmwareFilesData.data?.firmwareModuleByUpdateId.orEmpty()) {
-                        i("firmwareModule: $firmwareModule")
-                        transferFirmwareFile(firmwareModule)
-                    }
-
+                    //@TODO: UNCOMMENT
+//                    for (firmwareModule in firmwareFilesData.data?.firmwareModuleByUpdateId.orEmpty()) {
+//                        i("firmwareModule: $firmwareModule")
+//                        transferFirmwareFile(firmwareModule)
+//                    }
+                    transferFirmwareFile(firmwareFilesData.data?.firmwareModuleByUpdateId?.firstOrNull())
+                    setFirmwareVersionState(TRANSFER_COMPLETED)
                 }
             }
         }
@@ -102,10 +105,10 @@ class FirmwareUpdateViewModel @Inject constructor(
             )
 
             is Result.Success -> {
-                i("fileBytes: ${firmwareUpdateFile.data?.bytes?.size}")
                 bluetoothManager.transferFileToDevice(firmwareUpdateFile.data!!)
-                //setFirmwareVersionState(TRANSFER_COMPLETED)
-
+                    ?.collect {
+                        println("currentPackage: ${it.currentPackage}, totalPackages: ${it.totalPackages}")
+                    }
             }
         }
     }
