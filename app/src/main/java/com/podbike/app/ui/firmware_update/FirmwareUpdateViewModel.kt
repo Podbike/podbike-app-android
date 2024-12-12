@@ -204,10 +204,8 @@ class FirmwareUpdateViewModel @Inject constructor(
                 val hasAllPermissions =
                     action.hasBluetoothPermissions && action.isBluetoothEnabled && action.isLocationEnabled
                 val hasStartedFirmwareUpdate = uiState.value.firmwareVersion != UNKNOWN
-                Timber.d(
-                    "FirmwareUpdateViewModel",
-                    "PermissionsChanged: $action" + " firmwareVersion: ${uiState.value.firmwareVersion}"
-                )
+                Timber.tag("FirmwareUpdateViewModel")
+                    .d("PermissionsChanged: $action" + " firmwareVersion: ${uiState.value.firmwareVersion}")
                 updateState {
                     copy(
                         hasBluetoothPermissions = action.hasBluetoothPermissions,
@@ -217,6 +215,7 @@ class FirmwareUpdateViewModel @Inject constructor(
                     )
                 }
                 if (hasAllPermissions && !hasStartedFirmwareUpdate) {
+                    Timber.tag("FirmwareUpdateViewModel").d("checkForUpdates")
                     checkForUpdates()
                 } else {
                     setErrorState(NoBluetoothDeviceError(Throwable("Bluetooth not available")))
@@ -243,10 +242,10 @@ class FirmwareUpdateViewModel @Inject constructor(
         }
     }
 
-    private suspend fun getFrameNumber(): String? {
-        //TODO remove mock
-        return "000000-F8-1-00-000"
-        return bluetoothManager.selectedDevice?.data?.getDeviceMetadata()?.frameNumber
+    private fun getFrameNumber(): String? {
+//        //TODO remove mock
+//        return "000000-F8-1-00-000"
+        return bluetoothManager.selectedDevice?.data?.deviceMetadata?.frameNumber
     }
 
     data class FirmwareUpdateState(

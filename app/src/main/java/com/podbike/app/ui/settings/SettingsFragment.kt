@@ -99,7 +99,10 @@ class SettingsFragment : BaseFragment() {
             }
 
         val aboutGroupView = SettingGroupView(requireContext(), getString(R.string.SettingsAbout))
-        val aboutDeviceView = SettingView(requireContext(), getString(R.string.AboutDevice))
+        val aboutDeviceView = SettingView(requireContext(), getString(R.string.AboutDevice)) {
+            Navigation.findNavController(view)
+                .navigate(R.id.action_settingsFragment_to_aboutDeviceFragment)
+        }
         val frikarPoliciesView =
             SettingView(requireContext(), getString(R.string.SettingsPolicies)) {
                 Navigation.findNavController(view)
