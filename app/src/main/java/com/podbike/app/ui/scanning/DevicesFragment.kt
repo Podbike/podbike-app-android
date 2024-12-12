@@ -210,7 +210,7 @@ class DevicesFragment : BaseFragment(), OnDeviceClickListener {
     }
 
     private fun showConnectingDialog(deviceName: String) {
-        val message = "${getString(R.string.ConnectingTo)} $deviceName}"
+        val message = "${getString(R.string.ConnectingTo)} $deviceName"
         connectingDialog = AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
             .setMessage(message)
             .setCancelable(false)

@@ -17,7 +17,7 @@
     <string name="DevicePairingSuccess">"Gerät erfolgreich gekoppelt!"</string>
     <string name="DeviceSkip">"Überspringen"</string>
     <string name="DeviceSkipError">"Kann nicht übersprungen werden"</string>
-    <string name="DevicesPageTitle">"Frikars"</string>
+    <string name="DevicesPageTitle">"FRIKARS"</string>
     <!--  Start a new Bluetooth scan  -->
     <string name="DeviceStartScan">"Suchen"</string>
     <!--  Stop the current Bluetooth scan  -->
@@ -27,15 +27,15 @@
     <string name="DisconnectedFrom">"Abgekoppelt von"</string>
     <string name="DisconnectingFrom">"German Translation for \"Disconnecting from\" Trennen von"</string>
     <string name="FrikarBluetoothDisabled">"Bluetooth nicht aktiviert"</string>
-    <string name="FrikarConnecting">"Mit zuletzt verwendetem Frikar verbinden..."</string>
+    <string name="FrikarConnecting">"Mit zuletzt verwendetem FRIKAR verbinden..."</string>
     <string name="FrikarConnectionLost">"Verbindung unterbrochen. Neuer Verbindungsaufbau..."</string>
-    <string name="FrikarMissing">"Es wurde kein Frikar ausgewählt."</string>
-    <string name="FrikarNotFound">"Einen Moment bitte. Die Verbindung zum Frikar wird hergestellt. Wenn Ihr Frikar nicht gefunden wird, wählen Sie bitte 'NACH FRIKAR SUCHEN', um ein anderes Frikar zu verbinden. "</string>
-    <string name="FrikarNotPaired">"Frikar nicht mit Bluetooth verbunden"</string>
+    <string name="FrikarMissing">"Es wurde kein FRIKAR ausgewählt."</string>
+    <string name="FrikarNotFound">"Einen Moment bitte. Die Verbindung zum FRIKAR wird hergestellt. Wenn Ihr FRIKAR nicht gefunden wird, wählen Sie bitte 'NACH FRIKAR SUCHEN', um ein anderes FRIKAR zu verbinden. "</string>
+    <string name="FrikarNotPaired">"FRIKAR nicht mit Bluetooth verbunden"</string>
     <string name="FrikarPause">"Pause"</string>
     <string name="FrikarReconnect">"Neu Verbinden"</string>
     <string name="FrikarResume">"Fortsetzen"</string>
-    <string name="FrikarScan">"Nach Frikar suchen"</string>
+    <string name="FrikarScan">"Nach FRIKAR suchen"</string>
     <string name="FrikarTurnOnBluetooth">"Bitte schalten Sie Ihr Bluetooth ein, um fortzufahren."</string>
     <string name="GoDashboardOption">"Instrumententafel zeigen"</string>
     <string name="GoHomeOption">"Zur Startseite"</string>
@@ -46,7 +46,7 @@
     <string name="HomeService">"Service"</string>
     <string name="HomeStore">"Onlineshop"</string>
     <string name="HomeTutorial">"Anleitung"</string>
-    <string name="HomeUpdate">"Frikar Aktualisierung"</string>
+    <string name="HomeUpdate">"FRIKAR Aktualisierung"</string>
     <string name="LoginButton">"Anmelden"</string>
     <string name="LoginError">"Anmeldefehler"</string>
     <string name="LoginForgot">"Passwort vergessen?"</string>
@@ -77,13 +77,13 @@
     <string name="SettingsDistanceMi">"Miles"</string>
     <string name="SettingsDistanceNm">"Nautical Miles"</string>
     <string name="SettingsDistanceUnit">"Kilometerzähler einstellen"</string>
-    <string name="SettingsFrikar">"Ihr Frikar"</string>
+    <string name="SettingsFrikar">"Ihr FRIKAR"</string>
     <!--  Settings page subtitle  -->
     <string name="SettingsGeneral">"Allgemeine Einstellungen"</string>
     <string name="SettingsLanguage">"Sprache"</string>
     <!--  The settings page title  -->
     <string name="SettingsPageTitle">"Einstellungen"</string>
-    <string name="SettingsPolicies">"Frikar-Richtlinien"</string>
+    <string name="SettingsPolicies">"FRIKAR-Richtlinien"</string>
     <string name="SettingsPressureAtm">"Standard Atmospheres"</string>
     <string name="SettingsPressureBar">"Bars"</string>
     <string name="SettingsPressurePsi">"Pounds per Square Inch"</string>
@@ -102,7 +102,7 @@
     <string name="SettingsTires">"Reifen einstellen"</string>
     <!--  Settings page subtitle  -->
     <string name="SettingsUnits">"Maßeinheiten"</string>
-    <string name="SettingsUpdate">"Frikar Aktualisierung"</string>
+    <string name="SettingsUpdate">"FRIKAR Aktualisierung"</string>
     <string name="StatisticAverageCadence">"Durchschnittliche Trittfrequenz"</string>
     <string name="StatisticAverageSpeed">"Durchschnittliche Geschwindigkeit"</string>
     <string name="StatisticBattery">"Akkustand"</string>
@@ -117,7 +117,7 @@
     <string name="TutorialCadence">"Grün zeigt den aktuellen Gang / Trittfrequenz von niedrig bis hoch."</string>
     <string name="TutorialExit">"Beenden"</string>
     <string name="TutorialFurther">"Weitere Informationen finden Sie im Benutzerhandbuch."</string>
-    <string name="TutorialHandlebars">"Der Lenker Ihres Frikar kann in vier verschiedene Richtungen bewegt werden, zusätzlich gibt es zwei Tasten."</string>
+    <string name="TutorialHandlebars">"Der Lenker Ihres FRIKAR kann in vier verschiedene Richtungen bewegt werden, zusätzlich gibt es zwei Tasten."</string>
     <string name="TutorialIntroduction">"Auf einen Blick können Sie Geschwindigkeit und Akkustand sehen."</string>
     <string name="TutorialLogo">"Berühren Sie das Logo, um Ihre Statistiken zu sehen."</string>
     <string name="TutorialNext">"Nächste"</string>
@@ -133,10 +133,10 @@
     <string name="UpdateButtonTransfer">"Transfer Firmware-Update"</string>
     <string name="UpdateButtonUpgrade">"Upgrade"</string>
     <string name="UpdateComplete">"Firmware-Aktualisierung abgeschlossen!"</string>
-    <string name="UpdateConfirmUpload">"Bestätigen Sie den Upload der neuesten Firmware-Version auf Ihren Frikar."</string>
+    <string name="UpdateConfirmUpload">"Bestätigen Sie den Upload der neuesten Firmware-Version auf Ihren FRIKAR."</string>
     <string name="UpdateCurrent">"Firmware ist auf dem neuesten Stand"</string>
     <string name="UpdateDisconnected">"Firmware-Upgrade-Trennung"</string>
-    <string name="UpdateDisconnectedInfo">"Aktuell wird auf den Abschluss des Update-Prozesses gewartet. Die Anwendung wird vorübergehend von Frikar getrennt."</string>
+    <string name="UpdateDisconnectedInfo">"Aktuell wird auf den Abschluss des Update-Prozesses gewartet. Die Anwendung wird vorübergehend von FRIKAR getrennt."</string>
     <string name="UpdateFiles">"Files"</string>
     <string name="UpdateIssue">"Es ist ein Fehler aufgetreten. Bitte kontaktieren Sie Podbike."</string>
     <string name="UpdateLast">"Zuletzt aktualisiert:"</string>
@@ -147,9 +147,9 @@
     <string name="UpdateSent">"Geschickt"</string>
     <string name="UpdateTransfer">"Firmware-Übertragung"</string>
     <string name="UpdateTransferComplete">"Alle Dateien erfolgreich übertragen!"</string>
-    <string name="UpdateTransferInfo">"Derzeit werden Dateien zwischen Cloud-Server und Frikar über die mobile Anwendung übertragen."</string>
+    <string name="UpdateTransferInfo">"Derzeit werden Dateien zwischen Cloud-Server und FRIKAR über die mobile Anwendung übertragen."</string>
     <string name="UpdateUpgrade">"Firmware Upgrade"</string>
-    <string name="UpdateUpgradeInfo1">"Stellen Sie sicher, dass der Frikar stationär ist und sich in Bluetooth-Reichweite Ihres Telefons befindet."</string>
+    <string name="UpdateUpgradeInfo1">"Stellen Sie sicher, dass der FRIKAR stationär ist und sich in Bluetooth-Reichweite Ihres Telefons befindet."</string>
     <string name="UpdateUpgradeInfo2">"Sie können diese Seite nicht verlassen, bis dieser Vorgang abgeschlossen ist."</string>
     <string name="UpdateVersion">"Aktuelle Firmware-Version:"</string>
     <string name="StatisticsTitle">Statistik</string>

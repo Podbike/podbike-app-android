@@ -92,7 +92,7 @@ class YModem {
         suspend fun getMockedDeviceMetadata(device: PodbikeDevice): PodbikeDeviceMetadata {
             return PodbikeDeviceMetadata(
                 fileName = "device_metadata.json",
-                productName = "Podbike Frikar",
+                productName = "Podbike FRIKAR",
                 releaseId = "1.0.0",
                 productId = "FRK-2024",
                 frameNumber = "FRK123456789",

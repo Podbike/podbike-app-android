@@ -17,7 +17,7 @@
     <string name="DevicePairingSuccess">"Device paired successfully!"</string>
     <string name="DeviceSkip">"Skip"</string>
     <string name="DeviceSkipError">"Unable to Skip"</string>
-    <string name="DevicesPageTitle">"Frikars"</string>
+    <string name="DevicesPageTitle">"FRIKARS"</string>
     <!--  Start a new Bluetooth scan  -->
     <string name="DeviceStartScan">"Start Scan"</string>
     <!--  Stop the current Bluetooth scan  -->
@@ -27,15 +27,15 @@
     <string name="DisconnectedFrom">"Disconnected from"</string>
     <string name="DisconnectingFrom">"Disconnecting from"</string>
     <string name="FrikarBluetoothDisabled">"Bluetooth not enabled"</string>
-    <string name="FrikarConnecting">"Connecting to your most recent Frikar..."</string>
-    <string name="FrikarConnectionLost">"Connection lost. Please reconnect to your Frikar..."</string>
-    <string name="FrikarMissing">"No Frikar is paired to this device!"</string>
-    <string name="FrikarNotFound">"Please wait a moment to establish a connection with the Frikar. If your Frikar cannot be found, then press 'SCAN FOR FRIKAR' to choose another Frikar."</string>
-    <string name="FrikarNotPaired">"Frikar not Paired"</string>
+    <string name="FrikarConnecting">"Connecting to your most recent FRIKAR..."</string>
+    <string name="FrikarConnectionLost">"Connection lost. Please reconnect to your FRIKAR..."</string>
+    <string name="FrikarMissing">"No FRIKAR is paired to this device!"</string>
+    <string name="FrikarNotFound">"Please wait a moment to establish a connection with the FRIKAR. If your FRIKAR cannot be found, then press 'SCAN FOR FRIKAR' to choose another FRIKAR."</string>
+    <string name="FrikarNotPaired">"FRIKAR not Paired"</string>
     <string name="FrikarPause">"Pause"</string>
     <string name="FrikarReconnect">"Reconnect"</string>
     <string name="FrikarResume">"Resume"</string>
-    <string name="FrikarScan">"Scan for Frikar"</string>
+    <string name="FrikarScan">"Scan for FRIKAR"</string>
     <string name="FrikarTurnOnBluetooth">"Please turn on your Bluetooth to continue"</string>
     <string name="GoDashboardOption">"Go to Dashboard"</string>
     <string name="GoHomeOption">"Go to Home Page"</string>
@@ -46,7 +46,7 @@
     <string name="HomeService">"Service"</string>
     <string name="HomeStore">"Web Shop"</string>
     <string name="HomeTutorial">"Tutorial"</string>
-    <string name="HomeUpdate">"Frikar Update"</string>
+    <string name="HomeUpdate">"FRIKAR Update"</string>
     <string name="LoginButton">"Log In"</string>
     <string name="LoginError">"Login Error"</string>
     <string name="LoginForgot">"Forgot Password?"</string>
@@ -77,13 +77,13 @@
     <string name="SettingsDistanceMi">"Miles"</string>
     <string name="SettingsDistanceNm">"Nautical Miles"</string>
     <string name="SettingsDistanceUnit">"Distance Unit"</string>
-    <string name="SettingsFrikar">"Your Frikar"</string>
+    <string name="SettingsFrikar">"Your FRIKAR"</string>
     <!--  Settings page subtitle  -->
     <string name="SettingsGeneral">"General Settings"</string>
     <string name="SettingsLanguage">"Language"</string>
     <!--  The settings page title  -->
     <string name="SettingsPageTitle">"Settings"</string>
-    <string name="SettingsPolicies">"Frikar Policies"</string>
+    <string name="SettingsPolicies">"FRIKAR Policies"</string>
     <string name="SettingsPressureAtm">"Standard Atmospheres"</string>
     <string name="SettingsPressureBar">"Bar"</string>
     <string name="SettingsPressurePsi">"Pounds per Square Inch"</string>
@@ -102,7 +102,7 @@
     <string name="SettingsTires">"Manage Tires"</string>
     <!--  Settings page subtitle  -->
     <string name="SettingsUnits">"Units of Measurement"</string>
-    <string name="SettingsUpdate">"Frikar Update"</string>
+    <string name="SettingsUpdate">"FRIKAR Update"</string>
     <string name="StatisticAverageCadence">"Average RPM"</string>
     <string name="StatisticAverageSpeed">"Average Speed"</string>
     <string name="StatisticBattery">"Battery Remaining"</string>
@@ -117,7 +117,7 @@
     <string name="TutorialCadence">"Green represents the current gear/cadence setting, from low to high."</string>
     <string name="TutorialExit">"Exit"</string>
     <string name="TutorialFurther">"For further instructions check out the user manual."</string>
-    <string name="TutorialHandlebars">"The controls on the handlebars in your Frikar can be moved in four different directions in addition to two buttons."</string>
+    <string name="TutorialHandlebars">"The controls on the handlebars in your FRIKAR can be moved in four different directions in addition to two buttons."</string>
     <string name="TutorialIntroduction">"With just a glance you can keep track of your speed and battery capacity."</string>
     <string name="TutorialLogo">"Press the logo to see statistics."</string>
     <string name="TutorialNext">"Next"</string>
@@ -133,10 +133,10 @@
     <string name="UpdateButtonTransfer">"Transfer Update"</string>
     <string name="UpdateButtonUpgrade">"Upgrade"</string>
     <string name="UpdateComplete">"Firmware update complete!"</string>
-    <string name="UpdateConfirmUpload">"Confirm upload of the newest version of firmware to your Frikar."</string>
+    <string name="UpdateConfirmUpload">"Confirm upload of the newest version of firmware to your FRIKAR."</string>
     <string name="UpdateCurrent">"Firmware is up to date"</string>
     <string name="UpdateDisconnected">"Firmware Upgrade Disconnect"</string>
-    <string name="UpdateDisconnectedInfo">"Currently waiting for the update process to complete. The application will be disconnected from the Frikar for the time being."</string>
+    <string name="UpdateDisconnectedInfo">"Currently waiting for the update process to complete. The application will be disconnected from the FRIKAR for the time being."</string>
     <string name="UpdateFiles">"files"</string>
     <string name="UpdateIssue">"Something went wrong. Please contact Podbike."</string>
     <string name="UpdateLast">"Last Updated:"</string>
@@ -147,14 +147,14 @@
     <string name="UpdateSent">"Sent"</string>
     <string name="UpdateTransfer">"Firmware Transfer"</string>
     <string name="UpdateTransferComplete">"Finished transferring all files!"</string>
-    <string name="UpdateTransferInfo">"Currently transferring files between cloud server and Frikar via the mobiile application"</string>
+    <string name="UpdateTransferInfo">"Currently transferring files between cloud server and FRIKAR via the mobiile application"</string>
     <string name="UpdateUpgrade">"Firmware Upgrade"</string>
-    <string name="UpdateUpgradeInfo1">"Make sure the Frikar is stationary and in Bluetooth range of your phone."</string>
+    <string name="UpdateUpgradeInfo1">"Make sure the FRIKAR is stationary and in Bluetooth range of your phone."</string>
     <string name="UpdateUpgradeInfo2">"You will not be able to navigate away from this page until this process is complete."</string>
     <string name="UpdateVersion">"Current Firmware Version:"</string>
     <string name="PrivacyPolicyHtml" translatable="false">
         <![CDATA[
-        <p>Pobike AS ("us", "we", or "our") operates the Podbike Frikar mobile application (the "Service").</p>
+        <p>Pobike AS ("us", "we", or "our") operates the Podbike FRIKAR mobile application (the "Service").</p>
         <p>This page informs you of our policies regarding the collection,
         use and disclosure of Personal Information when you use our Service.</p>
         <p>We will not use or share your information with anyone except as described in this Privacy Policy.</p>
@@ -166,7 +166,7 @@
         <p>This application requires a specific privacy policy because it uses the "Location" permission.
         It is important to note that the app DOES NOT TRACK YOUR LOCATION.
         We require the "Location" permission to be able to access the Bluetooth functionality on your mobile device.
-        We also require permission to find nearby devices in order to connect to out Frikars.
+        We also require permission to find nearby devices in order to connect to out FRIKARS.
         The location-based functions are set by default and can be deactivated in the settings of your respective device.
         However, this may result in the application not behaving as intended.
         Finally, this application DOES NOT collect any personal information from our users.</p>
@@ -175,7 +175,7 @@
 
     <string name="TermsAndConditionsHtml" translatable="false">
         <![CDATA[
-        <p>These Terms and Conditions of Use (the "Terms of Use") apply to the Podbike Frikar mobile applications.
+        <p>These Terms and Conditions of Use (the "Terms of Use") apply to the Podbike FRIKAR mobile applications.
         The application is the property of Podbike AS and its licensors.
         BY USING THE APPLICATION, YOU AGREE TO THESE TERMS OF USE; IF YOU DO NOT AGREE, DO NOT AGREE, DO NOT USE THE APPLICATION.</p>
         <p>Podbike reserves the right, at its sole discretion, to change, modify, add and remove portions of these Terms of Use, at any time.
