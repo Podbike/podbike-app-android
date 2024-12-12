@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
@@ -20,6 +21,7 @@ import com.podbike.app.R
 import com.podbike.app.databinding.FragmentFirmwareUpdateBinding
 import com.podbike.app.ui.base.BaseFragment
 import com.podbike.app.ui.base.adjustEdgeToEdgePaddings
+import com.podbike.app.ui.firmware_update.FirmwareUpdateViewModel.ErrorTypeSealed
 import com.podbike.app.ui.firmware_update.FirmwareUpdateViewModel.FirmwareUpdateEffect
 import com.podbike.app.ui.firmware_update.FirmwareVersion.*
 import com.podbike.app.utils.PermissionManager
@@ -101,7 +103,11 @@ class FirmwareUpdateFragment : BaseFragment() {
     private fun setupBindings() {
         with(binding) {
             actionPositiveButton.setOnClickListener {
-                viewModel.processAction(FirmwareUpdateViewModel.FirmwareUpdateAction.ForwardAction)
+                viewModel.processAction(
+                    FirmwareUpdateViewModel.FirmwareUpdateAction.ForwardAction(
+                        permissionManager.isBluetoothEnabled()
+                    )
+                )
             }
             actionNegativeButton.setOnClickListener {
                 viewModel.processAction(FirmwareUpdateViewModel.FirmwareUpdateAction.GoBack)
@@ -114,21 +120,26 @@ class FirmwareUpdateFragment : BaseFragment() {
 
             var headerTextRes: Int?
             var bodyText: String?
+            var centerText: String?
             var positiveButtonTextRes: Int?
             var isCancelButtonVisible: Boolean
             var isProgressVisible: Boolean
+            var isBackButtonVisible: Boolean
             when (state.firmwareVersion) {
                 UP_TO_DATE -> {
-                    headerTextRes = R.string.UpdateCurrent
+                    headerTextRes = null
                     bodyText = null
+                    centerText = getString(R.string.UpdateCurrent)
                     positiveButtonTextRes = R.string.UpdateButtonCheck
                     isCancelButtonVisible = false
                     isProgressVisible = false
+                    isBackButtonVisible = false
                 }
 
                 UPDATE_AVAILABLE -> {
-                    headerTextRes = R.string.UpdateAvailable
+                    headerTextRes = null
                     bodyText = null
+                    centerText = getString(R.string.UpdateAvailable)
                     positiveButtonTextRes = R.string.UpdateButtonGet
                     isCancelButtonVisible = false
                     isProgressVisible = false
@@ -137,6 +148,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                 LICENSE_AGREEMENT -> {
                     headerTextRes = R.string.UpdateLicense
                     bodyText = state.firmwareLicense
+                    centerText = null
                     positiveButtonTextRes = R.string.UpdateButtonTransfer
                     isCancelButtonVisible = true
                     isProgressVisible = false
@@ -145,14 +157,16 @@ class FirmwareUpdateFragment : BaseFragment() {
                 TRANSFER_STARTED -> {
                     headerTextRes = R.string.UpdateTransfer
                     bodyText = getString(R.string.UpdateTransferInfo)
+                    centerText = null
                     positiveButtonTextRes = null
                     isCancelButtonVisible = false
                     isProgressVisible = true
                 }
 
                 TRANSFER_COMPLETED -> {
-                    headerTextRes = R.string.UpdateTransfer
-                    bodyText = getString(R.string.UpdateTransferComplete)
+                    headerTextRes = null
+                    bodyText = null
+                    centerText = getString(R.string.UpdateTransferComplete)
                     positiveButtonTextRes = R.string.UpdateButtonUpgrade
                     isCancelButtonVisible = true
                     isProgressVisible = false
@@ -162,6 +176,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     headerTextRes = R.string.UpdateUpgrade
                     bodyText =
                         getString(R.string.UpdateUpgradeInfo1) + "\n" + getString(R.string.UpdateUpgradeInfo2)
+                    centerText = null
                     positiveButtonTextRes = null
                     isCancelButtonVisible = false
                     isProgressVisible = true
@@ -170,30 +185,92 @@ class FirmwareUpdateFragment : BaseFragment() {
                 UNKNOWN -> {
                     headerTextRes = null
                     bodyText = null
+                    centerText = null
                     positiveButtonTextRes = null
                     isCancelButtonVisible = false
                     isProgressVisible = true
                 }
 
                 ERROR -> {
-                    headerTextRes = R.string.UpdateIssue
+                    showErrorDialog(state.error, state.hasBluetoothPermissions)
+                    headerTextRes = null
                     bodyText = null
-                    positiveButtonTextRes = null
-                    isCancelButtonVisible = true
+                    centerText = null
+                    positiveButtonTextRes = R.string.UpdateButtonCheck
+                    isCancelButtonVisible = false
                     isProgressVisible = false
                 }
             }
 
             header.text = headerTextRes?.let { getString(it) }
             body.text = bodyText
+            center.text = centerText
             actionPositiveButton.text = positiveButtonTextRes?.let { getString(it) }
 
             header.isVisible = headerTextRes != null
             body.isVisible = bodyText != null
+            center.isVisible = centerText != null
             actionPositiveButton.isVisible = positiveButtonTextRes != null
             actionNegativeButton.isInvisible = !isCancelButtonVisible
             progressBar.isVisible = isProgressVisible
         }
+    }
+
+    private fun showErrorDialog(
+        error: ErrorTypeSealed?,
+        hasBluetoothPermissions: Boolean
+    ) {
+        val throwable = error?.error
+
+        if (error is ErrorTypeSealed.NoBluetoothDeviceError) {
+            showBluetoothDisabledDialog()
+        } else {
+            when (throwable) {
+                is java.net.UnknownHostException -> {
+                    showNoInternetDialog()
+                }
+
+                is java.net.SocketTimeoutException -> {
+                    showNoInternetDialog()
+                }
+
+                else -> {
+                    showGenericErrorDialog(throwable)
+                }
+            }
+        }
+    }
+
+    private fun showBluetoothDisabledDialog() {
+        AlertDialog.Builder(requireContext())
+            .setMessage(getString(R.string.UpdateMissingDevice))
+            .setPositiveButton("OK") { dialog, _ ->
+                dialog.dismiss()
+                findNavController().popBackStack(R.id.settingsFragment, false)
+            }
+            .create()
+            .show()
+    }
+
+    private fun showNoInternetDialog() {
+        AlertDialog.Builder(requireContext())
+            .setMessage("The Internet connection appears to be offline.")
+            .setPositiveButton("OK") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+            .show()
+    }
+
+    private fun showGenericErrorDialog(throwable: Throwable?) {
+        AlertDialog.Builder(requireContext())
+            .setMessage(getString(R.string.UpdateIssue))
+            .setPositiveButton("OK") { dialog, _ ->
+                dialog.dismiss()
+                findNavController().popBackStack(R.id.settingsFragment, false)
+            }
+            .create()
+            .show()
     }
 
     private fun processEffect(effect: FirmwareUpdateEffect) {

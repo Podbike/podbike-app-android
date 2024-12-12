@@ -1,6 +1,5 @@
 package com.podbike.app.ui.firmware_update
 
-import android.util.Log
 import androidx.lifecycle.viewModelScope
 import com.kfc_polska.ui.base.UiAction
 import com.kfc_polska.ui.base.UiEffect
@@ -12,6 +11,7 @@ import com.podbike.app.ui.base.StateViewModel
 import com.podbike.app.ui.firmware_update.FirmwareUpdateViewModel.ErrorTypeSealed.CheckForUpdatesError
 import com.podbike.app.ui.firmware_update.FirmwareUpdateViewModel.ErrorTypeSealed.GetLicenceError
 import com.podbike.app.ui.firmware_update.FirmwareUpdateViewModel.ErrorTypeSealed.LoadFirmwareFilesError
+import com.podbike.app.ui.firmware_update.FirmwareUpdateViewModel.ErrorTypeSealed.NoBluetoothDeviceError
 import com.podbike.app.ui.firmware_update.FirmwareUpdateViewModel.FirmwareUpdateAction
 import com.podbike.app.ui.firmware_update.FirmwareUpdateViewModel.FirmwareUpdateEffect
 import com.podbike.app.ui.firmware_update.FirmwareUpdateViewModel.FirmwareUpdateState
@@ -20,6 +20,7 @@ import com.podbike.app.utils.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import timber.log.Timber.Forest.i
 import javax.inject.Inject
 
@@ -35,10 +36,18 @@ class FirmwareUpdateViewModel @Inject constructor(
         class CheckForUpdatesError(error: Throwable) : ErrorTypeSealed(error)
         class GetLicenceError(error: Throwable) : ErrorTypeSealed(error)
         class LoadFirmwareFilesError(error: Throwable) : ErrorTypeSealed(error)
+        class NoBluetoothDeviceError(error: Throwable) : ErrorTypeSealed(error)
     }
 
     private fun checkForUpdates() {
         viewModelScope.launch {
+
+            if (uiState.value.isBluetoothEnabled == false) {
+                setErrorState(NoBluetoothDeviceError(Throwable("Bluetooth not available")))
+                return@launch
+            }
+
+
             val frameNumber = getFrameNumber()
             if (frameNumber == null) {
                 setErrorState(CheckForUpdatesError(Throwable("No frame number")))
@@ -108,6 +117,15 @@ class FirmwareUpdateViewModel @Inject constructor(
     override fun processAction(action: FirmwareUpdateAction) {
         when (action) {
             is FirmwareUpdateAction.ForwardAction -> {
+                if (action.isBluetoothEnabled == false) {
+                    updateState {
+                        copy(
+                            isLoading = false,
+                            error = ErrorTypeSealed.NoBluetoothDeviceError(Throwable("Bluetooth not available"))
+                        )
+                    }
+                    return
+                }
                 when (uiState.value.firmwareVersion) {
                     UNKNOWN -> {
                         setFirmwareVersionState(ERROR)
@@ -161,7 +179,7 @@ class FirmwareUpdateViewModel @Inject constructor(
                     }
 
                     ERROR -> {
-                        //no action
+                        checkForUpdates()
                     }
                 }
             }
@@ -186,7 +204,7 @@ class FirmwareUpdateViewModel @Inject constructor(
                 val hasAllPermissions =
                     action.hasBluetoothPermissions && action.isBluetoothEnabled && action.isLocationEnabled
                 val hasStartedFirmwareUpdate = uiState.value.firmwareVersion != UNKNOWN
-                Log.d(
+                Timber.d(
                     "FirmwareUpdateViewModel",
                     "PermissionsChanged: $action" + " firmwareVersion: ${uiState.value.firmwareVersion}"
                 )
@@ -199,8 +217,9 @@ class FirmwareUpdateViewModel @Inject constructor(
                     )
                 }
                 if (hasAllPermissions && !hasStartedFirmwareUpdate) {
-                    Log.d("FirmwareUpdateViewModel", "checkForUpdates")
                     checkForUpdates()
+                } else {
+                    setErrorState(NoBluetoothDeviceError(Throwable("Bluetooth not available")))
                 }
             }
 
@@ -241,7 +260,10 @@ class FirmwareUpdateViewModel @Inject constructor(
     ) : UiState
 
     sealed class FirmwareUpdateAction : UiAction {
-        data object ForwardAction : FirmwareUpdateAction()
+        data class ForwardAction(
+            val isBluetoothEnabled: Boolean
+        ) : FirmwareUpdateAction()
+
         data object BluetoothPermissions : FirmwareUpdateAction()
         data object LocationPermissions : FirmwareUpdateAction()
         data object EnableBluetooth : FirmwareUpdateAction()
