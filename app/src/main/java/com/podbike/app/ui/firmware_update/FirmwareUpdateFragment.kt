@@ -241,34 +241,38 @@ class FirmwareUpdateFragment : BaseFragment() {
         }
     }
 
+    //TODO export to a separate dialog manager or something
     private fun showBluetoothDisabledDialog() {
-        AlertDialog.Builder(requireContext())
+        AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
             .setMessage(getString(R.string.UpdateMissingDevice))
             .setPositiveButton("OK") { dialog, _ ->
                 dialog.dismiss()
                 findNavController().popBackStack(R.id.settingsFragment, false)
             }
+            .setCancelable(false)
             .create()
             .show()
     }
 
     private fun showNoInternetDialog() {
-        AlertDialog.Builder(requireContext())
+        AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
             .setMessage("The Internet connection appears to be offline.")
             .setPositiveButton("OK") { dialog, _ ->
                 dialog.dismiss()
             }
+            .setCancelable(false)
             .create()
             .show()
     }
 
     private fun showGenericErrorDialog(throwable: Throwable?) {
-        AlertDialog.Builder(requireContext())
+        AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
             .setMessage(getString(R.string.UpdateIssue))
             .setPositiveButton("OK") { dialog, _ ->
                 dialog.dismiss()
                 findNavController().popBackStack(R.id.settingsFragment, false)
             }
+            .setCancelable(false)
             .create()
             .show()
     }
