@@ -13,6 +13,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
@@ -114,6 +115,8 @@ class DashboardFragment : BaseFragment() {
 
     private fun processUiState(state: DashboardViewModel.DashboardState) {
         with(binding) {
+            fragmentDashboardWelcomeBack.isInvisible = state.deviceData != null
+            fragmentDashboardSpeed.isInvisible = state.deviceData == null
             state.deviceData?.let {
                 fragmentDashboardSpeed.text = it.speed
                 fragmentDashboardBatteryIndicator.setProgress(
