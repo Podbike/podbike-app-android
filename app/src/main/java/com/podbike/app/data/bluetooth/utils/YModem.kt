@@ -5,6 +5,7 @@ import androidx.annotation.RequiresPermission
 import com.podbike.app.data.api.model.FirmwareFile
 import com.podbike.app.data.bluetooth.model.AudioFile
 import com.podbike.app.data.bluetooth.model.EcuModule
+import com.podbike.app.data.bluetooth.model.FirmwareFileTransferState
 import com.podbike.app.data.bluetooth.model.FirmwareFileTransferStatus
 import com.podbike.app.data.bluetooth.model.PodbikeDevice
 import com.podbike.app.data.bluetooth.model.PodbikeDeviceMetadata
@@ -203,7 +204,7 @@ class YModem {
                                 FirmwareFileTransferStatus(
                                     currentPackage = packageIndex + 1,
                                     totalPackages = dataChunks.size,
-                                    isTransferComplete = false
+                                    status = FirmwareFileTransferState.TRANSFERRING
                                 )
                             )
                             device.writeCharacteristic(
@@ -225,7 +226,7 @@ class YModem {
                                 FirmwareFileTransferStatus(
                                     currentPackage = packageIndex,
                                     totalPackages = dataChunks.size,
-                                    isTransferComplete = true
+                                    status = FirmwareFileTransferState.COMPLETED
                                 )
                             )
                             transferComplete = true
@@ -233,6 +234,15 @@ class YModem {
                             device.writeCharacteristic(
                                 HaarekBoardSpec.FTP_DATA_CHARACTERISTIC_UUID,
                                 value = DataByteArray(value = nullPacket)
+                            )
+                        } else if (data.value[0] == NACK.toByte() || data.value[0] == CA.toByte()) {
+                            println("Error sending packet, stop transfer")
+                            emit(
+                                FirmwareFileTransferStatus(
+                                    currentPackage = packageIndex,
+                                    totalPackages = dataChunks.size,
+                                    status = FirmwareFileTransferState.FAILED
+                                )
                             )
                         }
                     }
