@@ -118,6 +118,10 @@ class FirmwareUpdateFragment : BaseFragment() {
     private fun processUiState(state: FirmwareUpdateViewModel.FirmwareUpdateState) {
         with(binding) {
 
+            /*
+            TODO make FirmwareVersion a sealed class and move the variables there
+             to keep the ui state in one place
+             */
             var headerTextRes: Int?
             var bodyText: String?
             var centerText: String?
@@ -125,6 +129,7 @@ class FirmwareUpdateFragment : BaseFragment() {
             var isCancelButtonVisible: Boolean
             var isProgressVisible: Boolean
             var isBackButtonVisible: Boolean
+            var isAppBarBackVisible = true
             when (state.firmwareVersion) {
                 UP_TO_DATE -> {
                     headerTextRes = null
@@ -134,6 +139,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     isCancelButtonVisible = false
                     isProgressVisible = false
                     isBackButtonVisible = false
+                    isAppBarBackVisible = true
                 }
 
                 UPDATE_AVAILABLE -> {
@@ -143,6 +149,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     positiveButtonTextRes = R.string.UpdateButtonGet
                     isCancelButtonVisible = false
                     isProgressVisible = false
+                    isAppBarBackVisible = true
                 }
 
                 LICENSE_AGREEMENT -> {
@@ -152,6 +159,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     positiveButtonTextRes = R.string.UpdateButtonTransfer
                     isCancelButtonVisible = true
                     isProgressVisible = false
+                    isAppBarBackVisible = true
                 }
 
                 TRANSFER_STARTED -> {
@@ -161,6 +169,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     positiveButtonTextRes = null
                     isCancelButtonVisible = false
                     isProgressVisible = true
+                    isAppBarBackVisible = true
                 }
 
                 TRANSFER_COMPLETED -> {
@@ -170,6 +179,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     positiveButtonTextRes = R.string.UpdateButtonUpgrade
                     isCancelButtonVisible = true
                     isProgressVisible = false
+                    isAppBarBackVisible = true
                 }
 
                 UPGRADE -> {
@@ -180,6 +190,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     positiveButtonTextRes = null
                     isCancelButtonVisible = false
                     isProgressVisible = true
+                    isAppBarBackVisible = false
                 }
 
                 UNKNOWN -> {
@@ -189,6 +200,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     positiveButtonTextRes = null
                     isCancelButtonVisible = false
                     isProgressVisible = true
+                    isAppBarBackVisible = true
                 }
 
                 ERROR -> {
@@ -198,7 +210,8 @@ class FirmwareUpdateFragment : BaseFragment() {
                     centerText = null
                     positiveButtonTextRes = R.string.UpdateButtonCheck
                     isCancelButtonVisible = false
-                    isProgressVisible = false
+                    isProgressVisible = true
+                    isAppBarBackVisible = true
                 }
             }
 
@@ -213,6 +226,7 @@ class FirmwareUpdateFragment : BaseFragment() {
             actionPositiveButton.isVisible = positiveButtonTextRes != null
             actionNegativeButton.isInvisible = !isCancelButtonVisible
             progressBar.isVisible = isProgressVisible
+            binding.appBar.appBarBack.isInvisible = !isAppBarBackVisible
         }
     }
 
