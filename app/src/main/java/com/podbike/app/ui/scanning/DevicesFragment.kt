@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
@@ -37,6 +38,7 @@ class DevicesFragment : BaseFragment(), OnDeviceClickListener {
     private lateinit var binding: FragmentDevicesBinding
     val viewModel: DevicesViewModel by viewModels()
     private lateinit var deviceAdapter: DevicesAdapter
+    private var connectingDialog: AlertDialog? = null
 
     @Inject
     lateinit var permissionManager: PermissionManager
@@ -125,6 +127,9 @@ class DevicesFragment : BaseFragment(), OnDeviceClickListener {
 
     private fun processUiState(state: DevicesViewModel.DevicesState) {
         with(binding) {
+            if (state.error != null) {
+                connectingDialog?.hide()
+            }
             if (state.hasBluetoothPermissions == false) {
                 //check if also need location permissions for lower android version
                 fragmentDevicesErrorButton.isVisible = true
@@ -177,6 +182,7 @@ class DevicesFragment : BaseFragment(), OnDeviceClickListener {
             DevicesEffect.ConnectToDevice ->
                 findNavController().navigate(R.id.action_devicesFragment_to_dashboardFragment)
 
+            is DevicesEffect.ConnectingToDevice -> showConnectingDialog(effect.deviceName)
         }
     }
 
@@ -201,6 +207,15 @@ class DevicesFragment : BaseFragment(), OnDeviceClickListener {
                 )
             )
         }
+    }
+
+    private fun showConnectingDialog(deviceName: String) {
+        val message = "${getString(R.string.ConnectingTo)} $deviceName}"
+        connectingDialog = AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
+            .setMessage(message)
+            .setCancelable(false)
+            .create()
+        connectingDialog?.show()
     }
 
 }

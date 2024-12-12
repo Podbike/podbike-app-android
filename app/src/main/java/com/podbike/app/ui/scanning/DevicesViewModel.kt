@@ -77,6 +77,7 @@ class DevicesViewModel @Inject constructor(
 
             is DevicesAction.DeviceClick -> {
                 viewModelScope.launch {
+                    sendEffect(DevicesEffect.ConnectingToDevice(action.deviceItem.name))
                     runWithErrorHandling {
                         val deviceInfo =
                             DeviceInfo(action.deviceItem.name, action.deviceItem.address)
@@ -157,6 +158,7 @@ class DevicesViewModel @Inject constructor(
         data object NavigateToBluetoothSettings : DevicesEffect()
         data object NavigateToLocationSettings : DevicesEffect()
         data object ConnectToDevice : DevicesEffect()
+        data class ConnectingToDevice(val deviceName: String) : DevicesEffect()
     }
 
 }
