@@ -38,26 +38,34 @@ class DashboardTurnIndicator @JvmOverloads constructor(
     private fun startAnimations() {
         if (isLeftTurnIndicator) {
             leftAnimator = ObjectAnimator.ofFloat(this, "leftAlpha", 0f, 1f).apply {
-                duration = 150
+                duration = 500
+                repeatMode = ObjectAnimator.REVERSE
+                repeatCount = ObjectAnimator.INFINITE
                 start()
             }
         } else {
             leftAnimator?.cancel()
             leftAnimator = ObjectAnimator.ofFloat(this, "leftAlpha", 1f, 0f).apply {
-                duration = 150
+                duration = 500
+                repeatMode = ObjectAnimator.REVERSE
+                repeatCount = ObjectAnimator.INFINITE
                 start()
             }
         }
 
         if (isRightTurnIndicator) {
             rightAnimator = ObjectAnimator.ofFloat(this, "rightAlpha", 0f, 1f).apply {
-                duration = 150
+                duration = 500
+                repeatMode = ObjectAnimator.REVERSE
+                repeatCount = ObjectAnimator.INFINITE
                 start()
             }
         } else {
             rightAnimator?.cancel()
             rightAnimator = ObjectAnimator.ofFloat(this, "rightAlpha", 1f, 0f).apply {
-                duration = 150
+                duration = 500
+                repeatMode = ObjectAnimator.REVERSE
+                repeatCount = ObjectAnimator.INFINITE
                 start()
             }
         }
@@ -78,15 +86,13 @@ class DashboardTurnIndicator @JvmOverloads constructor(
         val width = width.toFloat()
         val height = height.toFloat()
         val padding = resources.getDimension(R.dimen.padding32)
-        val topMargin = resources.getDimension(R.dimen.turn_indicator_top_margin)
-        val bottomMargin = resources.getDimension(R.dimen.turn_indicator_bottom_margin)
 
         paint.alpha = (leftAlpha * 255).toInt()
         if (isLeftTurnIndicator) {
             leftPath.reset()
-            leftPath.moveTo(padding, height / 2 + topMargin)
-            leftPath.lineTo(width / 2, topMargin)
-            leftPath.lineTo(width / 2, height - bottomMargin)
+            leftPath.moveTo(padding, height / 2)
+            leftPath.lineTo(width / 2, (height / 2) + (height / 3))
+            leftPath.lineTo(width / 2, (height / 2) - (height / 3))
             leftPath.close()
             canvas.drawPath(leftPath, paint)
         }
@@ -94,9 +100,9 @@ class DashboardTurnIndicator @JvmOverloads constructor(
         paint.alpha = (rightAlpha * 255).toInt()
         if (isRightTurnIndicator) {
             rightPath.reset()
-            rightPath.moveTo(width - padding, height / 2 + topMargin)
-            rightPath.lineTo(width / 2, topMargin)
-            rightPath.lineTo(width / 2, height - bottomMargin)
+            rightPath.moveTo(width - padding, height / 2)
+            rightPath.lineTo(width / 2, (height / 2) + (height / 3))
+            rightPath.lineTo(width / 2, (height / 2) - (height / 3))
             rightPath.close()
             canvas.drawPath(rightPath, paint)
         }

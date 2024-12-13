@@ -9,9 +9,11 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.podbike.app.R
+import com.podbike.app.data.bluetooth.manager.BluetoothManager
 import com.podbike.app.databinding.FragmentStatisticsBinding
 import com.podbike.app.ui.base.BaseFragment
 import com.podbike.app.ui.base.adjustEdgeToEdgePaddings
+import com.podbike.app.utils.PermissionManager
 import com.podbike.app.utils.UnitConverter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
@@ -20,6 +22,9 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class StatisticsFragment : BaseFragment() {
+
+    @Inject
+    lateinit var bluetoothManager: BluetoothManager
 
     private lateinit var binding: FragmentStatisticsBinding
     private val viewModel: StatisticsViewModel by viewModels()
@@ -78,7 +83,7 @@ class StatisticsFragment : BaseFragment() {
                             requireContext(),
                             getString(R.string.StatisticCO2),
                             "kg",
-                            it.co2Saved.toString()
+                            "%.2f".format(it.co2Saved)
                         )
                     val distanceView = StatisticView(
                         requireContext(),
@@ -87,12 +92,15 @@ class StatisticsFragment : BaseFragment() {
                         it.totalDistance,
                     )
                     val tripTime =
-                        StatisticView(
-                            requireContext(),
-                            getString(R.string.StatisticTime),
-                            "min",
-                            "30" //@TODO: get from data
-                        )
+                        bluetoothManager.selectedDevice?.data?.tripStart?.elapsedNow()?.inWholeMinutes
+                            ?.let { it1 ->
+                                StatisticView(
+                                    requireContext(),
+                                    getString(R.string.StatisticTime),
+                                    "min",
+                                    it1.toString(),
+                                )
+                            }
                     val averageSpeed = StatisticView(
                         requireContext(),
                         getString(R.string.StatisticAverageSpeed),
