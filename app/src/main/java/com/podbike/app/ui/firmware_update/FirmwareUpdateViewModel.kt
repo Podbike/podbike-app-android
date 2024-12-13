@@ -6,7 +6,6 @@ import com.kfc_polska.ui.base.UiEffect
 import com.kfc_polska.ui.base.UiState
 import com.podbike.app.data.api.model.FirmwareModuleData
 import com.podbike.app.data.bluetooth.manager.BluetoothManager
-import com.podbike.app.data.bluetooth.model.FirmwareFileTransferState
 import com.podbike.app.data.bluetooth.model.FirmwareFileTransferStatus
 import com.podbike.app.data.repository.FirmwareRepository
 import com.podbike.app.ui.base.StateViewModel
@@ -25,7 +24,6 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import timber.log.Timber.Forest.i
 import javax.inject.Inject
-import kotlin.random.Random
 
 @HiltViewModel
 class FirmwareUpdateViewModel @Inject constructor(
@@ -72,7 +70,14 @@ class FirmwareUpdateViewModel @Inject constructor(
     }
 
     private fun setErrorState(error: ErrorTypeSealed) {
-        updateState { copy(firmwareVersion = FirmwareVersion.ERROR, error = error) }
+        updateState {
+            copy(
+                firmwareVersion = FirmwareVersion.ERROR,
+                error = error,
+                uploadingFileIndex = null,
+                firmwareFileTransferStatus = null
+            )
+        }
     }
 
     private fun getAndTransferFirmwareFiles() {
@@ -88,11 +93,20 @@ class FirmwareUpdateViewModel @Inject constructor(
                 is Result.Error -> setErrorState(LoadFirmwareFilesError(firmwareFilesData.error))
                 is Result.Success -> {
                     //@TODO: UNCOMMENT
-//                    for (firmwareModule in firmwareFilesData.data?.firmwareModuleByUpdateId.orEmpty()) {
-//                        i("firmwareModule: $firmwareModule")
-//                        transferFirmwareFile(firmwareModule)
-//                    }
-                    transferFirmwareFile(firmwareFilesData.data?.firmwareModuleByUpdateId?.firstOrNull())
+                    val totalFileCount =
+                        firmwareFilesData.data?.firmwareModuleByUpdateId.orEmpty().size
+                    firmwareFilesData.data?.firmwareModuleByUpdateId.orEmpty()
+                        .forEachIndexed { index, firmwareModule ->
+                            i("firmwareModule: $firmwareModule")
+                            updateState {
+                                copy(
+                                    uploadingFileIndex = index,
+                                    totalFileCount = totalFileCount
+                                )
+                            }
+                            transferFirmwareFile(firmwareModule)
+                        }
+//                    transferFirmwareFile(firmwareFilesData.data?.firmwareModuleByUpdateId?.firstOrNull())
                     setFirmwareVersionState(TRANSFER_COMPLETED)
                 }
             }
@@ -272,6 +286,8 @@ class FirmwareUpdateViewModel @Inject constructor(
         val firmwareVersion: FirmwareVersion = FirmwareVersion.UNKNOWN,
         val firmwareLicense: String? = null,
         val firmwareFileTransferStatus: FirmwareFileTransferStatus? = null,
+        val uploadingFileIndex: Int? = null,
+        val totalFileCount: Int? = null,
         val error: ErrorTypeSealed? = null
     ) : UiState
 

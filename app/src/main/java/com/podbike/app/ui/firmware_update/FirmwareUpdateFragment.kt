@@ -223,17 +223,18 @@ class FirmwareUpdateFragment : BaseFragment() {
                             buildString {
                                 append(getString(R.string.UpdateSent))
                                 append(" ")
-                                append(this@run.currentPackage)
+                                append(state.uploadingFileIndex ?: 0)
                                 append(" ")
                                 append(getString(R.string.UpdateFiles))
                                 append(" ")
                                 append(getString(R.string.UpdateOutOf))
                                 append(" ")
-                                append(this@run.totalPackages)
+                                append(state.totalFileCount ?: 0)
                                 append(" ")
                                 append(getString(R.string.UpdateFiles))
                             }
                         progressText.isVisible = true
+                        progressBar.progress = (this.currentPackage * 100) / this.totalPackages
                     }
 
                     COMPLETED -> {
