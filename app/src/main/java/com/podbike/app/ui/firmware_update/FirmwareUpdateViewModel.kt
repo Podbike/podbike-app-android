@@ -6,7 +6,6 @@ import com.kfc_polska.ui.base.UiEffect
 import com.kfc_polska.ui.base.UiState
 import com.podbike.app.data.api.model.FirmwareModuleData
 import com.podbike.app.data.bluetooth.manager.BluetoothManager
-import com.podbike.app.data.bluetooth.model.FirmwareFileTransferState
 import com.podbike.app.data.bluetooth.model.FirmwareFileTransferStatus
 import com.podbike.app.data.repository.FirmwareRepository
 import com.podbike.app.ui.base.StateViewModel
@@ -76,7 +75,7 @@ class FirmwareUpdateViewModel @Inject constructor(
             copy(
                 firmwareVersion = FirmwareVersion.ERROR,
                 error = error,
-                uploadingFileIndex = null,
+                uploadingFileCount = null,
                 firmwareFileTransferStatus = null,
                 isSendingFiles = false
             )
@@ -103,7 +102,7 @@ class FirmwareUpdateViewModel @Inject constructor(
                             i("firmwareModule: $firmwareModule")
                             updateState {
                                 copy(
-                                    uploadingFileIndex = index,
+                                    uploadingFileCount = index + 1,
                                     totalFileCount = totalFileCount,
                                     isSendingFiles = true
                                 )
@@ -291,7 +290,7 @@ class FirmwareUpdateViewModel @Inject constructor(
         val firmwareVersion: FirmwareVersion = FirmwareVersion.UNKNOWN,
         val firmwareLicense: String? = null,
         val firmwareFileTransferStatus: FirmwareFileTransferStatus? = null,
-        val uploadingFileIndex: Int? = null,
+        val uploadingFileCount: Int? = null,
         val totalFileCount: Int? = null,
         val isSendingFiles: Boolean = false,
         val error: ErrorTypeSealed? = null

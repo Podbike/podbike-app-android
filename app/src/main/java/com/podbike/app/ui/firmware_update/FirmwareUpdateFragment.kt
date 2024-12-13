@@ -233,9 +233,9 @@ class FirmwareUpdateFragment : BaseFragment() {
                     TRANSFERRING -> {
                         progressText.text =
                             buildString {
-                                append(getString(R.string.UpdateSent))
+                                append(getString(R.string.UpdateSending))
                                 append(" ")
-                                append(state.uploadingFileIndex ?: 0)
+                                append(state.uploadingFileCount ?: 0)
                                 append(" ")
                                 append(getString(R.string.UpdateFiles))
                                 append(" ")

@@ -145,6 +145,7 @@
     <string name="UpdateOutOf">"out of"</string>
     <string name="UpdatePageTitle">"Firmware Update"</string>
     <string name="UpdateSent">"Sent"</string>
+    <string name="UpdateSending">"Sending"</string>
     <string name="UpdateTransfer">"Firmware Transfer"</string>
     <string name="UpdateTransferComplete">"Finished transferring all files!"</string>
     <string name="UpdateTransferInfo">"Currently transferring files between cloud server and FRIKAR via the mobiile application"</string>
