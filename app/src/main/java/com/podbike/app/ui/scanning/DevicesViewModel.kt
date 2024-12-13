@@ -83,7 +83,6 @@ class DevicesViewModel @Inject constructor(
                             DeviceInfo(action.deviceItem.name, action.deviceItem.address)
                         val result = bluetoothManager.connect(
                             deviceInfo,
-                            coroutineScope = ConnectionManager.connectionScope
                         )
                         Timber.d("Connect result: $result")
                         result?.let {

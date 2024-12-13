@@ -27,14 +27,17 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
     override suspend fun connect(
         device: DeviceInfo,
         waitForPairing: Boolean,
-        coroutineScope: CoroutineScope,
     ): PodbikeDevice {
         try {
             disconnectAll()
+            ConnectionManager.resetConnection()
+
 
             val connection = ClientBleGatt.connect(
-                context, device.address, coroutineScope, options = BleGattConnectOptions(
-                )
+                context,
+                device.address,
+                ConnectionManager.connectionScope,
+                options = BleGattConnectOptions()
             )
             println("Connecting to device: ${device.address}")
 
@@ -78,7 +81,7 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
         }
         connectedDevices.clear()
     }
-    
+
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun transferFileToDevice(file: FirmwareFile): Flow<FirmwareFileTransferStatus>? =
         selectedDevice?.let { YModem.sendFileToDevice(file, it) }

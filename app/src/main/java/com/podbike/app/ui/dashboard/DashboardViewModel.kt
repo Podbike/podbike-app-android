@@ -105,13 +105,16 @@ class DashboardViewModel @Inject constructor(
                         reconnectJob = viewModelScope.launch {
                             while (true) {
                                 runWithErrorHandling {
-                                    bluetoothManager.connect(
+                                    val result = bluetoothManager.connect(
                                         device.device,
-                                        coroutineScope = ConnectionManager.connectionScope
                                     )
+                                    if (result != null) {
+                                        updateState { copy(isLoading = false) }
+                                        return@launch
+                                    }
                                 }
                                 dashboard()
-                                delay(5000)
+                                delay(10000)
                             }
                         }
                     } else {

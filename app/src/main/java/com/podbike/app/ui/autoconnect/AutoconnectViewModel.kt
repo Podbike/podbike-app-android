@@ -55,7 +55,6 @@ class AutoconnectViewModel @Inject constructor(
                     runWithErrorHandling {
                         bluetoothManager.connect(
                             deviceInfo,
-                            coroutineScope = ConnectionManager.connectionScope
                         )
                     }
                     delay(1000)

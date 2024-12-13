@@ -15,7 +15,6 @@ interface BluetoothManager {
     suspend fun connect(
         device: DeviceInfo,
         waitForPairing: Boolean = true,
-        coroutineScope: CoroutineScope
     ): PodbikeDevice?
 
     fun scan(
