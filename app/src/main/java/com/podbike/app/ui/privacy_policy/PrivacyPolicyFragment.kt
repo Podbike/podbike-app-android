@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.tabs.TabLayoutMediator
@@ -46,16 +48,33 @@ class PrivacyPolicyFragment : Fragment() {
         viewPager.adapter = PrivacyPolicyPagerAdapter()
 
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+            val tabView = LayoutInflater.from(context).inflate(R.layout.custom_tab, null)
+            val tabIcon = tabView.findViewById<ImageView>(R.id.tab_icon)
+            val tabText = tabView.findViewById<TextView>(R.id.tab_text)
+
             when (position) {
                 0 -> {
-                    tab.text = getString(R.string.PolicyPrivacy)
-                    tab.icon = ResourcesCompat.getDrawable(resources, R.drawable.privacy_policy_24, null)
+                    tabText.text = getString(R.string.PolicyPrivacy)
+                    tabIcon.setImageDrawable(
+                        ResourcesCompat.getDrawable(
+                            resources,
+                            R.drawable.privacy_policy_24,
+                            null
+                        )
+                    )
                 }
                 1 -> {
-                    tab.text = getString(R.string.PolicyTermsConditions)
-                    tab.icon = ResourcesCompat.getDrawable(resources, R.drawable.terms_of_conditions_24, null)
+                    tabText.text = getString(R.string.PolicyTermsConditions)
+                    tabIcon.setImageDrawable(
+                        ResourcesCompat.getDrawable(
+                            resources,
+                            R.drawable.terms_of_conditions_24,
+                            null
+                        )
+                    )
                 }
             }
+            tab.customView = tabView
         }.attach()
     }
 }
