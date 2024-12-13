@@ -21,6 +21,9 @@ class CustomProgressBar @JvmOverloads constructor(
     init {
         val inflater = LayoutInflater.from(context)
         binding = ViewCustomProgressBarBinding.inflate(inflater, this, true)
+        setProgress(0, "")
+        binding.progressBarIndicatorView.setBackgroundColor(Color.GRAY)
+        binding.progressBarBackgroundView.setBackgroundColor(Color.GRAY)
     }
 
     fun setProgress(progress: Int, progressText: String) {
