@@ -43,19 +43,8 @@ class YModem {
             val dataFlow =
                 device.getCharacteristicNotifications(HaarekBoardSpec.FTP_DATA_CHARACTERISTIC_UUID)
 
-
             val ackArray = byteArrayOf(PODBIKE_DTA_BYTE.toByte(), ACK.toByte())
             val rqsPktArray = byteArrayOf(PODBIKE_DTA_BYTE.toByte(), RQS_PKT.toByte())
-
-            device.writeCharacteristic(
-                HaarekBoardSpec.FTP_DATA_CHARACTERISTIC_UUID,
-                value = DataByteArray(value = ackArray)
-            )
-
-            device.writeCharacteristic(
-                HaarekBoardSpec.FTP_DATA_CHARACTERISTIC_UUID,
-                value = DataByteArray(value = rqsPktArray)
-            )
 
             device.writeCharacteristic(
                 HaarekBoardSpec.FTP_DATA_CHARACTERISTIC_UUID,
@@ -81,18 +70,27 @@ class YModem {
                     } else {
                         collectedData.add(cleanedData)
                     }
+
+                    device.writeCharacteristic(
+                        HaarekBoardSpec.FTP_DATA_CHARACTERISTIC_UUID,
+                        value = DataByteArray(value = ackArray)
+                    )
+
+                    if (packageIndex == 0) {
+                        device.writeCharacteristic(
+                            HaarekBoardSpec.FTP_DATA_CHARACTERISTIC_UUID,
+                            value = DataByteArray(value = rqsPktArray)
+                        )
+                    }
+
                     packageIndex++
-
-                    device.writeCharacteristic(
-                        HaarekBoardSpec.FTP_DATA_CHARACTERISTIC_UUID,
-                        value = DataByteArray(value = ackArray)
-                    )
-
-                    device.writeCharacteristic(
-                        HaarekBoardSpec.FTP_DATA_CHARACTERISTIC_UUID,
-                        value = DataByteArray(value = ackArray)
-                    )
                 }
+
+            // ACK for EOT
+            device.writeCharacteristic(
+                HaarekBoardSpec.FTP_DATA_CHARACTERISTIC_UUID,
+                value = DataByteArray(value = ackArray)
+            )
 
             val data = collectedData.joinToString(separator = "") { it.toString(Charsets.UTF_8) }
             val metadata = Json.decodeFromString<PodbikeDeviceMetadata>(data)

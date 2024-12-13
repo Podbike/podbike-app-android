@@ -109,7 +109,7 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     suspend fun initDeviceMetadata() {
         try {
-            deviceMetadata = YModem.getMockedDeviceMetadata(device)
+            deviceMetadata = YModem.getDeviceMetadata(device)
         } catch (e: Exception) {
             println("Failed to get device metadata: ${deviceInfo.address}, error: ${e.message}")
         }
