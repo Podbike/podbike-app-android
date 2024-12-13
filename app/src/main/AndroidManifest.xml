@@ -35,7 +35,9 @@
         <activity
             android:name=".ui.splash.SplashActivity"
             android:exported="true"
-            android:theme="@style/Base.Theme.Podbike.Splash">
+            android:screenOrientation="portrait"
+            android:theme="@style/Base.Theme.Podbike.Splash"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -45,7 +47,9 @@
 
         <activity
             android:name=".ui.MainActivity"
-            android:exported="true" />
+            android:exported="true"
+            android:screenOrientation="portrait"
+            tools:ignore="DiscouragedApi,LockedOrientationActivity" />
 
     </application>
 
