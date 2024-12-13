@@ -18,6 +18,7 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.podbike.app.R
+import com.podbike.app.data.bluetooth.model.FirmwareFileTransferState.*
 import com.podbike.app.databinding.FragmentFirmwareUpdateBinding
 import com.podbike.app.ui.base.BaseFragment
 import com.podbike.app.ui.base.adjustEdgeToEdgePaddings
@@ -212,6 +213,40 @@ class FirmwareUpdateFragment : BaseFragment() {
                     isCancelButtonVisible = false
                     isProgressVisible = true
                     isAppBarBackVisible = true
+                }
+            }
+
+            state.firmwareFileTransferStatus.run {
+                when (this?.status) {
+                    TRANSFERRING -> {
+                        progressText.text =
+                            buildString {
+                                append(getString(R.string.UpdateSent))
+                                append(" ")
+                                append(this@run.currentPackage)
+                                append(" ")
+                                append(getString(R.string.UpdateFiles))
+                                append(" ")
+                                append(getString(R.string.UpdateOutOf))
+                                append(" ")
+                                append(this@run.totalPackages)
+                                append(" ")
+                                append(getString(R.string.UpdateFiles))
+                            }
+                        progressText.isVisible = true
+                    }
+
+                    COMPLETED -> {
+                        progressText.isVisible = false
+                    }
+
+                    FAILED -> {
+                        progressText.isVisible = false
+                    }
+
+                    null -> {
+                        progressText.isVisible = false
+                    }
                 }
             }
 

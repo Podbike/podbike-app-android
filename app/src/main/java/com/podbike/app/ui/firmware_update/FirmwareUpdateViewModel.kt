@@ -4,10 +4,10 @@ import androidx.lifecycle.viewModelScope
 import com.kfc_polska.ui.base.UiAction
 import com.kfc_polska.ui.base.UiEffect
 import com.kfc_polska.ui.base.UiState
-import com.podbike.app.data.api.model.FirmwareFilesData
 import com.podbike.app.data.api.model.FirmwareModuleData
 import com.podbike.app.data.bluetooth.manager.BluetoothManager
-import com.podbike.app.data.bluetooth.utils.YModem
+import com.podbike.app.data.bluetooth.model.FirmwareFileTransferState
+import com.podbike.app.data.bluetooth.model.FirmwareFileTransferStatus
 import com.podbike.app.data.repository.FirmwareRepository
 import com.podbike.app.ui.base.StateViewModel
 import com.podbike.app.ui.firmware_update.FirmwareUpdateViewModel.ErrorTypeSealed.CheckForUpdatesError
@@ -21,11 +21,11 @@ import com.podbike.app.ui.firmware_update.FirmwareVersion.*
 import com.podbike.app.utils.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import timber.log.Timber.Forest.i
 import javax.inject.Inject
+import kotlin.random.Random
 
 @HiltViewModel
 class FirmwareUpdateViewModel @Inject constructor(
@@ -115,6 +115,13 @@ class FirmwareUpdateViewModel @Inject constructor(
             is Result.Success -> {
                 bluetoothManager.transferFileToDevice(firmwareUpdateFile.data!!)
                     ?.collect {
+                        updateState {
+                            copy(
+                                firmwareFileTransferStatus = it,
+                                isLoading = false,
+                                error = null
+                            )
+                        }
                         println("currentPackage: ${it.currentPackage}, totalPackages: ${it.totalPackages}")
                     }
             }
@@ -264,6 +271,7 @@ class FirmwareUpdateViewModel @Inject constructor(
         val isLoading: Boolean = true,
         val firmwareVersion: FirmwareVersion = FirmwareVersion.UNKNOWN,
         val firmwareLicense: String? = null,
+        val firmwareFileTransferStatus: FirmwareFileTransferStatus? = null,
         val error: ErrorTypeSealed? = null
     ) : UiState
 
