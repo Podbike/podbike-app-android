@@ -9,7 +9,6 @@ import com.podbike.app.data.DistanceUnit
 import com.podbike.app.data.SpeedUnit
 import com.podbike.app.data.UserPreferences
 import com.podbike.app.data.bluetooth.manager.BluetoothManager
-import com.podbike.app.data.bluetooth.manager.ConnectionManager
 import com.podbike.app.data.bluetooth.model.PodbikeLightStatus
 import com.podbike.app.ui.base.StateViewModel
 import com.podbike.app.ui.base.collectWithErrorHandling
@@ -17,10 +16,8 @@ import com.podbike.app.ui.dashboard.DashboardViewModel.DashboardAction
 import com.podbike.app.ui.dashboard.DashboardViewModel.DashboardEffect
 import com.podbike.app.ui.dashboard.DashboardViewModel.DashboardState
 import com.podbike.app.utils.UnitConverter
-import com.podbike.app.utils.runWithErrorHandling
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -37,7 +34,6 @@ class DashboardViewModel @Inject constructor(
     }
 
     private var dashboardJob: Job? = null
-    private var reconnectJob: Job? = null
     private val distanceUnit: DistanceUnit
         get() = userPreferences.getDistanceUnit()
 

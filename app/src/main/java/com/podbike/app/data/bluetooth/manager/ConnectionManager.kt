@@ -12,13 +12,4 @@ object ConnectionManager {
     fun cancelConnection() {
         connectionJob.cancel()
     }
-
-    fun resetConnection() {
-        connectionJob.cancel()
-        connectionScope.cancel()
-
-        connectionJob = Job()
-        connectionScope = CoroutineScope(Dispatchers.IO + connectionJob)
-        println("ConnectionManager reset")
-    }
 }
