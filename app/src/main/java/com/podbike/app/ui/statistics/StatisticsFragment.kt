@@ -64,7 +64,6 @@ class StatisticsFragment : BaseFragment() {
             state.data?.let {
 
                 val selectedDeviceData = bluetoothManager.selectedDevice?.data
-                println(selectedDeviceData?.averageTripSpeed)
 
                 val temperatureBatteryRow = TableRow(requireContext())
                 val rpmPowerGeneratedRow = TableRow(requireContext())
