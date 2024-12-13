@@ -8,40 +8,37 @@
     <include
         android:id="@+id/app_bar"
         layout="@layout/app_bar"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ProgressBar
-        android:id="@+id/fragment_devices_progress_bar"
+        android:id="@+id/fragment_manage_connections_progress_bar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="invisible"
-        app:layout_constraintBottom_toTopOf="@id/fragment_devices_scanning_button"
+        app:layout_constraintBottom_toTopOf="@id/fragment_manage_connections_scanning_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/app_bar"
         app:layout_constraintVertical_bias="0.0" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/fragment_devices_linear_layout"
+        android:id="@+id/fragment_manage_connections_linear_layout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@id/fragment_devices_scanning_button"
+        app:layout_constraintBottom_toTopOf="@id/fragment_manage_connections_scanning_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/fragment_devices_progress_bar" />
+        app:layout_constraintTop_toBottomOf="@id/fragment_manage_connections_progress_bar" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/fragment_devices_scanning_button"
+        android:id="@+id/fragment_manage_connections_scanning_button"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:text="@string/DeviceStopScan"
+        android:text="@string/FrikarScan"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -49,7 +46,7 @@
         tools:visibility="visible" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/fragment_devices_error_button"
+        android:id="@+id/fragment_manage_connections_error_button"
         style="@style/MaterialErrorButton"
         android:layout_width="200dp"
         android:layout_height="wrap_content"

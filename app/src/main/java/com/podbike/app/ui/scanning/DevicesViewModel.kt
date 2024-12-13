@@ -36,9 +36,6 @@ class DevicesViewModel @Inject constructor(
         get() = bluetoothManager.selectedDevice?.device
 
     private fun loadDevices() {
-        userPreferences.getRecentDevices().let { recentDevices ->
-            updateState { copy(devices = recentDevices.map { it.toDeviceItem(it.address == currentlyConnectedDevice?.address) }) }
-        }
         loadDevicesJob = viewModelScope.launch {
             bluetoothManager.scan().collectWithErrorHandling { deviceList ->
                 val updatedDevices =
