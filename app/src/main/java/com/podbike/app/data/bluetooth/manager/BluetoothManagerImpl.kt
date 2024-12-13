@@ -29,15 +29,18 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
         waitForPairing: Boolean,
     ): PodbikeDevice {
         try {
-            disconnectAll()
-            ConnectionManager.resetConnection()
-
-
+            if (selectedDevice?.device?.address == device.address) {
+                selectedDevice?.client?.reconnect()
+                return selectedDevice!!
+            }
             val connection = ClientBleGatt.connect(
                 context,
                 device.address,
                 ConnectionManager.connectionScope,
-                options = BleGattConnectOptions()
+                options = BleGattConnectOptions(
+                    autoConnect = true,
+                    closeOnDisconnect = false
+                )
             )
             println("Connecting to device: ${device.address}")
 

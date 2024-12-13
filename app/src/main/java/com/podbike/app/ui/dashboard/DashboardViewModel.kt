@@ -102,23 +102,9 @@ class DashboardViewModel @Inject constructor(
                 device?.isConnected()?.collectWithErrorHandling { isConnected ->
                     updateState { copy(isLoading = !isConnected) }
                     if (!isConnected) {
-                        reconnectJob = viewModelScope.launch {
-                            while (true) {
-                                runWithErrorHandling {
-                                    val result = bluetoothManager.connect(
-                                        device.device,
-                                    )
-                                    if (result != null) {
-                                        updateState { copy(isLoading = false) }
-                                        return@launch
-                                    }
-                                }
-                                dashboard()
-                                delay(10000)
-                            }
-                        }
-                    } else {
-                        reconnectJob?.cancel()
+                        bluetoothManager.connect(
+                            device.device,
+                        )
                     }
                 }
             }
