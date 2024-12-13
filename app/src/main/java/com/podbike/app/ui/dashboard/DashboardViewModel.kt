@@ -11,6 +11,7 @@ import com.podbike.app.data.DistanceUnit.*
 import com.podbike.app.data.SpeedUnit
 import com.podbike.app.data.UserPreferences
 import com.podbike.app.data.bluetooth.manager.BluetoothManager
+import com.podbike.app.data.bluetooth.model.PodbikeDevice
 import com.podbike.app.data.bluetooth.model.PodbikeLightStatus
 import com.podbike.app.ui.base.StateViewModel
 import com.podbike.app.ui.base.collectWithErrorHandling
@@ -23,6 +24,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.time.TimeSource
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
@@ -115,6 +117,7 @@ class DashboardViewModel @Inject constructor(
                 device?.isConnected()?.distinctUntilChanged()
                     ?.collectWithErrorHandling { isConnected ->
                         updateState { copy(isLoading = !isConnected) }
+                        updateTripStartOffset(device, isConnected)
                         if (!isConnected) {
                             bluetoothManager.connect(
                                 device.device,
@@ -122,6 +125,26 @@ class DashboardViewModel @Inject constructor(
                         }
                     }
             }
+        }
+    }
+
+    private fun updateTripStartOffset(device: PodbikeDevice, isConnected: Boolean) {
+        if (isConnected) {
+            device.data.cancelCleanTripDataTimer()
+        } else {
+            device.data.startCleanTripDataTimer()
+        }
+        val tripInactivityStartTime = device.data.tripInactivityStartTime
+        val tripStartTimeOffset = device.data.tripStartTimeOffset
+        if (tripInactivityStartTime != null && isConnected) {
+            val inactivityTime = tripInactivityStartTime.elapsedNow()
+            device.data.tripStartTimeOffset =
+                tripStartTimeOffset?.plus(inactivityTime) ?: tripStartTimeOffset
+            device.data.tripInactivityStartTime = null
+        }
+
+        if (!isConnected && tripInactivityStartTime == null) {
+            device.data.tripInactivityStartTime = TimeSource.Monotonic.markNow()
         }
     }
 

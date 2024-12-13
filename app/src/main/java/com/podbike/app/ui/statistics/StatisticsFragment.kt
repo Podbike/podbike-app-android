@@ -106,14 +106,14 @@ class StatisticsFragment : BaseFragment() {
                         it.distanceUnit,
                         it.totalDistance.ifEmpty { "0" },
                     )
-                    val tripTimeInMinutes =
-                        selectedDeviceData?.tripStart?.elapsedNow()?.inWholeMinutes
+                    val tripTimeOffsetInMinutes =
+                        selectedDeviceData?.tripStartTimeOffset?.elapsedNow()?.inWholeMinutes
                     val tripTime =
                         StatisticView(
                             requireContext(),
                             getString(R.string.StatisticTime),
                             "min",
-                            tripTimeInMinutes?.toString() ?: "0",
+                            tripTimeOffsetInMinutes?.toString() ?: "0",
                         )
                     val averageSpeedTotal = StatisticView(
                         requireContext(),

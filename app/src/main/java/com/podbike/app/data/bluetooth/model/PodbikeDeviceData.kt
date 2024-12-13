@@ -1,22 +1,25 @@
 package com.podbike.app.data.bluetooth.model
 
 import android.Manifest
-import android.os.CountDownTimer
 import androidx.annotation.RequiresPermission
 import com.podbike.app.data.bluetooth.utils.YModem
 import com.podbike.app.data.bluetooth.values.HaarekBoardSpec
 import com.podbike.app.ui.base.collectWithErrorHandling
 import com.podbike.app.ui.scanning.DeviceInfo
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
 import no.nordicsemi.android.kotlin.ble.core.data.util.toDisplayString
 import java.util.UUID
@@ -29,7 +32,10 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
 
     // start counting time when speed is greater than 0
     var tripStart: TimeMark? = null
+    var tripStartTimeOffset: TimeMark? = null
+    var tripInactivityStartTime: TimeMark? = null
     private var tripStartDistance: Float? = null
+    private var clearTripDataTimerJob: Job? = null
 
     @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     val speed: Flow<Int>
@@ -39,6 +45,7 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
                 if (speed > 0 && tripStart == null) {
                     val timeSource = TimeSource.Monotonic
                     tripStart = timeSource.markNow()
+                    tripStartTimeOffset = timeSource.markNow()
                 }
                 if (speed > _maxSpeed.value) {
                     _maxSpeed.update { speed }
@@ -151,8 +158,24 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
             }
         }
 
-    fun cleanTripData() {
+    fun startCleanTripDataTimer() {
+        if (clearTripDataTimerJob?.isActive == true) {
+            return
+        }
+        clearTripDataTimerJob = CoroutineScope(Dispatchers.Default).launch {
+            delay(5 * 60 * 1000)
+            cleanTripData()
+        }
+    }
+
+    fun cancelCleanTripDataTimer() {
+        clearTripDataTimerJob?.cancel()
+    }
+
+    private fun cleanTripData() {
         tripStart = null
+        tripStartTimeOffset = null
+        tripInactivityStartTime = null
         _maxSpeed.update { 0 }
         tripStartDistance = null
     }
