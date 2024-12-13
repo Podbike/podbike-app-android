@@ -13,4 +13,22 @@ data class StatisticsDataUiModel(
     val powerGenerated: Int,
     val batteryRemaining: Int,
     val maxSpeed: String,
-)
+) {
+    companion object {
+        val empty = StatisticsDataUiModel(
+            interiorTemperature = "",
+            temperatureUnit = "",
+            co2Saved = 0f,
+            totalDistance = "",
+            distanceUnit = "",
+            currentTripTime = 0,
+            averageSpeed = "0",
+            speedUnit = "",
+            averageRpm = 0,
+            powerGenerated = 0,
+            batteryRemaining = 0,
+            maxSpeed = "",
+        )
+    }
+
+}

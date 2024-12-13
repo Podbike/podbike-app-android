@@ -45,24 +45,21 @@ class StatisticsFragment : BaseFragment() {
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
         binding.appBar.appBarTitle.text = getString(R.string.StatisticsTitle)
-        //buildStatistics(view)
     }
 
     private fun subscribeToViewModel() {
-        viewModel.statistics()
+
         viewModel.uiState
             .flowWithLifecycle(viewLifecycleOwner.lifecycle)
             .onEach(::buildStatistics)
             .launchIn(viewLifecycleOwner.lifecycleScope)
-
-
+        viewModel.statistics()
     }
 
 
     private fun buildStatistics(state: StatisticsViewModel.StatisticsState) {
         with(binding) {
-            state.data?.let {
-
+            state.data.let {
                 val selectedDeviceData = bluetoothManager.selectedDevice?.data
 
                 val temperatureBatteryRow = TableRow(requireContext())
@@ -76,8 +73,8 @@ class StatisticsFragment : BaseFragment() {
                         StatisticView(
                             requireContext(),
                             getString(R.string.StatisticTemperature),
-                            it.temperatureUnit,
-                            it.interiorTemperature,
+                            if (it.interiorTemperature.isEmpty()) "" else it.temperatureUnit,
+                            it.interiorTemperature.ifEmpty { "N/A" },
                         )
 
                     val batteryRemaining =
@@ -107,18 +104,17 @@ class StatisticsFragment : BaseFragment() {
                         requireContext(),
                         getString(R.string.StatisticTotalDistance),
                         it.distanceUnit,
-                        it.totalDistance,
+                        it.totalDistance.ifEmpty { "0" },
                     )
-                    val tripTime =
+                    val tripTimeInMinutes =
                         selectedDeviceData?.tripStart?.elapsedNow()?.inWholeMinutes
-                            ?.let { it1 ->
-                                StatisticView(
-                                    requireContext(),
-                                    getString(R.string.StatisticTime),
-                                    "min",
-                                    it1.toString(),
-                                )
-                            }
+                    val tripTime =
+                        StatisticView(
+                            requireContext(),
+                            getString(R.string.StatisticTime),
+                            "min",
+                            tripTimeInMinutes?.toString() ?: "0",
+                        )
                     val averageSpeedTotal = StatisticView(
                         requireContext(),
                         getString(R.string.StatisticAverageSpeedTotal),
@@ -187,6 +183,7 @@ class StatisticsFragment : BaseFragment() {
                         addView(speedTotalTripRow)
                     }
                 } catch (e: Exception) {
+                    println("Failed to build statistics: $e")
                     e.printStackTrace()
                 }
             }

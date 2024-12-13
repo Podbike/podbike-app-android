@@ -4,7 +4,7 @@ import com.podbike.app.data.DistanceUnit
 import com.podbike.app.data.SpeedUnit
 import com.podbike.app.data.TemperatureUnit
 
-class UnitConverter() {
+class UnitConverter {
 
     fun convertDistance(meters: Float, distanceUnit: DistanceUnit, decimalPlaces: Int): String {
         val result = when (distanceUnit) {

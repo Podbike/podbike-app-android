@@ -91,21 +91,20 @@ class StatisticsViewModel @Inject constructor(
         updateState {
             copy(
                 data = StatisticsDataUiModel(
-                    interiorTemperature = temperature ?: uiState.value.data?.interiorTemperature
-                    ?: "0",
-                    co2Saved = co2Saved ?: uiState.value.data?.co2Saved ?: 0f,
-                    totalDistance = distance ?: uiState.value.data?.totalDistance ?: "0",
+                    interiorTemperature = temperature ?: uiState.value.data.interiorTemperature,
+                    co2Saved = co2Saved ?: uiState.value.data.co2Saved,
+                    totalDistance = distance ?: uiState.value.data.totalDistance,
                     currentTripTime = 0,
-                    averageSpeed = averageSpeed ?: uiState.value.data?.averageSpeed ?: "0",
-                    averageRpm = averageRpm ?: uiState.value.data?.averageRpm ?: 0,
-                    powerGenerated = powerGenerated ?: uiState.value.data?.powerGenerated ?: 0,
-                    batteryRemaining = battery ?: uiState.value.data?.batteryRemaining ?: 0,
+                    averageSpeed = averageSpeed ?: uiState.value.data.averageSpeed,
+                    averageRpm = averageRpm ?: uiState.value.data.averageRpm,
+                    powerGenerated = powerGenerated ?: uiState.value.data.powerGenerated,
+                    batteryRemaining = battery ?: uiState.value.data.batteryRemaining,
                     distanceUnit = unitConverter.getDistanceUnitAbbreviation(distanceUnit),
                     speedUnit = unitConverter.getSpeedUnitAbbreviation(speedUnit),
                     temperatureUnit = unitConverter.getTemperatureUnitAbbreviation(
                         temperatureUnit
                     ),
-                    maxSpeed = maxSpeed ?: uiState.value.data?.maxSpeed ?: "0"
+                    maxSpeed = maxSpeed ?: uiState.value.data.maxSpeed
                 )
             )
         }
@@ -113,7 +112,7 @@ class StatisticsViewModel @Inject constructor(
 
 
     data class StatisticsState(
-        val data: StatisticsDataUiModel? = null,
+        val data: StatisticsDataUiModel = StatisticsDataUiModel.empty,
         val error: ErrorTypeSealed? = null
     ) : UiState
 
