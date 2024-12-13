@@ -79,7 +79,7 @@ class PrivacyPolicyPagerAdapter :
 
         val additionalText = "For further information on the terms and conditions, please click "
         val hyperlinkText = "here"
-        val hyperlinkUrl = "https://www.podbike.com/podbike-terms-conditions/"
+        val hyperlinkUrl = "https://www.podbike.com/terms-conditions/"
 
         val spannableStringBuilder = SpannableStringBuilder(spannedHtml).apply {
             append("\n")
