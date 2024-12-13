@@ -87,6 +87,9 @@ class StatisticsViewModel @Inject constructor(
         val maxSpeed = maxSpeed?.let {
             unitConverter.convertSpeed(it.toFloat(), speedUnit, 1)
         }
+        val averageTripSpeed = bluetoothManager.selectedDevice?.let {
+            unitConverter.convertSpeed(it.data.averageTripSpeed, speedUnit, 1)
+        }
 
         updateState {
             copy(
@@ -104,7 +107,8 @@ class StatisticsViewModel @Inject constructor(
                     temperatureUnit = unitConverter.getTemperatureUnitAbbreviation(
                         temperatureUnit
                     ),
-                    maxSpeed = maxSpeed ?: uiState.value.data.maxSpeed
+                    maxSpeed = maxSpeed ?: uiState.value.data.maxSpeed,
+                    averageTripSpeed = averageTripSpeed ?: "0",
                 )
             )
         }
