@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
 import no.nordicsemi.android.kotlin.ble.core.data.util.toDisplayString
@@ -109,30 +110,38 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
 
     private var lastLightStatus: PodbikeLightStatus = PodbikeLightStatus()
 
-
+    @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     @OptIn(FlowPreview::class)
     val lightStatus: Flow<PodbikeLightStatus>
         get() = flow {
             coroutineScope {
                 device.getCharacteristicNotifications(
                     HaarekBoardSpec.LIGHT_STATUS_CHARACTERISTIC_UUID
-                )?.collectWithErrorHandling { data ->
-                    val bytes = data.value
-                    println(bytes.toDisplayString())
-                    val status = PodbikeLightStatus(
-                        lowBeam = bytes[0].toInt().toChar() != '0',
-                        highBeam = bytes[6].toInt().toChar() != '0',
-                        rearLight = bytes[5].toInt().toChar() != '0',
-                        brakeLight = bytes[4].toInt().toChar() != '0',
-                        indicatorLeft = bytes[3].toInt().toChar() != '0',
-                        indicatorRight = bytes[2].toInt().toChar() != '0',
-                        reverseLight = bytes[1].toInt().toChar() != '0',
-                        runningLight = bytes[7].toInt().toChar() != '0'
-                    )
-
-                    emit(status)
-                    lastLightStatus = status
+                )?.onStart {
+                    try {
+                        device.readCharacteristic(HaarekBoardSpec.LIGHT_STATUS_CHARACTERISTIC_UUID)
+                            ?.let { this.emit(it) }
+                    } catch (e: Exception) {
+                        println("Initial lights characteristic read error: $e")
+                    }
                 }
+                    ?.collectWithErrorHandling { data ->
+                        val bytes = data.value
+                        println(bytes.toDisplayString())
+                        val status = PodbikeLightStatus(
+                            lowBeam = bytes[0].toInt().toChar() != '0',
+                            highBeam = bytes[6].toInt().toChar() != '0',
+                            rearLight = bytes[5].toInt().toChar() != '0',
+                            brakeLight = bytes[4].toInt().toChar() != '0',
+                            indicatorLeft = bytes[3].toInt().toChar() != '0',
+                            indicatorRight = bytes[2].toInt().toChar() != '0',
+                            reverseLight = bytes[1].toInt().toChar() != '0',
+                            runningLight = bytes[7].toInt().toChar() != '0'
+                        )
+
+                        emit(status)
+                        lastLightStatus = status
+                    }
             }
         }.debounce { data ->
             if ((!data.indicatorLeft && lastLightStatus.indicatorLeft) || (!data.indicatorRight && lastLightStatus.indicatorRight)) {
