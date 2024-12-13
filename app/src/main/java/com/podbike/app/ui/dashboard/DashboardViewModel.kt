@@ -68,7 +68,7 @@ class DashboardViewModel @Inject constructor(
                         isMoving = if (BuildConfig.DEV) {
                             (uiState.value.deviceData?.assist ?: 0).div(20) >= 3f
                         } else {
-                            it.toFloat() >= 20f
+                            it.toFloat() >= 3f
                         }
                     )
                 }
