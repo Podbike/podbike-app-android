@@ -210,7 +210,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     centerText = null
                     positiveButtonTextRes = R.string.UpdateButtonCheck
                     isCancelButtonVisible = false
-                    isProgressVisible = true
+                    isProgressVisible = false
                     isAppBarBackVisible = true
                 }
             }
