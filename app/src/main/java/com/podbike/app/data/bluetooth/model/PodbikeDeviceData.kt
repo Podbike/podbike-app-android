@@ -15,14 +15,26 @@ import kotlinx.coroutines.flow.flow
 import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
 import no.nordicsemi.android.kotlin.ble.core.data.util.toDisplayString
 import java.util.UUID
+import kotlin.time.TimeMark
+import kotlin.time.TimeSource
 
 data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: DeviceInfo) {
 
     var deviceMetadata: PodbikeDeviceMetadata? = null
 
+    // start counting time when speed is greater than 0
+    var tripStart: TimeMark? = null
+
     @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     val speed: Flow<Int>
-        get() = getStringCharacteristicData(HaarekBoardSpec.SPEED_CHARACTERISTIC_UUID)
+        get() = getStringCharacteristicData<Int>(
+            HaarekBoardSpec.SPEED_CHARACTERISTIC_UUID,
+            onValue = { speed ->
+                if (speed > 0 && tripStart == null) {
+                    val timeSource = TimeSource.Monotonic
+                    tripStart = timeSource.markNow()
+                }
+            })
 
     @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     val battery: Flow<Int>
@@ -50,7 +62,9 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
 
     @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     val averageSpeed: Flow<Float>
-        get() = getStringCharacteristicData(HaarekBoardSpec.AVERAGE_SPEED_CHARACTERISTIC_UUID)
+        get() = getStringCharacteristicData(
+            HaarekBoardSpec.AVERAGE_SPEED_CHARACTERISTIC_UUID
+        )
 
     @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     val averageRpm: Flow<Int>
@@ -105,7 +119,10 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
         }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    private inline fun <reified T> getStringCharacteristicData(characteristicId: UUID): Flow<T> =
+    private inline fun <reified T> getStringCharacteristicData(
+        characteristicId: UUID,
+        crossinline onValue: (T) -> Unit = {},
+    ): Flow<T> =
         flow {
             try {
                 device.readCharacteristic(characteristicId)?.let { data ->
@@ -120,6 +137,7 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
                 device.getCharacteristicNotifications(characteristicId)?.collect { data ->
                     val str = data.asString()
                     emit(str.convertToType())
+                    onValue(str.convertToType())
                 }
             } catch (e: Exception) {
                 println("Error subscribing to characteristic $characteristicId: $e")

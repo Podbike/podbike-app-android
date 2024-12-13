@@ -75,7 +75,7 @@ class StatisticsViewModel @Inject constructor(
         powerGenerated: Int? = null,
         battery: Int? = null
     ) {
-        val co2Saved = distance?.div(5)
+        val co2Saved = distance?.let { (it / 1000) * (0.1204 - 0.00044) }?.toFloat()
         val averageSpeed =
             averageSpeed?.let { unitConverter.convertSpeed(it, speedUnit, 1) }
         val distance =
