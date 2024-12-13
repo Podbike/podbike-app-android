@@ -6,6 +6,7 @@ import com.kfc_polska.ui.base.UiEffect
 import com.kfc_polska.ui.base.UiState
 import com.podbike.app.data.api.model.FirmwareModuleData
 import com.podbike.app.data.bluetooth.manager.BluetoothManager
+import com.podbike.app.data.bluetooth.model.FirmwareFileTransferState
 import com.podbike.app.data.bluetooth.model.FirmwareFileTransferStatus
 import com.podbike.app.data.repository.FirmwareRepository
 import com.podbike.app.ui.base.StateViewModel

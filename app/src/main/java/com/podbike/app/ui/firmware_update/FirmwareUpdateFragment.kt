@@ -129,6 +129,7 @@ class FirmwareUpdateFragment : BaseFragment() {
             var positiveButtonTextRes: Int?
             var isCancelButtonVisible: Boolean
             var isProgressVisible: Boolean
+            var isFileProgressVisible: Boolean
             var isBackButtonVisible: Boolean
             var isAppBarBackVisible = true
             when (state.firmwareVersion) {
@@ -139,6 +140,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     positiveButtonTextRes = R.string.UpdateButtonCheck
                     isCancelButtonVisible = false
                     isProgressVisible = false
+                    isFileProgressVisible = false
                     isBackButtonVisible = false
                     isAppBarBackVisible = true
                 }
@@ -150,6 +152,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     positiveButtonTextRes = R.string.UpdateButtonGet
                     isCancelButtonVisible = false
                     isProgressVisible = false
+                    isFileProgressVisible = false
                     isAppBarBackVisible = true
                 }
 
@@ -160,6 +163,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     positiveButtonTextRes = R.string.UpdateButtonTransfer
                     isCancelButtonVisible = true
                     isProgressVisible = false
+                    isFileProgressVisible = false
                     isAppBarBackVisible = true
                 }
 
@@ -169,7 +173,8 @@ class FirmwareUpdateFragment : BaseFragment() {
                     centerText = null
                     positiveButtonTextRes = null
                     isCancelButtonVisible = false
-                    isProgressVisible = true
+                    isProgressVisible = false
+                    isFileProgressVisible = true
                     isAppBarBackVisible = true
                 }
 
@@ -180,6 +185,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     positiveButtonTextRes = R.string.UpdateButtonUpgrade
                     isCancelButtonVisible = true
                     isProgressVisible = false
+                    isFileProgressVisible = false
                     isAppBarBackVisible = true
                 }
 
@@ -191,6 +197,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     positiveButtonTextRes = null
                     isCancelButtonVisible = false
                     isProgressVisible = true
+                    isFileProgressVisible = false
                     isAppBarBackVisible = false
                 }
 
@@ -201,6 +208,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     positiveButtonTextRes = null
                     isCancelButtonVisible = false
                     isProgressVisible = true
+                    isFileProgressVisible = false
                     isAppBarBackVisible = true
                 }
 
@@ -212,6 +220,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     positiveButtonTextRes = R.string.UpdateButtonCheck
                     isCancelButtonVisible = false
                     isProgressVisible = true
+                    isFileProgressVisible = false
                     isAppBarBackVisible = true
                 }
             }
@@ -234,7 +243,8 @@ class FirmwareUpdateFragment : BaseFragment() {
                                 append(getString(R.string.UpdateFiles))
                             }
                         progressText.isVisible = true
-                        progressBar.progress = (this.currentPackage * 100) / this.totalPackages
+                        fileProgressIndicator.progress =
+                            (this.currentPackage * 100) / this.totalPackages
                     }
 
                     COMPLETED -> {
@@ -262,6 +272,7 @@ class FirmwareUpdateFragment : BaseFragment() {
             actionPositiveButton.isVisible = positiveButtonTextRes != null
             actionNegativeButton.isInvisible = !isCancelButtonVisible
             progressBar.isVisible = isProgressVisible
+            fileProgressIndicator.isVisible = isFileProgressVisible
             binding.appBar.appBarBack.isInvisible = !isAppBarBackVisible
         }
     }
