@@ -1,5 +1,7 @@
 package com.podbike.app.ui
 
+import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.navigation.NavController
@@ -33,6 +35,15 @@ class MainActivity : BaseActivity() {
 
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp() || super.onSupportNavigateUp()
+    }
+
+    override fun attachBaseContext(newBase: Context?) {
+
+        val newOverride = Configuration(newBase?.resources?.configuration)
+        newOverride.fontScale = 1.0f
+        applyOverrideConfiguration(newOverride)
+
+        super.attachBaseContext(newBase)
     }
 
     private fun setupNavController() {
