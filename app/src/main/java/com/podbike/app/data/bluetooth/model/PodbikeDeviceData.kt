@@ -10,8 +10,12 @@ import com.podbike.app.ui.scanning.DeviceInfo
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
 import no.nordicsemi.android.kotlin.ble.core.data.util.toDisplayString
 import java.util.UUID
@@ -24,6 +28,7 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
 
     // start counting time when speed is greater than 0
     var tripStart: TimeMark? = null
+    var tripStartDistance: Float? = null
 
     @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     val speed: Flow<Int>
@@ -34,6 +39,10 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
                     val timeSource = TimeSource.Monotonic
                     tripStart = timeSource.markNow()
                 }
+                if (speed > _maxSpeed.value) {
+                    _maxSpeed.update { speed }
+                    lastTripSpeedValue = speed
+                }
             })
 
     @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
@@ -42,7 +51,14 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
 
     @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     val distance: Flow<Float>
-        get() = getStringCharacteristicData(HaarekBoardSpec.DISTANCE_CHARACTERISTIC_UUID)
+        get() = getStringCharacteristicData(
+            HaarekBoardSpec.DISTANCE_CHARACTERISTIC_UUID,
+            onValue = { distance ->
+                lastTripDistanceValue = distance
+                if (tripStartDistance == null && distance >= 0) {
+                    tripStartDistance = distance
+                }
+            })
 
     @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     val cadence: Flow<Int>
@@ -62,9 +78,17 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
 
     @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     val averageSpeed: Flow<Float>
-        get() = getStringCharacteristicData(
-            HaarekBoardSpec.AVERAGE_SPEED_CHARACTERISTIC_UUID
+        get() = getStringCharacteristicData<Float>(
+            HaarekBoardSpec.AVERAGE_SPEED_CHARACTERISTIC_UUID,
         )
+
+    private var _maxSpeed = MutableStateFlow(0)
+    val maxSpeed = _maxSpeed.asStateFlow()
+
+    private var lastTripSpeedValue: Int = 0
+    private var lastTripDistanceValue: Float = 0f
+    var averageTripSpeed: Float = if (lastTripSpeedValue == 0) 0f else
+        (lastTripDistanceValue - (tripStartDistance ?: 0f) / lastTripSpeedValue)
 
     @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     val averageRpm: Flow<Int>
@@ -117,6 +141,12 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
                 0L
             }
         }
+
+    fun cleanTripData() {
+        tripStart = null
+        _maxSpeed.update { 0 }
+        tripStartDistance = null
+    }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private inline fun <reified T> getStringCharacteristicData(

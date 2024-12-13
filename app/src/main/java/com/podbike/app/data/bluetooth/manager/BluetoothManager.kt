@@ -26,5 +26,7 @@ interface BluetoothManager {
             )
     ): Flow<List<DeviceInfo>>
 
+    fun disconnectAll()
+
     var selectedDevice: PodbikeDevice?
 }

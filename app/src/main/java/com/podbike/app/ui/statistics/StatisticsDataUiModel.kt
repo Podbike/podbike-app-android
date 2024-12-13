@@ -8,8 +8,9 @@ data class StatisticsDataUiModel(
     val distanceUnit: String,
     val currentTripTime: Int,
     val averageSpeed: String,
-    val averageSpeedUnit: String,
+    val speedUnit: String,
     val averageRpm: Int,
     val powerGenerated: Int,
     val batteryRemaining: Int,
+    val maxSpeed: String,
 )

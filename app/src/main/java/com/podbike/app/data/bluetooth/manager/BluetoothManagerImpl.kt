@@ -27,6 +27,8 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
         coroutineScope: CoroutineScope,
     ): PodbikeDevice {
         try {
+            disconnectAll()
+
             val connection = ClientBleGatt.connect(
                 context, device.address, coroutineScope, options = BleGattConnectOptions(
                 )
@@ -65,6 +67,13 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
         )
             .map { aggregator.aggregateDevices(it) }
             .map { it -> it.map { DeviceInfo(it.name ?: "Unknown", it.address) } }
+    }
+
+    override fun disconnectAll() {
+        for (device in connectedDevices) {
+            device.client.disconnect()
+        }
+        connectedDevices.clear()
     }
 
 }

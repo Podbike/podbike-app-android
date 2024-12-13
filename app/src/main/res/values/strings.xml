@@ -104,7 +104,7 @@
     <string name="SettingsUnits">"Units of Measurement"</string>
     <string name="SettingsUpdate">"FRIKAR Update"</string>
     <string name="StatisticAverageCadence">"Average RPM"</string>
-    <string name="StatisticAverageSpeed">"Average Speed"</string>
+    <string name="StatisticAverageSpeedTotal">Average Speed Total</string>
     <string name="StatisticBattery">"Battery Remaining"</string>
     <string name="StatisticCO2">"CO2 Saved"</string>
     <string name="StatisticPower">"Power Generated"</string>
@@ -185,4 +185,6 @@
         ]]>
     </string>
     <string name="StatisticsTitle">Statistics</string>
+    <string name="StatisticAverageSpeedTrip">Average Speed Trip</string>
+    <string name="StatisticMaxTripSpeed">Max Trip Speed</string>
 </resources>

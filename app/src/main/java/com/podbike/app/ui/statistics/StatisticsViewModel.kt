@@ -55,6 +55,7 @@ class StatisticsViewModel @Inject constructor(
                     }
                 }
                 launch { device?.data?.battery?.collect { updateStatisticsState(battery = it) } }
+                launch { device?.data?.maxSpeed?.collect { updateStatisticsState(maxSpeed = it) } }
             }
         } catch (e: Exception) {
             println("Error fetching statistics: $e")
@@ -73,7 +74,8 @@ class StatisticsViewModel @Inject constructor(
         averageSpeed: Float? = null,
         averageRpm: Int? = null,
         powerGenerated: Int? = null,
-        battery: Int? = null
+        battery: Int? = null,
+        maxSpeed: Int? = null
     ) {
         val co2Saved = distance?.let { (it / 1000) * (0.1204 - 0.00044) }?.toFloat()
         val averageSpeed =
@@ -82,6 +84,10 @@ class StatisticsViewModel @Inject constructor(
             distance?.let { unitConverter.convertDistance(it, distanceUnit, 1) }
         val temperature =
             temperature?.let { unitConverter.convertTemperature(it, temperatureUnit) }
+        val maxSpeed = maxSpeed?.let {
+            unitConverter.convertSpeed(it.toFloat(), speedUnit, 1)
+        }
+
         updateState {
             copy(
                 data = StatisticsDataUiModel(
@@ -95,10 +101,11 @@ class StatisticsViewModel @Inject constructor(
                     powerGenerated = powerGenerated ?: uiState.value.data?.powerGenerated ?: 0,
                     batteryRemaining = battery ?: uiState.value.data?.batteryRemaining ?: 0,
                     distanceUnit = unitConverter.getDistanceUnitAbbreviation(distanceUnit),
-                    averageSpeedUnit = unitConverter.getSpeedUnitAbbreviation(speedUnit),
+                    speedUnit = unitConverter.getSpeedUnitAbbreviation(speedUnit),
                     temperatureUnit = unitConverter.getTemperatureUnitAbbreviation(
                         temperatureUnit
-                    )
+                    ),
+                    maxSpeed = maxSpeed ?: uiState.value.data?.maxSpeed ?: "0"
                 )
             )
         }

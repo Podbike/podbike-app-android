@@ -104,7 +104,7 @@
     <string name="SettingsUnits">"Maßeinheiten"</string>
     <string name="SettingsUpdate">"FRIKAR Aktualisierung"</string>
     <string name="StatisticAverageCadence">"Durchschnittliche Trittfrequenz"</string>
-    <string name="StatisticAverageSpeed">"Durchschnittliche Geschwindigkeit"</string>
+    <string name="StatisticAverageSpeedTotal">"Durchschnittliche Geschwindigkeit"</string>
     <string name="StatisticBattery">"Akkustand"</string>
     <string name="StatisticCO2">"Eingespartes CO2"</string>
     <string name="StatisticPower">"Erzeugte Energie"</string>
@@ -153,4 +153,6 @@
     <string name="UpdateUpgradeInfo2">"Sie können diese Seite nicht verlassen, bis dieser Vorgang abgeschlossen ist."</string>
     <string name="UpdateVersion">"Aktuelle Firmware-Version:"</string>
     <string name="StatisticsTitle">Statistik</string>
+    <string name="StatisticAverageSpeedTrip">Durchschnittsgeschwindigkeit Reise</string>
+    <string name="StatisticMaxTripSpeed">Maximale Auslösegeschwindigkeit</string>
 </resources>

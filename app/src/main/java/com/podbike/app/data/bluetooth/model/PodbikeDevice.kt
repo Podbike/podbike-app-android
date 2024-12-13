@@ -17,7 +17,7 @@ import java.util.UUID
  * A Wrapper class over ClientBleGatt for easy access to the methods specific for Podbike.
  */
 
-class PodbikeDevice(private val client: ClientBleGatt, val device: DeviceInfo) {
+class PodbikeDevice(val client: ClientBleGatt, val device: DeviceInfo) {
 
     private var services: ClientBleGattServices? = null
 
