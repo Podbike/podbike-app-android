@@ -144,7 +144,7 @@ class StatisticsFragment : BaseFragment() {
                         requireContext(),
                         getString(R.string.StatisticAverageSpeedTrip),
                         it.speedUnit,
-                        selectedDeviceData?.averageTripSpeed.toString(),
+                        selectedDeviceData?.averageTripSpeed?.toInt().toString(),
                     )
 
                     temperatureBatteryRow.removeAllViews()

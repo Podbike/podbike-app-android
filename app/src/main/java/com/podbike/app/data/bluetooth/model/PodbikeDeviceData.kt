@@ -28,7 +28,7 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
 
     // start counting time when speed is greater than 0
     var tripStart: TimeMark? = null
-    var tripStartDistance: Float? = null
+    private var tripStartDistance: Float? = null
 
     @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     val speed: Flow<Int>
@@ -87,8 +87,9 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
 
     private var lastTripSpeedValue: Int = 0
     private var lastTripDistanceValue: Float = 0f
-    var averageTripSpeed: Float = if (lastTripSpeedValue == 0) 0f else
-        (lastTripDistanceValue - (tripStartDistance ?: 0f) / lastTripSpeedValue)
+    val averageTripSpeed: Float
+        get() = if (lastTripSpeedValue == 0) 0f else
+            (lastTripDistanceValue - (tripStartDistance ?: 0f) / lastTripSpeedValue)
 
     @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     val averageRpm: Flow<Int>
