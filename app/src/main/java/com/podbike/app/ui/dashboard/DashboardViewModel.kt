@@ -18,6 +18,7 @@ import com.podbike.app.ui.dashboard.DashboardViewModel.DashboardState
 import com.podbike.app.utils.UnitConverter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -95,14 +96,15 @@ class DashboardViewModel @Inject constructor(
                 }
             }
             launch {
-                device?.isConnected()?.collectWithErrorHandling { isConnected ->
-                    updateState { copy(isLoading = !isConnected) }
-                    if (!isConnected) {
-                        bluetoothManager.connect(
-                            device.device,
-                        )
+                device?.isConnected()?.distinctUntilChanged()
+                    ?.collectWithErrorHandling { isConnected ->
+                        updateState { copy(isLoading = !isConnected) }
+                        if (!isConnected) {
+                            bluetoothManager.connect(
+                                device.device,
+                            )
+                        }
                     }
-                }
             }
         }
     }

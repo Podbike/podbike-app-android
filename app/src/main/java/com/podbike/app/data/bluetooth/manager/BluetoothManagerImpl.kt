@@ -30,6 +30,7 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
     ): PodbikeDevice {
         try {
             if (selectedDevice?.device?.address == device.address) {
+                println("Reconnecting to device: ${device.address}")
                 selectedDevice?.client?.reconnect()
                 return selectedDevice!!
             }
