@@ -41,6 +41,7 @@ class FirmwareUpdateViewModel @Inject constructor(
 
     private fun checkForUpdates() {
         viewModelScope.launch {
+            updateState { copy(isLoading = true) }
 
             if (uiState.value.isBluetoothEnabled == false) {
                 setErrorState(NoBluetoothDeviceError(Throwable("Bluetooth not available")))
