@@ -41,7 +41,6 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
                 }
                 if (speed > _maxSpeed.value) {
                     _maxSpeed.update { speed }
-                    lastTripSpeedValue = speed
                 }
             })
 
@@ -54,7 +53,7 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
         get() = getStringCharacteristicData(
             HaarekBoardSpec.DISTANCE_CHARACTERISTIC_UUID,
             onValue = { distance ->
-                lastTripDistanceValue = distance
+                lastDistanceValue = distance
                 if (tripStartDistance == null && distance >= 0) {
                     tripStartDistance = distance
                 }
@@ -85,11 +84,11 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
     private var _maxSpeed = MutableStateFlow(0)
     val maxSpeed = _maxSpeed.asStateFlow()
 
-    private var lastTripSpeedValue: Int = 0
-    private var lastTripDistanceValue: Float = 0f
+    private var lastDistanceValue: Float = 0f
     val averageTripSpeed: Float
-        get() = if (lastTripSpeedValue == 0) 0f else
-            (lastTripDistanceValue - (tripStartDistance ?: 0f) / lastTripSpeedValue)
+        get() = if (tripStart == null) 0f else
+            ((lastDistanceValue - (tripStartDistance
+                ?: 0f)) / tripStart!!.elapsedNow().inWholeSeconds) * 3.6f
 
     @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     val averageRpm: Flow<Int>

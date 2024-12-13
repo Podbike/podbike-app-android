@@ -78,7 +78,7 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
         }
         connectedDevices.clear()
     }
-
+    
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     override fun transferFileToDevice(file: FirmwareFile): Flow<FirmwareFileTransferStatus>? =
         selectedDevice?.let { YModem.sendFileToDevice(file, it) }
