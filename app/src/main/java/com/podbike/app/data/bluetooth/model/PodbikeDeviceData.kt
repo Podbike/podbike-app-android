@@ -7,9 +7,14 @@ import com.podbike.app.data.bluetooth.utils.YModem
 import com.podbike.app.data.bluetooth.values.HaarekBoardSpec
 import com.podbike.app.ui.base.collectWithErrorHandling
 import com.podbike.app.ui.scanning.DeviceInfo
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
 import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
 import no.nordicsemi.android.kotlin.ble.core.data.util.toDisplayString
 import java.util.UUID
@@ -17,8 +22,7 @@ import java.util.UUID
 data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: DeviceInfo) {
 
     var deviceMetadata: PodbikeDeviceMetadata? = null
-    var leftIndicatorTimer: CountDownTimer? = null
-    var rightIndicatorTimer: CountDownTimer? = null
+    var leftIndicatorJob: Job? = null
 
     @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     val speed: Flow<Int>
@@ -72,63 +76,35 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
     private var lastLightStatus: PodbikeLightStatus = PodbikeLightStatus()
 
 
+    @OptIn(FlowPreview::class)
     val lightStatus: Flow<PodbikeLightStatus>
         get() = flow {
-            device.getCharacteristicNotifications(
-                HaarekBoardSpec.LIGHT_STATUS_CHARACTERISTIC_UUID
-            )?.collectWithErrorHandling { data ->
-                val bytes = data.value
-                println(bytes.toDisplayString())
-                var status = PodbikeLightStatus(
-                    lowBeam = bytes[0].toInt().toChar() != '0',
-                    highBeam = bytes[6].toInt().toChar() != '0',
-                    rearLight = bytes[5].toInt().toChar() != '0',
-                    brakeLight = bytes[4].toInt().toChar() != '0',
-                    indicatorLeft = bytes[3].toInt().toChar() != '0',
-                    indicatorRight = bytes[2].toInt().toChar() != '0',
-                    reverseLight = bytes[1].toInt().toChar() != '0',
-                    runningLight = bytes[7].toInt().toChar() != '0'
-                )
+            coroutineScope {
+                device.getCharacteristicNotifications(
+                    HaarekBoardSpec.LIGHT_STATUS_CHARACTERISTIC_UUID
+                )?.collectWithErrorHandling { data ->
+                    val bytes = data.value
+                    println(bytes.toDisplayString())
+                    val status = PodbikeLightStatus(
+                        lowBeam = bytes[0].toInt().toChar() != '0',
+                        highBeam = bytes[6].toInt().toChar() != '0',
+                        rearLight = bytes[5].toInt().toChar() != '0',
+                        brakeLight = bytes[4].toInt().toChar() != '0',
+                        indicatorLeft = bytes[3].toInt().toChar() != '0',
+                        indicatorRight = bytes[2].toInt().toChar() != '0',
+                        reverseLight = bytes[1].toInt().toChar() != '0',
+                        runningLight = bytes[7].toInt().toChar() != '0'
+                    )
 
-                if (!status.indicatorLeft && lastLightStatus.indicatorLeft) {
-                    if (leftIndicatorTimer == null) {
-                        leftIndicatorTimer = object : CountDownTimer(600, 600) {
-                            override fun onTick(millisUntilFinished: Long) {}
-                            override fun onFinish() {
-                                status = status.copy(indicatorLeft = false)
-                                leftIndicatorTimer = null
-                            }
-                        }.start()
-                    } else {
-                        leftIndicatorTimer?.cancel()
-                        leftIndicatorTimer = null
-                    }
-                } else if (status.indicatorLeft && !lastLightStatus.indicatorLeft) {
-                    leftIndicatorTimer?.cancel()
-                    leftIndicatorTimer = null
+                    emit(status)
+                    lastLightStatus = status
                 }
-
-                if (!status.indicatorRight && lastLightStatus.indicatorRight) {
-                    if (rightIndicatorTimer == null) {
-                        rightIndicatorTimer = object : CountDownTimer(600, 600) {
-                            override fun onTick(millisUntilFinished: Long) {}
-                            override fun onFinish() {
-                                status = status.copy(indicatorRight = false)
-                                rightIndicatorTimer = null
-                            }
-                        }.start()
-                    } else {
-                        rightIndicatorTimer?.cancel()
-                        rightIndicatorTimer = null
-                    }
-                } else if (status.indicatorRight && !lastLightStatus.indicatorRight) {
-                    rightIndicatorTimer?.cancel()
-                    rightIndicatorTimer = null
-                }
-
-
-                emit(status)
-                lastLightStatus = status
+            }
+        }.debounce { data ->
+            if ((!data.indicatorLeft && !data.indicatorRight) || (!data.indicatorRight && lastLightStatus.indicatorRight)) {
+                600L
+            } else {
+                0L
             }
         }
 
