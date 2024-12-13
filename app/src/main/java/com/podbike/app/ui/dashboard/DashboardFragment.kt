@@ -128,8 +128,8 @@ class DashboardFragment : BaseFragment() {
                 fragmentDashboardAssistance.currentAssistance = it.assist
                 fragmentDashboardCadence.currentCadence = it.cadence
 
-                fragmentDashboardIconsLayout.isVisible = !it.isMoving
-                fragmentDashboardMenuLayout.isVisible = it.isMoving
+                fragmentDashboardIconsLayout.isVisible = it.isMoving
+                fragmentDashboardMenuLayout.isVisible = !it.isMoving
 
                 if (it.isFreezing) {
                     fragmentDashboardIcon1.setColorFilter(requireContext().getColor(R.color.white))

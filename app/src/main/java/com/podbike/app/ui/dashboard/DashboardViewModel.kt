@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.kfc_polska.ui.base.UiAction
 import com.kfc_polska.ui.base.UiEffect
 import com.kfc_polska.ui.base.UiState
+import com.podbike.app.BuildConfig
 import com.podbike.app.data.DistanceUnit
 import com.podbike.app.data.DistanceUnit.*
 import com.podbike.app.data.SpeedUnit
@@ -63,7 +64,12 @@ class DashboardViewModel @Inject constructor(
                             it.toFloat(),
                             speedUnit,
                             0
-                        )
+                        ),
+                        isMoving = if (BuildConfig.DEV) {
+                            (uiState.value.deviceData?.assist ?: 0).div(20) >= 3f
+                        } else {
+                            it.toFloat() >= 20f
+                        }
                     )
                 }
             }
@@ -128,16 +134,9 @@ class DashboardViewModel @Inject constructor(
         lightStatus: PodbikeLightStatus? = null,
         range: String? = null,
         temperature: Float? = null,
+        isMoving: Boolean? = null
     ) {
-        //TODO replace cadence with speed eventually
         val cadence = cadence ?: uiState.value.deviceData?.cadence ?: 0
-        val isMoving = if (cadence >= 3) {
-            true
-        } else if (cadence <= 1) {
-            false
-        } else {
-            uiState.value.deviceData?.isMoving == true
-        }
         updateState {
             copy(
                 deviceData = DeviceDataUiModel(
@@ -154,7 +153,7 @@ class DashboardViewModel @Inject constructor(
                     rangeAbbreviation = unitConverter.getDistanceUnitAbbreviation(rangeUnit),
                     range = range ?: this.deviceData?.range ?: "0",
                     temperature = temperature ?: this.deviceData?.temperature ?: 0f,
-                    isMoving = isMoving,
+                    isMoving = isMoving ?: this.deviceData?.isMoving ?: false,
                     name = bluetoothManager.selectedDevice?.device?.name
                 )
             )
