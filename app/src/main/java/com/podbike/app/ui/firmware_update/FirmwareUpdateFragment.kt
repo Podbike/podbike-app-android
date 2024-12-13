@@ -18,6 +18,7 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.podbike.app.R
+import com.podbike.app.data.bluetooth.model.FirmwareFileTransferState.*
 import com.podbike.app.databinding.FragmentFirmwareUpdateBinding
 import com.podbike.app.ui.base.BaseFragment
 import com.podbike.app.ui.base.adjustEdgeToEdgePaddings
@@ -128,6 +129,7 @@ class FirmwareUpdateFragment : BaseFragment() {
             var positiveButtonTextRes: Int?
             var isCancelButtonVisible: Boolean
             var isProgressVisible: Boolean
+            var isFileProgressVisible: Boolean
             var isBackButtonVisible: Boolean
             var isAppBarBackVisible = true
             when (state.firmwareVersion) {
@@ -138,6 +140,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     positiveButtonTextRes = R.string.UpdateButtonCheck
                     isCancelButtonVisible = false
                     isProgressVisible = false
+                    isFileProgressVisible = false
                     isBackButtonVisible = false
                     isAppBarBackVisible = true
                 }
@@ -149,6 +152,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     positiveButtonTextRes = R.string.UpdateButtonGet
                     isCancelButtonVisible = false
                     isProgressVisible = false
+                    isFileProgressVisible = false
                     isAppBarBackVisible = true
                 }
 
@@ -159,6 +163,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     positiveButtonTextRes = R.string.UpdateButtonTransfer
                     isCancelButtonVisible = true
                     isProgressVisible = false
+                    isFileProgressVisible = false
                     isAppBarBackVisible = true
                 }
 
@@ -168,7 +173,8 @@ class FirmwareUpdateFragment : BaseFragment() {
                     centerText = null
                     positiveButtonTextRes = null
                     isCancelButtonVisible = false
-                    isProgressVisible = true
+                    isProgressVisible = false
+                    isFileProgressVisible = true
                     isAppBarBackVisible = true
                 }
 
@@ -179,6 +185,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     positiveButtonTextRes = R.string.UpdateButtonUpgrade
                     isCancelButtonVisible = true
                     isProgressVisible = false
+                    isFileProgressVisible = false
                     isAppBarBackVisible = true
                 }
 
@@ -190,6 +197,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     positiveButtonTextRes = null
                     isCancelButtonVisible = false
                     isProgressVisible = true
+                    isFileProgressVisible = false
                     isAppBarBackVisible = false
                 }
 
@@ -200,6 +208,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     positiveButtonTextRes = null
                     isCancelButtonVisible = false
                     isProgressVisible = true
+                    isFileProgressVisible = false
                     isAppBarBackVisible = true
                 }
 
@@ -210,8 +219,45 @@ class FirmwareUpdateFragment : BaseFragment() {
                     centerText = null
                     positiveButtonTextRes = R.string.UpdateButtonCheck
                     isCancelButtonVisible = false
-                    isProgressVisible = false
+                    isProgressVisible = true
+                    isFileProgressVisible = false
                     isAppBarBackVisible = true
+                }
+            }
+
+            state.firmwareFileTransferStatus.run {
+                when (this?.status) {
+                    TRANSFERRING -> {
+                        progressText.text =
+                            buildString {
+                                append(getString(R.string.UpdateSent))
+                                append(" ")
+                                append(state.uploadingFileIndex ?: 0)
+                                append(" ")
+                                append(getString(R.string.UpdateFiles))
+                                append(" ")
+                                append(getString(R.string.UpdateOutOf))
+                                append(" ")
+                                append(state.totalFileCount ?: 0)
+                                append(" ")
+                                append(getString(R.string.UpdateFiles))
+                            }
+                        progressText.isVisible = true
+                        fileProgressIndicator.progress =
+                            (this.currentPackage * 100) / this.totalPackages
+                    }
+
+                    COMPLETED -> {
+                        progressText.isVisible = false
+                    }
+
+                    FAILED -> {
+                        progressText.isVisible = false
+                    }
+
+                    null -> {
+                        progressText.isVisible = false
+                    }
                 }
             }
 
@@ -226,6 +272,7 @@ class FirmwareUpdateFragment : BaseFragment() {
             actionPositiveButton.isVisible = positiveButtonTextRes != null
             actionNegativeButton.isInvisible = !isCancelButtonVisible
             progressBar.isVisible = isProgressVisible
+            fileProgressIndicator.isVisible = isFileProgressVisible
             binding.appBar.appBarBack.isInvisible = !isAppBarBackVisible
         }
     }

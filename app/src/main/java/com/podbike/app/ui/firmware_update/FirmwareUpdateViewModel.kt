@@ -4,8 +4,10 @@ import androidx.lifecycle.viewModelScope
 import com.kfc_polska.ui.base.UiAction
 import com.kfc_polska.ui.base.UiEffect
 import com.kfc_polska.ui.base.UiState
-import com.podbike.app.data.api.model.FirmwareFilesData
+import com.podbike.app.data.api.model.FirmwareModuleData
 import com.podbike.app.data.bluetooth.manager.BluetoothManager
+import com.podbike.app.data.bluetooth.model.FirmwareFileTransferState
+import com.podbike.app.data.bluetooth.model.FirmwareFileTransferStatus
 import com.podbike.app.data.repository.FirmwareRepository
 import com.podbike.app.ui.base.StateViewModel
 import com.podbike.app.ui.firmware_update.FirmwareUpdateViewModel.ErrorTypeSealed.CheckForUpdatesError
@@ -70,7 +72,14 @@ class FirmwareUpdateViewModel @Inject constructor(
     }
 
     private fun setErrorState(error: ErrorTypeSealed) {
-        updateState { copy(firmwareVersion = FirmwareVersion.ERROR, error = error) }
+        updateState {
+            copy(
+                firmwareVersion = FirmwareVersion.ERROR,
+                error = error,
+                uploadingFileIndex = null,
+                firmwareFileTransferStatus = null
+            )
+        }
     }
 
     private fun getAndTransferFirmwareFiles() {
@@ -85,21 +94,34 @@ class FirmwareUpdateViewModel @Inject constructor(
             when (firmwareFilesData) {
                 is Result.Error -> setErrorState(LoadFirmwareFilesError(firmwareFilesData.error))
                 is Result.Success -> {
-                    transferFirmwareFiles(firmwareFilesData.data)
+                    //@TODO: UNCOMMENT
+                    val totalFileCount =
+                        firmwareFilesData.data?.firmwareModuleByUpdateId.orEmpty().size
+                    firmwareFilesData.data?.firmwareModuleByUpdateId.orEmpty()
+                        .forEachIndexed { index, firmwareModule ->
+                            i("firmwareModule: $firmwareModule")
+                            updateState {
+                                copy(
+                                    uploadingFileIndex = index,
+                                    totalFileCount = totalFileCount
+                                )
+                            }
+                            transferFirmwareFile(firmwareModule)
+                        }
+//                    transferFirmwareFile(firmwareFilesData.data?.firmwareModuleByUpdateId?.firstOrNull())
+                    setFirmwareVersionState(TRANSFER_COMPLETED)
                 }
             }
         }
     }
 
-    private suspend fun transferFirmwareFiles(firmwareFilesData: FirmwareFilesData?) {
-        val firmwareFileName = firmwareFilesData?.firmwareModuleByUpdateId?.get(2)?.fileName
+    private suspend fun transferFirmwareFile(firmwareModule: FirmwareModuleData?) {
+        val firmwareFileName = firmwareModule?.fileName
         if (firmwareFileName == null) {
             setErrorState(LoadFirmwareFilesError(Throwable("No firmware file name")))
             return
         }
-        val firmwareUpdateFile = firmwareRepository.getFirmwareFile(firmwareFileName)
-
-        when (firmwareUpdateFile) {
+        when (val firmwareUpdateFile = firmwareRepository.getFirmwareFile(firmwareFileName)) {
             is Result.Error -> setErrorState(
                 LoadFirmwareFilesError(
                     firmwareUpdateFile.error
@@ -107,10 +129,17 @@ class FirmwareUpdateViewModel @Inject constructor(
             )
 
             is Result.Success -> {
-                //TODO remove delay
-                delay(3000)
-                setFirmwareVersionState(TRANSFER_COMPLETED)
-                i("fileBytes: ${firmwareUpdateFile.data?.bytes?.size}")
+                bluetoothManager.transferFileToDevice(firmwareUpdateFile.data!!)
+                    ?.collect {
+                        updateState {
+                            copy(
+                                firmwareFileTransferStatus = it,
+                                isLoading = false,
+                                error = null
+                            )
+                        }
+                        println("currentPackage: ${it.currentPackage}, totalPackages: ${it.totalPackages}")
+                    }
             }
         }
     }
@@ -169,13 +198,15 @@ class FirmwareUpdateViewModel @Inject constructor(
 
                     TRANSFER_COMPLETED -> {
                         setFirmwareVersionState(UPGRADE)
-                        viewModelScope.launch() {
+                        viewModelScope.launch {
+                            println("UPGRADE")
                             delay(3000)
                             setFirmwareVersionState(UP_TO_DATE)
                         }
                     }
 
                     UPGRADE -> {
+                        println("TRANSFER_STARTED")
                         //no action
                     }
 
@@ -256,6 +287,9 @@ class FirmwareUpdateViewModel @Inject constructor(
         val isLoading: Boolean = true,
         val firmwareVersion: FirmwareVersion = FirmwareVersion.UNKNOWN,
         val firmwareLicense: String? = null,
+        val firmwareFileTransferStatus: FirmwareFileTransferStatus? = null,
+        val uploadingFileIndex: Int? = null,
+        val totalFileCount: Int? = null,
         val error: ErrorTypeSealed? = null
     ) : UiState
 
