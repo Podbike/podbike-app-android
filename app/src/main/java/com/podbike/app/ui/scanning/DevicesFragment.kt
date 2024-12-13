@@ -179,8 +179,10 @@ class DevicesFragment : BaseFragment(), OnDeviceClickListener {
             DevicesEffect.NavigateToBluetoothSettings -> enableBluetooth()
             DevicesEffect.NavigateToLocationPermissions -> permissionManager.requestPermissions()
             DevicesEffect.NavigateToLocationSettings -> intentManager.openLocationSettings()
-            DevicesEffect.ConnectToDevice ->
+            DevicesEffect.ConnectToDevice -> {
+                connectingDialog?.hide()
                 findNavController().navigate(R.id.action_devicesFragment_to_dashboardFragment)
+            }
 
             is DevicesEffect.ConnectingToDevice -> showConnectingDialog(effect.deviceName)
         }

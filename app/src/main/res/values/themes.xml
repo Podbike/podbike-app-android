@@ -13,8 +13,8 @@
     <style name="Base.Theme.Podbike.Splash" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:windowBackground">@color/black</item>
         <item name="android:windowTranslucentStatus">true</item>
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/black</item>
+        <item name="android:navigationBarColor">@android:color/black</item>
     </style>
 
     <style name="Theme.Podbike" parent="Base.Theme.Podbike" />
