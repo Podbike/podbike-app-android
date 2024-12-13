@@ -225,6 +225,9 @@ class FirmwareUpdateFragment : BaseFragment() {
                 }
             }
 
+            progressText.isVisible =
+                state.isSendingFiles && state.firmwareVersion == TRANSFER_STARTED
+
             state.firmwareFileTransferStatus.run {
                 when (this?.status) {
                     TRANSFERRING -> {
@@ -242,21 +245,17 @@ class FirmwareUpdateFragment : BaseFragment() {
                                 append(" ")
                                 append(getString(R.string.UpdateFiles))
                             }
-                        progressText.isVisible = true
                         fileProgressIndicator.progress =
                             (this.currentPackage * 100) / this.totalPackages
                     }
 
                     COMPLETED -> {
-                        progressText.isVisible = false
                     }
 
                     FAILED -> {
-                        progressText.isVisible = false
                     }
 
                     null -> {
-                        progressText.isVisible = false
                     }
                 }
             }

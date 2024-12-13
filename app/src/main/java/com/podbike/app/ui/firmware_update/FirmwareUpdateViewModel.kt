@@ -77,7 +77,8 @@ class FirmwareUpdateViewModel @Inject constructor(
                 firmwareVersion = FirmwareVersion.ERROR,
                 error = error,
                 uploadingFileIndex = null,
-                firmwareFileTransferStatus = null
+                firmwareFileTransferStatus = null,
+                isSendingFiles = false
             )
         }
     }
@@ -103,12 +104,14 @@ class FirmwareUpdateViewModel @Inject constructor(
                             updateState {
                                 copy(
                                     uploadingFileIndex = index,
-                                    totalFileCount = totalFileCount
+                                    totalFileCount = totalFileCount,
+                                    isSendingFiles = true
                                 )
                             }
                             transferFirmwareFile(firmwareModule)
                         }
 //                    transferFirmwareFile(firmwareFilesData.data?.firmwareModuleByUpdateId?.firstOrNull())
+                    updateState { copy(isSendingFiles = false) }
                     setFirmwareVersionState(TRANSFER_COMPLETED)
                 }
             }
@@ -290,6 +293,7 @@ class FirmwareUpdateViewModel @Inject constructor(
         val firmwareFileTransferStatus: FirmwareFileTransferStatus? = null,
         val uploadingFileIndex: Int? = null,
         val totalFileCount: Int? = null,
+        val isSendingFiles: Boolean = false,
         val error: ErrorTypeSealed? = null
     ) : UiState
 
