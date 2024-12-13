@@ -6,10 +6,10 @@ import com.kfc_polska.ui.base.UiEffect
 import com.kfc_polska.ui.base.UiState
 import com.podbike.app.data.UserPreferences
 import com.podbike.app.data.bluetooth.manager.BluetoothManager
-import com.podbike.app.data.bluetooth.manager.ConnectionManager
 import com.podbike.app.ui.base.StateViewModel
 import com.podbike.app.ui.base.collectWithErrorHandling
 import com.podbike.app.ui.scanning.DevicesViewModel.DevicesAction
+import com.podbike.app.ui.scanning.DevicesViewModel.DevicesAction.CancelConnect
 import com.podbike.app.ui.scanning.DevicesViewModel.DevicesEffect
 import com.podbike.app.ui.scanning.DevicesViewModel.DevicesState
 import com.podbike.app.utils.runWithErrorHandling
@@ -31,6 +31,7 @@ class DevicesViewModel @Inject constructor(
     }
 
     private var loadDevicesJob: Job? = null
+    private var connectJob: Job? = null
     private var currentlyConnectedDevice: DeviceInfo? = null
         get() = bluetoothManager.selectedDevice?.device
 
@@ -76,7 +77,7 @@ class DevicesViewModel @Inject constructor(
             }
 
             is DevicesAction.DeviceClick -> {
-                viewModelScope.launch {
+                connectJob = viewModelScope.launch {
                     sendEffect(DevicesEffect.ConnectingToDevice(action.deviceItem.name))
                     runWithErrorHandling {
                         val deviceInfo =
@@ -91,6 +92,10 @@ class DevicesViewModel @Inject constructor(
                         }
                     }
                 }
+            }
+
+            is CancelConnect -> {
+                connectJob?.cancel()
             }
 
             is DevicesAction.PermissionsChanged -> {
@@ -139,6 +144,7 @@ class DevicesViewModel @Inject constructor(
         data object LocationPermissions : DevicesAction()
         data object EnableBluetooth : DevicesAction()
         data object EnableLocation : DevicesAction()
+        data object CancelConnect : DevicesAction()
         data class DeviceClick(val deviceItem: DeviceItem) : DevicesAction()
         data class PermissionsChanged(
             val hasBluetoothPermissions: Boolean = false,

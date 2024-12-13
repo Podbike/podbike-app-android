@@ -215,6 +215,10 @@ class DevicesFragment : BaseFragment(), OnDeviceClickListener {
         val message = "${getString(R.string.ConnectingTo)} $deviceName"
         connectingDialog = AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
             .setMessage(message)
+            .setPositiveButton(getString(R.string.Cancel)) { _, _ ->
+                connectingDialog?.dismiss()
+                viewModel.processAction(DevicesViewModel.DevicesAction.CancelConnect)
+            }
             .setCancelable(false)
             .create()
         connectingDialog?.show()
