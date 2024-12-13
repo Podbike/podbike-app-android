@@ -8,13 +8,10 @@ import com.podbike.app.data.bluetooth.values.HaarekBoardSpec
 import com.podbike.app.ui.base.collectWithErrorHandling
 import com.podbike.app.ui.scanning.DeviceInfo
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.launch
 import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
 import no.nordicsemi.android.kotlin.ble.core.data.util.toDisplayString
 import java.util.UUID
@@ -22,7 +19,6 @@ import java.util.UUID
 data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: DeviceInfo) {
 
     var deviceMetadata: PodbikeDeviceMetadata? = null
-    var leftIndicatorJob: Job? = null
 
     @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     val speed: Flow<Int>
@@ -101,7 +97,7 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
                 }
             }
         }.debounce { data ->
-            if ((!data.indicatorLeft && !data.indicatorRight) || (!data.indicatorRight && lastLightStatus.indicatorRight)) {
+            if ((!data.indicatorLeft && lastLightStatus.indicatorLeft) || (!data.indicatorRight && lastLightStatus.indicatorRight)) {
                 600L
             } else {
                 0L
