@@ -6,6 +6,7 @@ import com.kfc_polska.ui.base.UiAction
 import com.kfc_polska.ui.base.UiEffect
 import com.kfc_polska.ui.base.UiState
 import com.podbike.app.data.DistanceUnit
+import com.podbike.app.data.DistanceUnit.*
 import com.podbike.app.data.SpeedUnit
 import com.podbike.app.data.UserPreferences
 import com.podbike.app.data.bluetooth.manager.BluetoothManager
@@ -37,6 +38,15 @@ class DashboardViewModel @Inject constructor(
     private var dashboardJob: Job? = null
     private val distanceUnit: DistanceUnit
         get() = userPreferences.getDistanceUnit()
+
+    private val rangeUnit: DistanceUnit
+        get() = userPreferences.getDistanceUnit().let {
+            when (it) {
+                KILOMETERS -> KILOMETERS
+                METERS -> KILOMETERS
+                MILES -> MILES
+            }
+        }
 
     private val speedUnit: SpeedUnit
         get() = userPreferences.getSpeedUnit()
@@ -82,7 +92,7 @@ class DashboardViewModel @Inject constructor(
                     updateDeviceDataState(
                         range = unitConverter.convertDistance(
                             it * 1000f,
-                            distanceUnit,
+                            rangeUnit,
                             0
                         )
                     )
@@ -141,6 +151,7 @@ class DashboardViewModel @Inject constructor(
                     ?: PodbikeLightStatus(),
                     time = 0,
                     distanceAbbreviation = unitConverter.getDistanceUnitAbbreviation(distanceUnit),
+                    rangeAbbreviation = unitConverter.getDistanceUnitAbbreviation(rangeUnit),
                     range = range ?: this.deviceData?.range ?: "0",
                     temperature = temperature ?: this.deviceData?.temperature ?: 0f,
                     isMoving = isMoving,

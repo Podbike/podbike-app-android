@@ -121,7 +121,7 @@ class DashboardFragment : BaseFragment() {
                 fragmentDashboardSpeed.text = it.speed
                 fragmentDashboardBatteryIndicator.setProgress(
                     it.battery,
-                    "${it.range} ${state.deviceData.distanceAbbreviation}"
+                    "${it.range} ${state.deviceData.rangeAbbreviation}"
                 )
                 fragmentDashboardDistance.text = it.distance.toString()
                 fragmentDashboardDistanceUnit.text = it.distanceAbbreviation
