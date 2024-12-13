@@ -1,19 +1,24 @@
 package com.podbike.app.data.bluetooth.model
 
 import android.Manifest
+import android.os.CountDownTimer
 import androidx.annotation.RequiresPermission
 import com.podbike.app.data.bluetooth.utils.YModem
 import com.podbike.app.data.bluetooth.values.HaarekBoardSpec
 import com.podbike.app.ui.base.collectWithErrorHandling
 import com.podbike.app.ui.scanning.DeviceInfo
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
+import no.nordicsemi.android.kotlin.ble.core.data.util.toDisplayString
 import java.util.UUID
 
 data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: DeviceInfo) {
 
     var deviceMetadata: PodbikeDeviceMetadata? = null
+    var leftIndicatorTimer: CountDownTimer? = null
+    var rightIndicatorTimer: CountDownTimer? = null
 
     @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     val speed: Flow<Int>
@@ -64,6 +69,8 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
         }
     }
 
+    private var lastLightStatus: PodbikeLightStatus = PodbikeLightStatus()
+
 
     val lightStatus: Flow<PodbikeLightStatus>
         get() = flow {
@@ -71,8 +78,8 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
                 HaarekBoardSpec.LIGHT_STATUS_CHARACTERISTIC_UUID
             )?.collectWithErrorHandling { data ->
                 val bytes = data.value
-                print(bytes[0].toInt().toChar())
-                val status = PodbikeLightStatus(
+                println(bytes.toDisplayString())
+                var status = PodbikeLightStatus(
                     lowBeam = bytes[0].toInt().toChar() != '0',
                     highBeam = bytes[6].toInt().toChar() != '0',
                     rearLight = bytes[5].toInt().toChar() != '0',
@@ -82,7 +89,46 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
                     reverseLight = bytes[1].toInt().toChar() != '0',
                     runningLight = bytes[7].toInt().toChar() != '0'
                 )
+
+                if (!status.indicatorLeft && lastLightStatus.indicatorLeft) {
+                    if (leftIndicatorTimer == null) {
+                        leftIndicatorTimer = object : CountDownTimer(600, 600) {
+                            override fun onTick(millisUntilFinished: Long) {}
+                            override fun onFinish() {
+                                status = status.copy(indicatorLeft = false)
+                                leftIndicatorTimer = null
+                            }
+                        }.start()
+                    } else {
+                        leftIndicatorTimer?.cancel()
+                        leftIndicatorTimer = null
+                    }
+                } else if (status.indicatorLeft && !lastLightStatus.indicatorLeft) {
+                    leftIndicatorTimer?.cancel()
+                    leftIndicatorTimer = null
+                }
+
+                if (!status.indicatorRight && lastLightStatus.indicatorRight) {
+                    if (rightIndicatorTimer == null) {
+                        rightIndicatorTimer = object : CountDownTimer(600, 600) {
+                            override fun onTick(millisUntilFinished: Long) {}
+                            override fun onFinish() {
+                                status = status.copy(indicatorRight = false)
+                                rightIndicatorTimer = null
+                            }
+                        }.start()
+                    } else {
+                        rightIndicatorTimer?.cancel()
+                        rightIndicatorTimer = null
+                    }
+                } else if (status.indicatorRight && !lastLightStatus.indicatorRight) {
+                    rightIndicatorTimer?.cancel()
+                    rightIndicatorTimer = null
+                }
+
+
                 emit(status)
+                lastLightStatus = status
             }
         }
 

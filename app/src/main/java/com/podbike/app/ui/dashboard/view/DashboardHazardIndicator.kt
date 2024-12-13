@@ -15,7 +15,7 @@ class DashboardHazardIndicator @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
 
     private val paint = Paint().apply {
-        color = ContextCompat.getColor(context, R.color.red)
+        color = ContextCompat.getColor(context, R.color.hazard_lights_red)
         style = Paint.Style.FILL
     }
     private val hazardDrawable: Drawable? =
@@ -25,6 +25,7 @@ class DashboardHazardIndicator @JvmOverloads constructor(
     private var hazardAlpha = 0f
 
     fun setHazardIndicator(isHazard: Boolean) {
+        //println("setHazardIndicator: $isHazard")
         isHazardIndicator = isHazard
         startAnimation()
         invalidate()
@@ -33,7 +34,7 @@ class DashboardHazardIndicator @JvmOverloads constructor(
     private fun startAnimation() {
         if (isHazardIndicator) {
             hazardAnimator = ObjectAnimator.ofFloat(this, "hazardAlpha", 0f, 1f).apply {
-                duration = 150
+                duration = 500
                 repeatMode = ObjectAnimator.REVERSE
                 repeatCount = ObjectAnimator.INFINITE
                 start()
@@ -41,7 +42,7 @@ class DashboardHazardIndicator @JvmOverloads constructor(
         } else {
             hazardAnimator?.cancel()
             hazardAnimator = ObjectAnimator.ofFloat(this, "hazardAlpha", 1f, 0f).apply {
-                duration = 150
+                duration = 500
                 start()
             }
         }
@@ -55,10 +56,15 @@ class DashboardHazardIndicator @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         if (isHazardIndicator) {
-            paint.alpha = (hazardAlpha * 255).toInt()
-            canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
             hazardDrawable?.alpha = (hazardAlpha * 255).toInt()
-            hazardDrawable?.setBounds(64, 64, width - 64, height - 64)
+            // draw hazardDrawable at the center of the view
+            canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
+            hazardDrawable?.setBounds(
+                (width / 2 - hazardDrawable.intrinsicWidth / 2),
+                (height / 2 - hazardDrawable.intrinsicHeight / 2),
+                (width / 2 + hazardDrawable.intrinsicWidth / 2),
+                (height / 2 + hazardDrawable.intrinsicHeight / 2)
+            )
             hazardDrawable?.draw(canvas)
         }
     }

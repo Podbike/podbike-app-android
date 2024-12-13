@@ -148,6 +148,7 @@ class DashboardFragment : BaseFragment() {
 
                 val bothTurnIndicatorsOn =
                     it.lightStatus.indicatorLeft && it.lightStatus.indicatorRight
+//                println("bothTurnIndicatorsOn: $bothTurnIndicatorsOn")
                 fragmentDashboardHazardIndicator.setHazardIndicator(bothTurnIndicatorsOn)
                 if (bothTurnIndicatorsOn) {
                     fragmentDashboardTurnIndicator.isVisible = false
