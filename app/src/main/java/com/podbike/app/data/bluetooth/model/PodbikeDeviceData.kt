@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
 import no.nordicsemi.android.kotlin.ble.core.data.util.toDisplayString
+import timber.log.Timber
 import java.util.UUID
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
@@ -111,12 +112,19 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     suspend fun initDeviceMetadata() {
-        try {
-            deviceMetadata = YModem.getDeviceMetadata(device)
-//            deviceMetadata = PodbikeDeviceMetadata.mock()
-        } catch (e: Exception) {
-            println("Failed to get device metadata: ${deviceInfo.address}, error: ${e.message}")
-        }
+        val maxAttempts = 3
+        var retry = 0
+        do {
+            try {
+                deviceMetadata = YModem.getDeviceMetadata(device)
+//                deviceMetadata = PodbikeDeviceMetadata.mock()
+                return
+            } catch (e: Exception) {
+                Timber.e("Failed to get device metadata: ${deviceInfo.address}, error: ${e.message}, retry: $retry")
+                ++retry
+                if (retry < maxAttempts) delay(500)
+            }
+        } while (retry < maxAttempts)
     }
 
     private var lastLightStatus: PodbikeLightStatus = PodbikeLightStatus()
@@ -133,12 +141,12 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
                         device.readCharacteristic(HaarekBoardSpec.LIGHT_STATUS_CHARACTERISTIC_UUID)
                             ?.let { this.emit(it) }
                     } catch (e: Exception) {
-                        println("Initial lights characteristic read error: $e")
+                        Timber.e("Initial lights characteristic read error: $e")
                     }
                 }
                     ?.collectWithErrorHandling { data ->
                         val bytes = data.value
-                        println(bytes.toDisplayString())
+                        Timber.d(bytes.toDisplayString())
                         val status = PodbikeLightStatus(
                             lowBeam = bytes[0].toInt().toChar() != '0',
                             highBeam = bytes[6].toInt().toChar() != '0',
@@ -189,14 +197,14 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
         characteristicId: UUID,
         crossinline onValue: (T) -> Unit = {},
     ): Flow<T> =
-        flow {
+        flow<T> {
             try {
                 device.readCharacteristic(characteristicId)?.let { data ->
                     val str = data.asString()
                     emit(str.convertToType())
                 }
             } catch (e: Exception) {
-                println("Initial characteristic read error $characteristicId: $e")
+                Timber.e("Initial characteristic read error $characteristicId: $e")
             }
 
             try {
@@ -206,7 +214,7 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
                     onValue(str.convertToType())
                 }
             } catch (e: Exception) {
-                println("Error subscribing to characteristic $characteristicId: $e")
+                Timber.e("Error subscribing to characteristic $characteristicId: $e")
             }
         }.shareIn(
             scope = ConnectionManager.connectionScope,

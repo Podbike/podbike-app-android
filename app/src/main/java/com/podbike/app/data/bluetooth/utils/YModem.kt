@@ -63,7 +63,6 @@ class YModem {
                 value = DataByteArray(value = rqsPktArray)
             )
 
-
             val collectedData = mutableListOf<ByteArray>()
             var fileName = ""
             var packageIndex = 0
@@ -90,6 +89,7 @@ class YModem {
                     )
 
                     if (packageIndex == 0) {
+                        delay(100) //the device needs to receive ACK and RQS_PKT separately
                         device.writeCharacteristic(
                             HaarekBoardSpec.FTP_DATA_CHARACTERISTIC_UUID,
                             value = DataByteArray(value = rqsPktArray)
