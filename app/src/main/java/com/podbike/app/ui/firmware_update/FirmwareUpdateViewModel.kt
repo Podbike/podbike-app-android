@@ -6,6 +6,7 @@ import com.kfc_polska.ui.base.UiEffect
 import com.kfc_polska.ui.base.UiState
 import com.podbike.app.data.api.model.FirmwareModuleData
 import com.podbike.app.data.bluetooth.manager.BluetoothManager
+import com.podbike.app.data.bluetooth.model.FirmwareFileTransferState
 import com.podbike.app.data.bluetooth.model.FirmwareFileTransferStatus
 import com.podbike.app.data.repository.FirmwareRepository
 import com.podbike.app.ui.base.StateViewModel
@@ -108,8 +109,11 @@ class FirmwareUpdateViewModel @Inject constructor(
                                 )
                             }
                             transferFirmwareFile(firmwareModule)
+                            if (uiState.value.error != null) {
+                                setErrorState(LoadFirmwareFilesError(Throwable("Error transferring files")))
+                                return@launch
+                            }
                         }
-//                    transferFirmwareFile(firmwareFilesData.data?.firmwareModuleByUpdateId?.firstOrNull())
                     updateState { copy(isSendingFiles = false) }
                     setFirmwareVersionState(TRANSFER_COMPLETED)
                 }
@@ -137,10 +141,11 @@ class FirmwareUpdateViewModel @Inject constructor(
                             copy(
                                 firmwareFileTransferStatus = it,
                                 isLoading = false,
-                                error = null
+                                error = if (it.status == FirmwareFileTransferState.FAILED) {
+                                    LoadFirmwareFilesError(Throwable("File transfer failed"))
+                                } else null
                             )
                         }
-                        println("currentPackage: ${it.currentPackage}, totalPackages: ${it.totalPackages}")
                     }
             }
         }

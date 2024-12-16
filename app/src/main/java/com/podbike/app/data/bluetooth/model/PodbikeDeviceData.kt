@@ -110,6 +110,7 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
     suspend fun initDeviceMetadata() {
         try {
             deviceMetadata = YModem.getDeviceMetadata(device)
+//            deviceMetadata = PodbikeDeviceMetadata.mock()
         } catch (e: Exception) {
             println("Failed to get device metadata: ${deviceInfo.address}, error: ${e.message}")
         }
