@@ -2,6 +2,7 @@ package com.podbike.app.data.bluetooth.model
 
 import android.Manifest
 import androidx.annotation.RequiresPermission
+import com.podbike.app.data.bluetooth.manager.ConnectionManager
 import com.podbike.app.data.bluetooth.utils.YModem
 import com.podbike.app.data.bluetooth.values.HaarekBoardSpec
 import com.podbike.app.ui.base.collectWithErrorHandling
@@ -14,10 +15,12 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
@@ -204,7 +207,11 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
             } catch (e: Exception) {
                 println("Error subscribing to characteristic $characteristicId: $e")
             }
-        }
+        }.shareIn(
+            scope = ConnectionManager.connectionScope,
+            started = SharingStarted.Lazily,
+            replay = 1
+        )
 
     private fun DataByteArray.asString(): String {
         val bytes = this.value.filter { it != 0.toByte() }.toByteArray()
