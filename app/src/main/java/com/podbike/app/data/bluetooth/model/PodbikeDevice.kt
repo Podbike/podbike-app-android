@@ -28,7 +28,7 @@ class PodbikeDevice(val client: ClientBleGatt, val device: DeviceInfo) {
         services = client.discoverServices()
     }
 
-    suspend fun isConnected(): Flow<Boolean> =
+    fun isConnected(): Flow<Boolean> =
         client.connectionState.map { it == GattConnectionState.STATE_CONNECTED }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
