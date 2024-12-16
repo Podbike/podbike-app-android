@@ -117,6 +117,13 @@ class DashboardFragment : BaseFragment() {
         with(binding) {
             fragmentDashboardWelcomeBack.isInvisible = state.deviceData != null
             fragmentDashboardSpeed.isInvisible = state.deviceData == null
+
+            if (state.isLoading) {
+                showConnectingDialog()
+            } else {
+                hideConnectingDialog()
+            }
+
             state.deviceData?.let {
                 fragmentDashboardSpeed.text = it.speed
                 fragmentDashboardBatteryIndicator.setProgress(
@@ -135,12 +142,6 @@ class DashboardFragment : BaseFragment() {
                     fragmentDashboardIcon1.setColorFilter(requireContext().getColor(R.color.white))
                 } else {
                     fragmentDashboardIcon1.setColorFilter(requireContext().getColor(R.color.gray))
-                }
-
-                if (state.isLoading) {
-                    showConnectingDialog()
-                } else {
-                    hideConnectingDialog()
                 }
 
                 fragmentDashboardTurnIndicator.setTurnIndicators(
