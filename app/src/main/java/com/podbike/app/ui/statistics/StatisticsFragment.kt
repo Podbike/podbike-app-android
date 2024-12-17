@@ -16,6 +16,7 @@ import com.podbike.app.ui.base.adjustEdgeToEdgePaddings
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -183,8 +184,7 @@ class StatisticsFragment : BaseFragment() {
                         addView(speedTotalTripRow)
                     }
                 } catch (e: Exception) {
-                    println("Failed to build statistics: $e")
-                    e.printStackTrace()
+                    Timber.e("Failed to build statistics: $e")
                 }
             }
 

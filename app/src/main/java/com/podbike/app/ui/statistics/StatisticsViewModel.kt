@@ -18,6 +18,7 @@ import com.podbike.app.utils.UnitConverter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @Suppress("NAME_SHADOWING")
@@ -58,7 +59,7 @@ class StatisticsViewModel @Inject constructor(
                 launch { device?.data?.maxSpeed?.collect { updateStatisticsState(maxSpeed = it) } }
             }
         } catch (e: Exception) {
-            println("Error fetching statistics: $e")
+            Timber.e("Error fetching statistics: $e")
         }
     }
 

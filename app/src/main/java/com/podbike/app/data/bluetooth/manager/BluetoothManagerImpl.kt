@@ -8,7 +8,6 @@ import com.podbike.app.data.bluetooth.model.FirmwareFileTransferStatus
 import com.podbike.app.data.bluetooth.model.PodbikeDevice
 import com.podbike.app.data.bluetooth.utils.YModem
 import com.podbike.app.ui.scanning.DeviceInfo
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
@@ -17,6 +16,7 @@ import no.nordicsemi.android.kotlin.ble.core.scanner.BleScanFilter
 import no.nordicsemi.android.kotlin.ble.core.scanner.BleScannerSettings
 import no.nordicsemi.android.kotlin.ble.scanner.BleScanner
 import no.nordicsemi.android.kotlin.ble.scanner.aggregator.BleScanResultAggregator
+import timber.log.Timber
 
 
 class BluetoothManagerImpl(val context: Context) : BluetoothManager {
@@ -62,7 +62,7 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
             selectedDevice = podbikeDevice
             return podbikeDevice
         } catch (e: Exception) {
-            println("Failed to connect to device: ${device.address}, error: ${e.message}")
+            Timber.e("Failed to connect to device: ${device.address}, error: ${e.message}")
             throw e
         }
     }
