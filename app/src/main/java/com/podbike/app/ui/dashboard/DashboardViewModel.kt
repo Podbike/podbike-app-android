@@ -160,6 +160,13 @@ class DashboardViewModel @Inject constructor(
         isMoving: Boolean? = null
     ) {
         val cadence = cadence ?: uiState.value.deviceData?.cadence ?: 0
+        val isMoving = isMoving ?: uiState.value.deviceData?.isMoving ?: false
+        val shouldForceDisableInteractiveTutorial = isMoving
+        val isInteractiveTutorialEnabled = if (shouldForceDisableInteractiveTutorial) {
+            false
+        } else {
+            uiState.value.isInteractiveTutorialEnabled
+        }
         updateState {
             copy(
                 deviceData = DeviceDataUiModel(
@@ -176,9 +183,10 @@ class DashboardViewModel @Inject constructor(
                     rangeAbbreviation = unitConverter.getDistanceUnitAbbreviation(rangeUnit),
                     range = range ?: this.deviceData?.range ?: "0",
                     temperature = temperature ?: this.deviceData?.temperature ?: 0f,
-                    isMoving = isMoving ?: this.deviceData?.isMoving ?: false,
-                    name = bluetoothManager.selectedDevice?.device?.name
-                )
+                    isMoving = isMoving,
+                    name = bluetoothManager.selectedDevice?.device?.name,
+                ),
+                isInteractiveTutorialEnabled = isInteractiveTutorialEnabled
             )
         }
     }
@@ -211,6 +219,10 @@ class DashboardViewModel @Inject constructor(
                 sendEffect(DashboardEffect.NavigateToLocationSettings)
             }
 
+            is DashboardAction.EnableInteractiveTutorial -> {
+                updateState { copy(isInteractiveTutorialEnabled = true) }
+            }
+
             is DashboardAction.PermissionsChanged -> {
                 val hasAllPermissions =
                     action.hasBluetoothPermissions && action.isBluetoothEnabled && action.isLocationEnabled
@@ -241,6 +253,10 @@ class DashboardViewModel @Inject constructor(
                 sendEffect(DashboardEffect.NavigateToHelp)
             }
 
+            is DashboardAction.ReturnToDashboardClicked -> {
+                updateState { copy(isInteractiveTutorialEnabled = false) }
+            }
+
             is DashboardAction.Retry -> {
                 updateState { copy(isLoading = true, error = null) }
             }
@@ -255,6 +271,7 @@ class DashboardViewModel @Inject constructor(
         val hasBluetoothPermissions: Boolean = false,
         val isBluetoothEnabled: Boolean = false,
         val isLocationEnabled: Boolean = false,
+        val isInteractiveTutorialEnabled: Boolean = false,
         val isLoading: Boolean = true,
         val deviceData: DeviceDataUiModel? = null,
         val error: ErrorTypeSealed? = null
@@ -266,6 +283,7 @@ class DashboardViewModel @Inject constructor(
         data object LocationPermissions : DashboardAction()
         data object EnableBluetooth : DashboardAction()
         data object EnableLocation : DashboardAction()
+        data object EnableInteractiveTutorial : DashboardAction()
         data class PermissionsChanged(
             val hasBluetoothPermissions: Boolean = false,
             val isBluetoothEnabled: Boolean = false,
@@ -275,6 +293,7 @@ class DashboardViewModel @Inject constructor(
         data object StatisticsClicked : DashboardAction()
         data object SettingsClicked : DashboardAction()
         data object HelpClicked : DashboardAction()
+        data object ReturnToDashboardClicked : DashboardAction()
         data object Retry : DashboardAction()
         data object GoBack : DashboardAction()
     }

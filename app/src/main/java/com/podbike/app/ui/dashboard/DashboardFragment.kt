@@ -110,6 +110,9 @@ class DashboardFragment : BaseFragment() {
             fragmentDashboardHelp.setOnClickListener {
                 viewModel.processAction(DashboardAction.HelpClicked)
             }
+            fragmentDashboardReturnButton.setOnClickListener {
+                viewModel.processAction(DashboardAction.ReturnToDashboardClicked)
+            }
         }
     }
 
@@ -122,6 +125,25 @@ class DashboardFragment : BaseFragment() {
                 showConnectingDialog()
             } else {
                 hideConnectingDialog()
+            }
+
+            getTooltips().forEach { tooltip ->
+                val view = binding.root.findViewById<View>(tooltip.widgetId)
+                if (state.isInteractiveTutorialEnabled) {
+                    view.setOnClickListener {
+                        setupTooltip(tooltip.title, tooltip.message)
+                    }
+                } else {
+                    view.setOnClickListener(null)
+                }
+            }
+
+            fragmentDashboardReturnButton.isVisible = state.isInteractiveTutorialEnabled
+
+            if (state.isInteractiveTutorialEnabled) {
+                binding.fragmentDashboardIconsLayout.isVisible = true
+                binding.fragmentDashboardMenuLayout.isVisible = false
+                return@with
             }
 
             state.deviceData?.let {
@@ -183,6 +205,67 @@ class DashboardFragment : BaseFragment() {
         }
     }
 
+    private fun getTooltips(): List<TooltipInfo> = listOf(
+        TooltipInfo(
+            R.id.fragment_dashboard_speed,
+            "Speed",
+            "This is your current speed. It is displayed in km/h."
+        ),
+        TooltipInfo(
+            R.id.fragment_dashboard_battery_indicator,
+            "Battery",
+            "This is your current battery level with remaining range."
+        ),
+        TooltipInfo(
+            R.id.fragment_dashboard_distance,
+            "Distance",
+            "This is the distance you have traveled."
+        ),
+        TooltipInfo(
+            R.id.fragment_dashboard_assistance,
+            "Assistance",
+            "This is the level of assistance you are currently receiving."
+        ),
+        TooltipInfo(
+            R.id.fragment_dashboard_cadence,
+            "Cadence",
+            "This is the number of revolutions per minute."
+        ),
+        TooltipInfo(
+            R.id.fragment_dashboard_icon_1,
+            "Freezing",
+            "This icon will turn white when the temperature is below 2°C."
+        ),
+        TooltipInfo(
+            R.id.fragment_dashboard_icon_2,
+            "Traction",
+            "This icon will turn white when the road is slippery."
+        ),
+        TooltipInfo(R.id.fragment_dashboard_icon_3, "Lights", "TODO"),
+        TooltipInfo(
+            R.id.fragment_dashboard_icon_4,
+            "Tire alert",
+            "This icon will turn white when the tire pressure is low."
+        ),
+        TooltipInfo(
+            R.id.fragment_dashboard_icon_5,
+            "Car brake",
+            "This icon will turn white when the car brake is on."
+        )
+    )
+
+    private fun setupTooltip(title: String, message: String, showOkButton: Boolean = false) {
+        val oldTitle = binding.fragmentDashboardTooltip.getTitle()
+        binding.fragmentDashboardTooltip.setTitle(title)
+        binding.fragmentDashboardTooltip.setMessage(message)
+        binding.fragmentDashboardTooltip.showOkButton(showOkButton)
+        if (title == oldTitle) {
+            binding.fragmentDashboardTooltip.isVisible = !binding.fragmentDashboardTooltip.isVisible
+        } else {
+            binding.fragmentDashboardTooltip.visibility = View.VISIBLE
+        }
+    }
+
     private fun processEffect(effect: DashboardEffect) {
         when (effect) {
             DashboardEffect.NavigateBack -> findNavController().popBackStack()
@@ -191,7 +274,17 @@ class DashboardFragment : BaseFragment() {
             DashboardEffect.NavigateToLocationPermissions -> permissionManager.requestPermissions()
             DashboardEffect.NavigateToLocationSettings -> intentManager.openLocationSettings()
             DashboardEffect.NavigateToAppSettings -> findNavController().navigate(R.id.action_dashboardFragment_to_settingsFragment)
-            DashboardEffect.NavigateToHelp -> findNavController().navigate(R.id.action_dashboardFragment_to_showTutorialFragment)
+            DashboardEffect.NavigateToHelp -> {
+
+                binding.fragmentDashboardTooltip.setTitle("Help Section")
+                binding.fragmentDashboardTooltip.setMessage("Here you'll discover how each component works. Simply click on any component to learn more.\n\n\nTap the Podbike logo to see Statistics\n\nHeads up: These icons will soon switch to warning icons, giving you insights into their functionality")
+                binding.fragmentDashboardTooltip.showOkButton(true, View.OnClickListener {
+                    binding.fragmentDashboardTooltip.visibility = View.GONE
+                    viewModel.processAction(DashboardAction.EnableInteractiveTutorial)
+                })
+                binding.fragmentDashboardTooltip.visibility = View.VISIBLE
+            }
+
             DashboardEffect.NavigateToStatistics -> findNavController().navigate(R.id.action_dashboardFragment_to_statisticsFragment)
         }
     }

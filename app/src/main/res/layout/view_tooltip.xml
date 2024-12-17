@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="32dp"
+    android:background="#ebebeb"
+    android:elevation="4dp"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/tooltipTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textColor="#000000"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        tools:text="Help Section" />
+
+    <TextView
+        android:id="@+id/tooltipMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:gravity="center"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        tools:text="Here you'll discover how each component works. Simply click on any component to learn more.\n\nTap the Podbike logo to see Statistics\n\n\nHeads up: These icons will soon switch to warning icons, giving you insights into their functionality" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/tooltipButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        android:text="@android:string/ok"
+        android:textColor="#ffffff"
+        android:visibility="gone"
+        app:backgroundTint="#3e4650"
+        tools:visibility="visible" />
+</LinearLayout>
