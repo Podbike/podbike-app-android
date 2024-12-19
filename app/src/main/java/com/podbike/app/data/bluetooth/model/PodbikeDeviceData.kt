@@ -32,7 +32,7 @@ import kotlin.time.TimeSource
 
 data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: DeviceInfo) {
 
-    var deviceMetadata: PodbikeDeviceMetadata? = null
+    private var deviceMetadata: PodbikeDeviceMetadata? = null
 
     // start counting time when speed is greater than 0
     var tripStart: TimeMark? = null
@@ -111,20 +111,26 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
         get() = getStringCharacteristicData(HaarekBoardSpec.GENERATED_POWER_CHARACTERISTIC_UUID)
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    suspend fun initDeviceMetadata() {
+    suspend fun initDeviceMetadata(): PodbikeDeviceMetadata? {
         val maxAttempts = 3
         var retry = 0
         do {
             try {
                 deviceMetadata = YModem.getDeviceMetadata(device)
 //                deviceMetadata = PodbikeDeviceMetadata.mock()
-                return
+                return deviceMetadata
             } catch (e: Exception) {
                 Timber.e("Failed to get device metadata: ${deviceInfo.address}, error: ${e.message}, retry: $retry")
                 ++retry
                 if (retry < maxAttempts) delay(500)
             }
         } while (retry < maxAttempts)
+        return null
+    }
+
+    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    suspend fun getDeviceMetadata(): PodbikeDeviceMetadata? {
+        return deviceMetadata ?: initDeviceMetadata()
     }
 
     private var lastLightStatus: PodbikeLightStatus = PodbikeLightStatus()
@@ -233,6 +239,10 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
             Float::class -> this.toFloat() as T
             else -> throw IllegalArgumentException("Unsupported type")
         }
+    }
+
+    fun clearInMemoryDeviceMetadata() {
+        deviceMetadata = null
     }
 
 }

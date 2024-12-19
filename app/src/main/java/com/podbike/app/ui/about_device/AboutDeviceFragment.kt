@@ -5,12 +5,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.podbike.app.R
 import com.podbike.app.data.bluetooth.manager.BluetoothManager
-import com.podbike.app.data.bluetooth.utils.YModem.YModemHelper
 import com.podbike.app.databinding.FragmentAboutDeviceBinding
 import com.podbike.app.ui.base.adjustEdgeToEdgeMargins
 import dagger.hilt.android.AndroidEntryPoint
@@ -58,9 +59,10 @@ class AboutDeviceFragment : Fragment() {
     }
 
     @SuppressLint("MissingPermission")
-    private fun loadDeviceMetadata() {
-        val device = bluetoothManager.selectedDevice ?: return
-        val deviceMetadata = device.data.deviceMetadata ?: return
+    private suspend fun loadDeviceMetadata() {
+        binding.progressBar.visibility = View.VISIBLE
+        val device = bluetoothManager.selectedDevice ?: return showError()
+        val deviceMetadata = device.data.getDeviceMetadata() ?: return showError()
 
         val items = mutableListOf<AboutDeviceItem>()
 
@@ -76,5 +78,24 @@ class AboutDeviceFragment : Fragment() {
         }
         val adapter = AboutDeviceAdapter(items)
         binding.recyclerView.adapter = adapter
+        binding.progressBar.visibility = View.GONE
     }
+
+    private fun showError() {
+        binding.progressBar.visibility = View.GONE
+        showGenericErrorDialog()
+    }
+
+    private fun showGenericErrorDialog() {
+        AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
+            .setMessage(getString(R.string.UpdateIssue))
+            .setPositiveButton("OK") { dialog, _ ->
+                dialog.dismiss()
+                findNavController().popBackStack(R.id.settingsFragment, false)
+            }
+            .setCancelable(false)
+            .create()
+            .show()
+    }
+
 }

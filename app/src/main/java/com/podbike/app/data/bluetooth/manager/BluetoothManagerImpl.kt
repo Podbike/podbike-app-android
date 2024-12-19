@@ -53,11 +53,9 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
             val podbikeDevice = PodbikeDevice(connection, device)
             connectedDevices.add(podbikeDevice)
 
+            podbikeDevice.data.clearInMemoryDeviceMetadata()
             podbikeDevice.discoverServices()
             println("Services discovered for device: ${device.address}")
-
-            podbikeDevice.data.initDeviceMetadata()
-            println("Device metadata initialized for device: ${device.address}")
 
             selectedDevice = podbikeDevice
             return podbikeDevice

@@ -270,7 +270,7 @@ class FirmwareUpdateFragment : BaseFragment() {
             center.isVisible = centerText != null
             actionPositiveButton.isVisible = positiveButtonTextRes != null
             actionNegativeButton.isInvisible = !isCancelButtonVisible
-            progressBar.isVisible = isProgressVisible
+            progressBar.isVisible = isProgressVisible || state.isLoading
             fileProgressIndicator.isVisible = isFileProgressVisible
             binding.appBar.appBarBack.isInvisible = !isAppBarBackVisible
         }

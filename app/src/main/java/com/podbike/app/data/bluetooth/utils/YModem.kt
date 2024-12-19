@@ -3,27 +3,22 @@ package com.podbike.app.data.bluetooth.utils
 import android.Manifest
 import androidx.annotation.RequiresPermission
 import com.podbike.app.data.api.model.FirmwareFile
-import com.podbike.app.data.bluetooth.model.AudioFile
-import com.podbike.app.data.bluetooth.model.EcuModule
 import com.podbike.app.data.bluetooth.model.FirmwareFileTransferState
 import com.podbike.app.data.bluetooth.model.FirmwareFileTransferStatus
 import com.podbike.app.data.bluetooth.model.PodbikeDevice
 import com.podbike.app.data.bluetooth.model.PodbikeDeviceMetadata
 import com.podbike.app.data.bluetooth.values.HaarekBoardSpec
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.flow.timeout
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
 import no.nordicsemi.android.kotlin.ble.core.data.util.toDisplayString
-import timber.log.Timber.Forest.i
 import timber.log.Timber.Forest.e
-import kotlin.time.Duration.Companion.milliseconds
+import timber.log.Timber.Forest.i
 import kotlin.time.Duration.Companion.seconds
 
 // YModem related consts
@@ -69,6 +64,7 @@ class YModem {
 
             dataFlow
                 ?.takeWhile { data -> data.value[0] != EOT.toByte() }
+                ?.timeout(TIMEOUT_DURATION)
                 ?.collect { data ->
                     println("Received data: ${data.value.toDisplayString()}")
                     val cleanedData = data.value.copyOfRange(

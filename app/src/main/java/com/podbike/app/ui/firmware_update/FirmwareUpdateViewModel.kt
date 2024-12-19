@@ -281,10 +281,10 @@ class FirmwareUpdateViewModel @Inject constructor(
         }
     }
 
-    private fun getFrameNumber(): String? {
+    private suspend fun getFrameNumber(): String? {
 //        //TODO remove mock
 //        return "000000-F8-1-00-000"
-        return bluetoothManager.selectedDevice?.data?.deviceMetadata?.frameNumber
+        return bluetoothManager.selectedDevice?.data?.getDeviceMetadata()?.frameNumber
     }
 
     data class FirmwareUpdateState(
