@@ -78,7 +78,6 @@ class YModem {
 
                     if (packageIndex == 0) {
                         fileName = cleanedData.toString(Charsets.UTF_8)
-                        delay(100)
                     } else {
                         collectedData.add(cleanedData)
                     }
@@ -89,7 +88,7 @@ class YModem {
                     )
 
                     if (packageIndex == 0) {
-                        delay(100) //the device needs to receive ACK and RQS_PKT separately
+                        delay(300) //the device needs to receive ACK and RQS_PKT separately
                         device.writeCharacteristic(
                             HaarekBoardSpec.FTP_DATA_CHARACTERISTIC_UUID,
                             value = DataByteArray(value = rqsPktArray)
