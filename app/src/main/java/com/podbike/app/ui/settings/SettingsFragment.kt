@@ -55,7 +55,7 @@ class SettingsFragment : BaseFragment() {
         val manageConnectionsView =
             SettingView(requireContext(), getString(R.string.SettingsDevices)) {
                 Navigation.findNavController(view)
-                    .navigate(R.id.action_settingsFragment_to_devicesFragment)
+                    .navigate(R.id.action_settingsFragment_to_manageConnectionsFragment)
             }
         val frikarUpdateView = SettingView(requireContext(), getString(R.string.SettingsUpdate)) {
             Navigation.findNavController(view)

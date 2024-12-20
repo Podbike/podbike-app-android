@@ -1,4 +1,4 @@
-package com.podbike.app.ui.devices
+package com.podbike.app.ui.manage_connections
 
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
@@ -18,13 +18,12 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.podbike.app.R
-import com.podbike.app.databinding.FragmentDevicesBinding
+import com.podbike.app.databinding.FragmentManageConnectionsBinding
 import com.podbike.app.ui.base.BaseFragment
 import com.podbike.app.ui.base.adjustEdgeToEdgePaddings
+import com.podbike.app.ui.manage_connections.ManageConnectionsViewModel.ManageConnectionsEffect
 import com.podbike.app.ui.scanning.DeviceItem
 import com.podbike.app.ui.scanning.DevicesAdapter
-import com.podbike.app.ui.scanning.DevicesViewModel
-import com.podbike.app.ui.scanning.DevicesViewModel.DevicesEffect
 import com.podbike.app.ui.scanning.OnDeviceClickListener
 import com.podbike.app.utils.PermissionManager
 import dagger.hilt.android.AndroidEntryPoint
@@ -33,10 +32,10 @@ import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class DevicesFragment : BaseFragment(), OnDeviceClickListener {
+class ManageConnectionsFragment : BaseFragment(), OnDeviceClickListener {
 
-    private lateinit var binding: FragmentDevicesBinding
-    val viewModel: DevicesViewModel by viewModels()
+    private lateinit var binding: FragmentManageConnectionsBinding
+    val viewModel: ManageConnectionsViewModel by viewModels()
     private lateinit var deviceAdapter: DevicesAdapter
     private var connectingDialog: AlertDialog? = null
 
@@ -56,7 +55,7 @@ class DevicesFragment : BaseFragment(), OnDeviceClickListener {
         val hasLocationPermission = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
 
         viewModel.processAction(
-            DevicesViewModel.DevicesAction.PermissionsChanged(
+            ManageConnectionsViewModel.ManageConnectionsAction.PermissionsChanged(
                 hasBluetoothPermissions = hasBluetoothPermission,
                 isBluetoothEnabled = permissionManager.isBluetoothEnabled(),
                 isLocationEnabled = permissionManager.isLocationEnabled()
@@ -68,7 +67,7 @@ class DevicesFragment : BaseFragment(), OnDeviceClickListener {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentDevicesBinding.inflate(inflater, container, false).apply {
+        binding = FragmentManageConnectionsBinding.inflate(inflater, container, false).apply {
             root.adjustEdgeToEdgePaddings()
         }
         permissionManager.initializePermissionLauncher(requestPermissionsLauncher)
@@ -84,7 +83,7 @@ class DevicesFragment : BaseFragment(), OnDeviceClickListener {
         binding.appBar.appBarBack.setOnClickListener {
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
-        binding.appBar.appBarTitle.text = getString(R.string.FrikarScan)
+        binding.appBar.appBarTitle.text = getString(R.string.DevicesPageTitle)
 
     }
 
@@ -94,12 +93,16 @@ class DevicesFragment : BaseFragment(), OnDeviceClickListener {
     }
 
     override fun onDeviceClick(deviceItem: DeviceItem) {
-        viewModel.processAction(DevicesViewModel.DevicesAction.DeviceClick(deviceItem))
+        viewModel.processAction(
+            ManageConnectionsViewModel.ManageConnectionsAction.DeviceClick(
+                deviceItem
+            )
+        )
     }
 
     private fun setupRecyclerView() {
         deviceAdapter = DevicesAdapter(this)
-        binding.fragmentDevicesLinearLayout.apply {
+        binding.fragmentManageConnectionsLinearLayout.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = deviceAdapter
         }
@@ -119,72 +122,66 @@ class DevicesFragment : BaseFragment(), OnDeviceClickListener {
 
     private fun setupBindings() {
         with(binding) {
-            fragmentDevicesScanningButton.setOnClickListener {
-                viewModel.processAction(DevicesViewModel.DevicesAction.ToggleScan)
+            fragmentManageConnectionsScanningButton.setOnClickListener {
+                viewModel.processAction(ManageConnectionsViewModel.ManageConnectionsAction.ToggleScan)
             }
         }
     }
 
-    private fun processUiState(state: DevicesViewModel.DevicesState) {
+    private fun processUiState(state: ManageConnectionsViewModel.ManageConnectionsState) {
         with(binding) {
             if (state.error != null) {
                 connectingDialog?.hide()
             }
             if (state.hasBluetoothPermissions == false) {
                 //check if also need location permissions for lower android version
-                fragmentDevicesErrorButton.isVisible = true
-                fragmentDevicesScanningButton.isVisible = false
-                fragmentDevicesErrorButton.text = "Add Bluetooth permissions"
-                fragmentDevicesErrorButton.setOnClickListener {
-                    viewModel.processAction(DevicesViewModel.DevicesAction.BluetoothPermissions)
+                fragmentManageConnectionsErrorButton.isVisible = true
+                fragmentManageConnectionsScanningButton.isVisible = false
+                fragmentManageConnectionsErrorButton.text = "Add Bluetooth permissions"
+                fragmentManageConnectionsErrorButton.setOnClickListener {
+                    viewModel.processAction(ManageConnectionsViewModel.ManageConnectionsAction.BluetoothPermissions)
                 }
             } else if (state.isBluetoothEnabled == false) {
-                fragmentDevicesErrorButton.isVisible = true
-                fragmentDevicesScanningButton.isVisible = false
-                fragmentDevicesErrorButton.text = "Enable Bluetooth"
-                fragmentDevicesErrorButton.setOnClickListener {
-                    viewModel.processAction(DevicesViewModel.DevicesAction.EnableBluetooth)
+                fragmentManageConnectionsErrorButton.isVisible = true
+                fragmentManageConnectionsScanningButton.isVisible = false
+                fragmentManageConnectionsErrorButton.text = "Enable Bluetooth"
+                fragmentManageConnectionsErrorButton.setOnClickListener {
+                    viewModel.processAction(ManageConnectionsViewModel.ManageConnectionsAction.EnableBluetooth)
                 }
             } else if (state.isLocationEnabled == false) {
-                fragmentDevicesErrorButton.isVisible = true
-                fragmentDevicesScanningButton.isVisible = false
-                fragmentDevicesErrorButton.text = "Enable Location"
-                fragmentDevicesErrorButton.setOnClickListener {
-                    viewModel.processAction(DevicesViewModel.DevicesAction.EnableLocation)
+                fragmentManageConnectionsErrorButton.isVisible = true
+                fragmentManageConnectionsScanningButton.isVisible = false
+                fragmentManageConnectionsErrorButton.text = "Enable Location"
+                fragmentManageConnectionsErrorButton.setOnClickListener {
+                    viewModel.processAction(ManageConnectionsViewModel.ManageConnectionsAction.EnableLocation)
                 }
             } else {
-                fragmentDevicesErrorButton.isVisible = false
-                fragmentDevicesScanningButton.isVisible = true
+                fragmentManageConnectionsErrorButton.isVisible = false
+                fragmentManageConnectionsScanningButton.isVisible = true
             }
 
-            deviceAdapter.submitList(state.devices)
-
-            state.isScanning.let { isScanning ->
-                val buttonText = if (isScanning) {
-                    getString(R.string.DeviceStopScan)
-                } else {
-                    getString(R.string.DeviceStartScan)
-                }
-                fragmentDevicesScanningButton.text = buttonText
-                fragmentDevicesProgressBar.visibility =
-                    if (isScanning) View.VISIBLE else View.INVISIBLE
-            }
+            deviceAdapter.submitList(state.manageConnections)
         }
     }
 
-    private fun processEffect(effect: DevicesEffect) {
+    private fun processEffect(effect: ManageConnectionsEffect) {
         when (effect) {
-            DevicesEffect.NavigateBack -> findNavController().popBackStack()
-            DevicesEffect.NavigateToBluetoothPermissions -> permissionManager.requestPermissions()
-            DevicesEffect.NavigateToBluetoothSettings -> enableBluetooth()
-            DevicesEffect.NavigateToLocationPermissions -> permissionManager.requestPermissions()
-            DevicesEffect.NavigateToLocationSettings -> intentManager.openLocationSettings()
-            DevicesEffect.ConnectToDevice -> {
+            ManageConnectionsEffect.NavigateBack -> findNavController().popBackStack()
+            ManageConnectionsEffect.NavigateToBluetoothPermissions -> permissionManager.requestPermissions()
+            ManageConnectionsEffect.NavigateToBluetoothSettings -> enableBluetooth()
+            ManageConnectionsEffect.NavigateToLocationPermissions -> permissionManager.requestPermissions()
+            ManageConnectionsEffect.NavigateToLocationSettings -> intentManager.openLocationSettings()
+            ManageConnectionsEffect.NavigateToScanning -> {
                 connectingDialog?.hide()
-                findNavController().navigate(R.id.action_devicesFragment_to_dashboardFragment)
+                findNavController().navigate(R.id.action_manageConnectionsFragment_to_devicesFragment)
             }
 
-            is DevicesEffect.ConnectingToDevice -> showConnectingDialog(effect.deviceName)
+            ManageConnectionsEffect.ConnectToDevice -> {
+                connectingDialog?.hide()
+                findNavController().navigate(R.id.action_manageConnectionsFragment_to_dashboardFragment)
+            }
+
+            is ManageConnectionsEffect.ConnectingToDevice -> showConnectingDialog(effect.deviceName)
         }
     }
 
@@ -202,7 +199,7 @@ class DevicesFragment : BaseFragment(), OnDeviceClickListener {
             permissionManager.requestPermissions()
         } else {
             viewModel.processAction(
-                DevicesViewModel.DevicesAction.PermissionsChanged(
+                ManageConnectionsViewModel.ManageConnectionsAction.PermissionsChanged(
                     hasBluetoothPermissions = permissionManager.hasBluetoothPermission(),
                     isBluetoothEnabled = permissionManager.isBluetoothEnabled(),
                     isLocationEnabled = permissionManager.isLocationEnabled()
@@ -217,7 +214,7 @@ class DevicesFragment : BaseFragment(), OnDeviceClickListener {
             .setMessage(message)
             .setPositiveButton(getString(R.string.Cancel)) { _, _ ->
                 connectingDialog?.dismiss()
-                viewModel.processAction(DevicesViewModel.DevicesAction.CancelConnect)
+                viewModel.processAction(ManageConnectionsViewModel.ManageConnectionsAction.CancelConnect)
             }
             .setCancelable(false)
             .create()
