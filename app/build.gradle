@@ -133,6 +133,7 @@ dependencies {
     implementation libs.kotlin.serialization
     implementation libs.retrofit.kotilinx.serialization
     implementation libs.okhttp.logging.interceptor
+    implementation libs.tooltip
 
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit

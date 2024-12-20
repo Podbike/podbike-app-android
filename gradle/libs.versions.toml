@@ -30,6 +30,7 @@ ymodem = "2.0.3"
 serializationPlugin = "2.1.0"
 serializationLibrary = "1.7.3"
 retrofitKotlinxSerialization = "2.11.0"
+tooltip = "1.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -62,6 +63,7 @@ ymodem = { group = "com.github.ArdWang", name = "YModemLib", version.ref = "ymod
 kotlin-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serializationLibrary" }
 retrofit-kotilinx-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofitKotlinxSerialization" }
 okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttpLogging" }
+tooltip = { group = "com.github.douglasjunior", name = "android-simple-tooltip", version.ref = "tooltip" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

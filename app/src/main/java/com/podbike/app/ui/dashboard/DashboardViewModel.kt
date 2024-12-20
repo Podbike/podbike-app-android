@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.kfc_polska.ui.base.UiAction
 import com.kfc_polska.ui.base.UiEffect
 import com.kfc_polska.ui.base.UiState
-import com.podbike.app.BuildConfig
 import com.podbike.app.data.DistanceUnit
 import com.podbike.app.data.DistanceUnit.*
 import com.podbike.app.data.SpeedUnit
@@ -56,6 +55,7 @@ class DashboardViewModel @Inject constructor(
 
     @SuppressLint("MissingPermission")
     private fun dashboard() {
+        setupDefaultUnits()
         dashboardJob = viewModelScope.launch {
             val device = bluetoothManager.selectedDevice
             launch { device?.data?.battery?.collectWithErrorHandling { updateDeviceDataState(battery = it) } }
@@ -128,6 +128,16 @@ class DashboardViewModel @Inject constructor(
         }
     }
 
+    private fun setupDefaultUnits() {
+        updateState {
+            copy(
+                distanceAbbreviation = unitConverter.getDistanceUnitAbbreviation(distanceUnit),
+                rangeAbbreviation = unitConverter.getDistanceUnitAbbreviation(rangeUnit),
+                speedAbbreviation = unitConverter.getSpeedUnitAbbreviation(speedUnit)
+            )
+        }
+    }
+
     private fun updateTripStartOffset(device: PodbikeDevice, isConnected: Boolean) {
         if (isConnected) {
             device.data.cancelCleanTripDataTimer()
@@ -160,6 +170,13 @@ class DashboardViewModel @Inject constructor(
         isMoving: Boolean? = null
     ) {
         val cadence = cadence ?: uiState.value.deviceData?.cadence ?: 0
+        val isMoving = isMoving ?: uiState.value.deviceData?.isMoving ?: false
+        val shouldForceDisableInteractiveTutorial = isMoving
+        val isInteractiveTutorialEnabled = if (shouldForceDisableInteractiveTutorial) {
+            false
+        } else {
+            uiState.value.isInteractiveTutorialEnabled
+        }
         updateState {
             copy(
                 deviceData = DeviceDataUiModel(
@@ -172,13 +189,15 @@ class DashboardViewModel @Inject constructor(
                     lightStatus = lightStatus ?: this.deviceData?.lightStatus
                     ?: PodbikeLightStatus(),
                     time = 0,
-                    distanceAbbreviation = unitConverter.getDistanceUnitAbbreviation(distanceUnit),
-                    rangeAbbreviation = unitConverter.getDistanceUnitAbbreviation(rangeUnit),
                     range = range ?: this.deviceData?.range ?: "0",
                     temperature = temperature ?: this.deviceData?.temperature ?: 0f,
-                    isMoving = isMoving ?: this.deviceData?.isMoving ?: false,
-                    name = bluetoothManager.selectedDevice?.device?.name
-                )
+                    isMoving = isMoving,
+                    name = bluetoothManager.selectedDevice?.device?.name,
+                ),
+                distanceAbbreviation = unitConverter.getDistanceUnitAbbreviation(distanceUnit),
+                rangeAbbreviation = unitConverter.getDistanceUnitAbbreviation(rangeUnit),
+                speedAbbreviation = unitConverter.getSpeedUnitAbbreviation(speedUnit),
+                isInteractiveTutorialEnabled = isInteractiveTutorialEnabled
             )
         }
     }
@@ -211,6 +230,10 @@ class DashboardViewModel @Inject constructor(
                 sendEffect(DashboardEffect.NavigateToLocationSettings)
             }
 
+            is DashboardAction.EnableInteractiveTutorial -> {
+                updateState { copy(isInteractiveTutorialEnabled = true) }
+            }
+
             is DashboardAction.PermissionsChanged -> {
                 val hasAllPermissions =
                     action.hasBluetoothPermissions && action.isBluetoothEnabled && action.isLocationEnabled
@@ -241,6 +264,10 @@ class DashboardViewModel @Inject constructor(
                 sendEffect(DashboardEffect.NavigateToHelp)
             }
 
+            is DashboardAction.ReturnToDashboardClicked -> {
+                updateState { copy(isInteractiveTutorialEnabled = false) }
+            }
+
             is DashboardAction.Retry -> {
                 updateState { copy(isLoading = true, error = null) }
             }
@@ -255,8 +282,12 @@ class DashboardViewModel @Inject constructor(
         val hasBluetoothPermissions: Boolean = false,
         val isBluetoothEnabled: Boolean = false,
         val isLocationEnabled: Boolean = false,
+        val isInteractiveTutorialEnabled: Boolean = false,
         val isLoading: Boolean = true,
         val deviceData: DeviceDataUiModel? = null,
+        val distanceAbbreviation: String = "",
+        val rangeAbbreviation: String = "",
+        val speedAbbreviation: String = "",
         val error: ErrorTypeSealed? = null
     ) : UiState
 
@@ -266,6 +297,7 @@ class DashboardViewModel @Inject constructor(
         data object LocationPermissions : DashboardAction()
         data object EnableBluetooth : DashboardAction()
         data object EnableLocation : DashboardAction()
+        data object EnableInteractiveTutorial : DashboardAction()
         data class PermissionsChanged(
             val hasBluetoothPermissions: Boolean = false,
             val isBluetoothEnabled: Boolean = false,
@@ -275,6 +307,7 @@ class DashboardViewModel @Inject constructor(
         data object StatisticsClicked : DashboardAction()
         data object SettingsClicked : DashboardAction()
         data object HelpClicked : DashboardAction()
+        data object ReturnToDashboardClicked : DashboardAction()
         data object Retry : DashboardAction()
         data object GoBack : DashboardAction()
     }

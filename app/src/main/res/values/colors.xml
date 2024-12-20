@@ -5,6 +5,7 @@
     <color name="red">#FFFF0000</color>
     <color name="hazard_lights_red">#FF292E</color>
     <color name="gray">#65686d</color>
+    <color name="tooltip_gray">#ebebeb</color>
     <color name="color_primary">#44d62c</color>
     <color name="color_primary_dark">#303F9F</color>
     <color name="color_accent">#44d62c</color>
