@@ -7,6 +7,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.podbike.app.R
+import com.podbike.app.ui.base.margin
 
 class TooltipView @JvmOverloads constructor(
     context: Context,
@@ -17,12 +18,14 @@ class TooltipView @JvmOverloads constructor(
     private val titleTextView: TextView
     private val messageTextView: TextView
     private val okButton: Button
+    private val tooltipLayout: LinearLayout
 
     init {
         LayoutInflater.from(context).inflate(R.layout.view_tooltip, this, true)
         titleTextView = findViewById(R.id.tooltipTitle)
         messageTextView = findViewById(R.id.tooltipMessage)
         okButton = findViewById(R.id.tooltipButton)
+        tooltipLayout = findViewById(R.id.tooltipLayout)
     }
 
     fun setTitle(title: String) {
@@ -40,5 +43,6 @@ class TooltipView @JvmOverloads constructor(
     fun showOkButton(show: Boolean, onClickListener: OnClickListener? = null) {
         okButton.visibility = if (show) VISIBLE else GONE
         okButton.setOnClickListener(onClickListener)
+        tooltipLayout.margin(left = if (show) 32f else 0f, right = if (show) 32f else 0f)
     }
 }

@@ -6,9 +6,11 @@ import android.bluetooth.BluetoothAdapter
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
@@ -25,8 +27,10 @@ import com.podbike.app.ui.base.BaseFragment
 import com.podbike.app.ui.base.adjustEdgeToEdgeMargins
 import com.podbike.app.ui.dashboard.DashboardViewModel.DashboardAction
 import com.podbike.app.ui.dashboard.DashboardViewModel.DashboardEffect
+import com.podbike.app.ui.dashboard.view.TooltipView
 import com.podbike.app.utils.PermissionManager
 import dagger.hilt.android.AndroidEntryPoint
+import io.github.douglasjunior.androidSimpleTooltip.SimpleTooltip
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
@@ -127,11 +131,11 @@ class DashboardFragment : BaseFragment() {
                 hideConnectingDialog()
             }
 
-            getTooltips().forEach { tooltip ->
+            getTooltips(state.speedAbbreviation).forEach { tooltip ->
                 val view = binding.root.findViewById<View>(tooltip.widgetId)
                 if (state.isInteractiveTutorialEnabled) {
                     view.setOnClickListener {
-                        setupTooltip(tooltip.title, tooltip.message)
+                        setupTooltip(tooltip.title, tooltip.message, view, tooltip.gravity)
                     }
                 } else {
                     view.setOnClickListener(null)
@@ -146,14 +150,15 @@ class DashboardFragment : BaseFragment() {
                 return@with
             }
 
+            fragmentDashboardDistanceUnit.text = state.distanceAbbreviation
+
             state.deviceData?.let {
                 fragmentDashboardSpeed.text = it.speed
                 fragmentDashboardBatteryIndicator.setProgress(
                     it.battery,
-                    "${it.range} ${state.deviceData.rangeAbbreviation}"
+                    "${it.range} ${state.rangeAbbreviation}"
                 )
                 fragmentDashboardDistance.text = it.distance.toString()
-                fragmentDashboardDistanceUnit.text = it.distanceAbbreviation
                 fragmentDashboardAssistance.currentAssistance = it.assist
                 fragmentDashboardCadence.currentCadence = it.cadence
 
@@ -205,65 +210,87 @@ class DashboardFragment : BaseFragment() {
         }
     }
 
-    private fun getTooltips(): List<TooltipInfo> = listOf(
+    private fun getTooltips(speedAbbreviation: String): List<TooltipInfo> = listOf(
         TooltipInfo(
             R.id.fragment_dashboard_speed,
             "Speed",
-            "This is your current speed. It is displayed in km/h."
+            "This is your current speed. It is displayed in $speedAbbreviation"
         ),
         TooltipInfo(
             R.id.fragment_dashboard_battery_indicator,
             "Battery",
-            "This is your current battery level with remaining range."
+            "This is your current battery level with remaining range",
+            Gravity.TOP
         ),
         TooltipInfo(
             R.id.fragment_dashboard_distance,
             "Distance",
-            "This is the distance you have traveled."
+            "This is the distance you have traveled",
+            Gravity.TOP
         ),
         TooltipInfo(
             R.id.fragment_dashboard_assistance,
             "Assistance",
-            "This is the level of assistance you are currently receiving."
+            "This is the level of assistance you are currently receiving",
+            Gravity.TOP
         ),
         TooltipInfo(
             R.id.fragment_dashboard_cadence,
             "Cadence",
-            "This is the number of revolutions per minute."
+            "This is the number of revolutions per minute",
+            Gravity.TOP
         ),
         TooltipInfo(
             R.id.fragment_dashboard_icon_1,
-            "Freezing",
-            "This icon will turn white when the temperature is below 2°C."
+            "Temperature",
+            "Lights up when temperature is below 4*C"
         ),
         TooltipInfo(
             R.id.fragment_dashboard_icon_2,
-            "Traction",
-            "This icon will turn white when the road is slippery."
+            "Traction Control System",
+            "It activates when sensors detect that one or more wheels are losing grip, such as on slippery or uneven surfaces"
         ),
-        TooltipInfo(R.id.fragment_dashboard_icon_3, "Lights", "TODO"),
+        TooltipInfo(
+            R.id.fragment_dashboard_icon_3,
+            "Headlights",
+            "This symbol indicates that there is an issue with headlights"
+        ),
         TooltipInfo(
             R.id.fragment_dashboard_icon_4,
-            "Tire alert",
-            "This icon will turn white when the tire pressure is low."
+            "Tire pressure",
+            "It means that one or more tires have low pressure"
         ),
         TooltipInfo(
             R.id.fragment_dashboard_icon_5,
-            "Car brake",
-            "This icon will turn white when the car brake is on."
+            "Handbreak",
+            "The symbol indicates that the parking break is engaged"
         )
     )
 
-    private fun setupTooltip(title: String, message: String, showOkButton: Boolean = false) {
+    private fun setupTooltip(
+        title: String,
+        message: String,
+        view: View,
+        gravity: Int = Gravity.BOTTOM
+    ) {
         val oldTitle = binding.fragmentDashboardTooltip.getTitle()
-        binding.fragmentDashboardTooltip.setTitle(title)
-        binding.fragmentDashboardTooltip.setMessage(message)
-        binding.fragmentDashboardTooltip.showOkButton(showOkButton)
-        if (title == oldTitle) {
-            binding.fragmentDashboardTooltip.isVisible = !binding.fragmentDashboardTooltip.isVisible
-        } else {
-            binding.fragmentDashboardTooltip.visibility = View.VISIBLE
-        }
+
+        val tooltipView = TooltipView(requireContext())
+        tooltipView.setTitle(title)
+        tooltipView.setMessage(message)
+
+        SimpleTooltip.Builder(requireContext())
+            .anchorView(view)
+            .text(message)
+            .contentView(tooltipView, R.id.tooltipMessage)
+            .textColor(requireContext().getColor(R.color.black))
+            .arrowColor(requireContext().getColor(R.color.tooltip_gray))
+            .backgroundColor(requireContext().getColor(R.color.tooltip_gray))
+            .gravity(gravity)
+            .animated(true)
+            .transparentOverlay(false)
+            .build()
+            .show();
     }
 
     private fun processEffect(effect: DashboardEffect) {
@@ -275,7 +302,6 @@ class DashboardFragment : BaseFragment() {
             DashboardEffect.NavigateToLocationSettings -> intentManager.openLocationSettings()
             DashboardEffect.NavigateToAppSettings -> findNavController().navigate(R.id.action_dashboardFragment_to_settingsFragment)
             DashboardEffect.NavigateToHelp -> {
-
                 binding.fragmentDashboardTooltip.setTitle("Help Section")
                 binding.fragmentDashboardTooltip.setMessage("Here you'll discover how each component works. Simply click on any component to learn more.\n\n\nTap the Podbike logo to see Statistics\n\nHeads up: These icons will soon switch to warning icons, giving you insights into their functionality")
                 binding.fragmentDashboardTooltip.showOkButton(true, View.OnClickListener {
@@ -283,6 +309,7 @@ class DashboardFragment : BaseFragment() {
                     viewModel.processAction(DashboardAction.EnableInteractiveTutorial)
                 })
                 binding.fragmentDashboardTooltip.visibility = View.VISIBLE
+                startBounceAnimation()
             }
 
             DashboardEffect.NavigateToStatistics -> findNavController().navigate(R.id.action_dashboardFragment_to_statisticsFragment)
@@ -336,6 +363,11 @@ class DashboardFragment : BaseFragment() {
     private fun hideConnectingDialog() {
         connectingDialog?.dismiss()
         connectingDialog = null
+    }
+
+    private fun startBounceAnimation() {
+        val bounceAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.bounce)
+        binding.fragmentDashboardLogo.startAnimation(bounceAnimation)
     }
 
 }
