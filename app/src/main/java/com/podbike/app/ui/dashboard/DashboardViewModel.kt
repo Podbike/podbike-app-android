@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.kfc_polska.ui.base.UiAction
 import com.kfc_polska.ui.base.UiEffect
 import com.kfc_polska.ui.base.UiState
+import com.podbike.app.BuildConfig
 import com.podbike.app.data.DistanceUnit
 import com.podbike.app.data.DistanceUnit.*
 import com.podbike.app.data.SpeedUnit

@@ -12,6 +12,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.flow.timeout
 import kotlinx.serialization.json.Json
@@ -40,12 +41,25 @@ const val PODBIKE_ATD_BYTE = 0x57
 const val DEFAULT_CHUNK_SIZE = 128
 val TIMEOUT_DURATION = 20.seconds
 
+enum class GetDeviceMetadataInfo(val message: String) {
+    REGISTERING_LISTENER("Registering listener for device metadata"),
+    SENDING_RQS_PKT("Sending RQS_PKT to request data"),
+    RECEIVED_DATA("Received data: "),
+    SENDING_ACK("Sending ACK for package "),
+    DELAY_BEFORE_RQS_PKT("300ms delay before sending RQS_PKT"),
+    SENDING_RQS_PKT_AGAIN("Sending RQS_PKT to request data"),
+    SENDING_ACK_FOR_EOT("Sending ACK for EOT"),
+    PARSED_METADATA("Parsed metadata: ")
+}
 
 class YModem {
     companion object YModemHelper {
 
+        private var logMessages = mutableListOf<String>()
+
+        @OptIn(FlowPreview::class)
         @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-        suspend fun getDeviceMetadata(device: PodbikeDevice): PodbikeDeviceMetadata {
+        suspend fun getDeviceMetadata(device: PodbikeDevice): PodbikeDeviceMetadata? {
 
             val dataFlow =
                 device.getCharacteristicNotifications(HaarekBoardSpec.FTP_DATA_CHARACTERISTIC_UUID)
@@ -53,20 +67,31 @@ class YModem {
             val ackArray = byteArrayOf(PODBIKE_DTA_BYTE.toByte(), ACK.toByte())
             val rqsPktArray = byteArrayOf(PODBIKE_DTA_BYTE.toByte(), RQS_PKT.toByte())
 
-            device.writeCharacteristic(
-                HaarekBoardSpec.FTP_DATA_CHARACTERISTIC_UUID,
-                value = DataByteArray(value = rqsPktArray)
-            )
-
             val collectedData = mutableListOf<ByteArray>()
             var fileName = ""
             var packageIndex = 0
 
+            if (dataFlow == null) {
+                e("Fatal error: Device metadata data flow is null")
+                return null
+            }
+
             dataFlow
-                ?.takeWhile { data -> data.value[0] != EOT.toByte() }
-                ?.timeout(TIMEOUT_DURATION)
-                ?.collect { data ->
-                    println("Received data: ${data.value.toDisplayString()}")
+                .onStart {
+                    logStatus(GetDeviceMetadataInfo.REGISTERING_LISTENER)
+                    logStatus(GetDeviceMetadataInfo.SENDING_RQS_PKT)
+                    device.writeCharacteristic(
+                        HaarekBoardSpec.FTP_DATA_CHARACTERISTIC_UUID,
+                        value = DataByteArray(value = rqsPktArray)
+                    )
+                }
+                .takeWhile { data -> data.value[0] != EOT.toByte() }
+                .timeout(TIMEOUT_DURATION)
+                .collect { data ->
+                    logStatus(
+                        GetDeviceMetadataInfo.RECEIVED_DATA,
+                        data.value.toDisplayString()
+                    )
                     val cleanedData = data.value.copyOfRange(
                         3,
                         data.size - CRC_BYTES_COUNT
@@ -78,13 +103,16 @@ class YModem {
                         collectedData.add(cleanedData)
                     }
 
+                    logStatus(GetDeviceMetadataInfo.SENDING_ACK, packageIndex.toString())
                     device.writeCharacteristic(
                         HaarekBoardSpec.FTP_DATA_CHARACTERISTIC_UUID,
                         value = DataByteArray(value = ackArray)
                     )
 
                     if (packageIndex == 0) {
-                        delay(300) //the device needs to receive ACK and RQS_PKT separately
+                        logStatus(GetDeviceMetadataInfo.DELAY_BEFORE_RQS_PKT)
+                        delay(300) // the device needs to receive ACK and RQS_PKT separately
+                        logStatus(GetDeviceMetadataInfo.SENDING_RQS_PKT_AGAIN)
                         device.writeCharacteristic(
                             HaarekBoardSpec.FTP_DATA_CHARACTERISTIC_UUID,
                             value = DataByteArray(value = rqsPktArray)
@@ -94,7 +122,7 @@ class YModem {
                     packageIndex++
                 }
 
-            // ACK for EOT
+            logStatus(GetDeviceMetadataInfo.SENDING_ACK_FOR_EOT)
             device.writeCharacteristic(
                 HaarekBoardSpec.FTP_DATA_CHARACTERISTIC_UUID,
                 value = DataByteArray(value = ackArray)
@@ -102,6 +130,7 @@ class YModem {
 
             val data = collectedData.joinToString(separator = "") { it.toString(Charsets.UTF_8) }
             val metadata = Json.decodeFromString<PodbikeDeviceMetadata>(data)
+            logStatus(GetDeviceMetadataInfo.PARSED_METADATA, metadata.toString())
             return metadata.copy(fileName = fileName)
         }
 
@@ -264,5 +293,16 @@ class YModem {
             return chunks
         }
 
+        private fun logStatus(info: GetDeviceMetadataInfo, additionalInfo: String = "") {
+            val message = info.message + additionalInfo
+            logMessages.add(message)
+            i(message)
+        }
+
+        fun getAndClearLogMessages(): List<String> {
+            val messages = logMessages.toList()
+            logMessages.clear()
+            return messages
+        }
     }
 }

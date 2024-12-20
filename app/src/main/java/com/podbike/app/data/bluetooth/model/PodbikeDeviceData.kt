@@ -122,7 +122,10 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
             } catch (e: Exception) {
                 Timber.e("Failed to get device metadata: ${deviceInfo.address}, error: ${e.message}, retry: $retry")
                 ++retry
-                if (retry < maxAttempts) delay(500)
+                if (retry < maxAttempts) delay(500) else {
+                    val logMessages = YModem.getAndClearLogMessages()
+                    Timber.e("Fatal error for device metadata: ${deviceInfo.address}, logMessages: $logMessages")
+                }
             }
         } while (retry < maxAttempts)
         return null
