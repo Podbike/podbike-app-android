@@ -3,6 +3,7 @@ package com.podbike.app.data.bluetooth.utils
 import android.Manifest
 import androidx.annotation.RequiresPermission
 import com.podbike.app.data.api.model.FirmwareFile
+import com.podbike.app.data.bluetooth.manager.ConnectionManager
 import com.podbike.app.data.bluetooth.model.FirmwareFileTransferState
 import com.podbike.app.data.bluetooth.model.FirmwareFileTransferStatus
 import com.podbike.app.data.bluetooth.model.PodbikeDevice
@@ -11,8 +12,10 @@ import com.podbike.app.data.bluetooth.values.HaarekBoardSpec
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.onSubscription
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.flow.timeout
 import kotlinx.serialization.json.Json
@@ -77,7 +80,11 @@ class YModem {
             }
 
             dataFlow
-                .onStart {
+                .shareIn(
+                    scope = ConnectionManager.connectionScope,
+                    started = SharingStarted.Lazily,
+                )
+                .onSubscription {
                     logStatus(GetDeviceMetadataInfo.REGISTERING_LISTENER)
                     logStatus(GetDeviceMetadataInfo.SENDING_RQS_PKT)
                     device.writeCharacteristic(
