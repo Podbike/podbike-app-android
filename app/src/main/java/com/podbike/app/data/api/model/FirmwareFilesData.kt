@@ -37,6 +37,8 @@ data class FirmwareModuleData(
     val fileIndexId: Int,
     @SerialName("board_name")
     val boardName: String,
+    @SerialName("serial_number")
+    val serialNumber: String? = null,
     @SerialName("firmware_version")
     val firmwareVersion: String,
     @SerialName("file_name")

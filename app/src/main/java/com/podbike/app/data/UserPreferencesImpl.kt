@@ -7,6 +7,7 @@ import android.icu.util.ULocale
 import android.os.Build
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.podbike.app.data.bluetooth.model.PodbikeTransferConfig
 import com.podbike.app.ui.scanning.DeviceInfo
 import timber.log.Timber
 
@@ -95,6 +96,17 @@ class UserPreferencesImpl(context: Context) : UserPreferences {
         sharedPreferences.edit().putString(KEY_CONNECTED_DEVICES, json).apply()
     }
 
+    fun setUpdateStartedFlag(updateStarted: Boolean, config: PodbikeTransferConfig? = null) {
+        val devices = getRecentDevices().toMutableList()
+        if (devices.isNotEmpty()) {
+            val currentDevice = devices.first().copy(
+                updateStarted = updateStarted,
+                updateConfigHash = config?.hashCode()
+            )
+            devices[0] = currentDevice
+            saveRecentDevices(devices)
+        }
+    }
     private fun getDefaultSpeedUnit(): SpeedUnit {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             when (LocaleData.getMeasurementSystem(ULocale.getDefault())) {

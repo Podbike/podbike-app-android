@@ -1,13 +1,19 @@
 package com.podbike.app.ui.firmware_update
 
 import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
 import com.kfc_polska.ui.base.UiAction
 import com.kfc_polska.ui.base.UiEffect
 import com.kfc_polska.ui.base.UiState
-import com.podbike.app.data.api.model.FirmwareModuleData
+import com.podbike.app.data.api.model.FirmwareFilesData
+import com.podbike.app.data.api.model.OtaFile
+import com.podbike.app.data.api.model.OtaFileType
 import com.podbike.app.data.bluetooth.manager.BluetoothManager
+import com.podbike.app.data.bluetooth.model.AudioFile
 import com.podbike.app.data.bluetooth.model.FirmwareFileTransferState
 import com.podbike.app.data.bluetooth.model.FirmwareFileTransferStatus
+import com.podbike.app.data.bluetooth.model.PodbikeTransferConfig
+import com.podbike.app.data.bluetooth.model.SupportedBoard
 import com.podbike.app.data.repository.FirmwareRepository
 import com.podbike.app.ui.base.StateViewModel
 import com.podbike.app.ui.firmware_update.FirmwareUpdateViewModel.ErrorTypeSealed.CheckForUpdatesError
@@ -95,12 +101,28 @@ class FirmwareUpdateViewModel @Inject constructor(
             when (firmwareFilesData) {
                 is Result.Error -> setErrorState(LoadFirmwareFilesError(firmwareFilesData.error))
                 is Result.Success -> {
-                    //@TODO: UNCOMMENT
-                    val totalFileCount =
-                        firmwareFilesData.data?.firmwareModuleByUpdateId.orEmpty().size
-                    firmwareFilesData.data?.firmwareModuleByUpdateId.orEmpty()
-                        .forEachIndexed { index, firmwareModule ->
-                            i("firmwareModule: $firmwareModule")
+                    if (firmwareFilesData.data == null) {
+                        setErrorState(LoadFirmwareFilesError(Throwable("No firmware files data")))
+                        return@launch
+                    }
+
+                    val updateFiles = mutableListOf<OtaFile>()
+                    updateFiles.add(createFrikarTransferConfigFile(firmwareFilesData.data))
+                    firmwareFilesData.data.firmwareModuleByUpdateId.forEach { moduleData ->
+                        updateFiles.add(
+                            OtaFile(
+                                type = OtaFileType.FIRMWARE,
+                                name = moduleData.fileName,
+                                bytes = null
+                            )
+                        )
+                    }
+
+                    val totalFileCount = updateFiles.size
+
+                    updateFiles
+                        .forEachIndexed { index, otaFile ->
+                            i("otaFile: $otaFile")
                             updateState {
                                 copy(
                                     uploadingFileCount = index + 1,
@@ -108,7 +130,7 @@ class FirmwareUpdateViewModel @Inject constructor(
                                     isSendingFiles = true
                                 )
                             }
-                            transferFirmwareFile(firmwareModule)
+                            transferOtaFile(otaFile)
                             if (uiState.value.error != null) {
                                 setErrorState(LoadFirmwareFilesError(Throwable("Error transferring files")))
                                 return@launch
@@ -121,21 +143,11 @@ class FirmwareUpdateViewModel @Inject constructor(
         }
     }
 
-    private suspend fun transferFirmwareFile(firmwareModule: FirmwareModuleData?) {
-        val firmwareFileName = firmwareModule?.fileName
-        if (firmwareFileName == null) {
-            setErrorState(LoadFirmwareFilesError(Throwable("No firmware file name")))
-            return
-        }
-        when (val firmwareUpdateFile = firmwareRepository.getFirmwareFile(firmwareFileName)) {
-            is Result.Error -> setErrorState(
-                LoadFirmwareFilesError(
-                    firmwareUpdateFile.error
-                )
-            )
-
-            is Result.Success -> {
-                bluetoothManager.transferFileToDevice(firmwareUpdateFile.data!!)
+    private suspend fun transferOtaFile(otaFile: OtaFile) {
+        val firmwareFileName = otaFile.name
+        when (otaFile.type) {
+            OtaFileType.FRIKAR_TRANSFER_CONFIG -> {
+                bluetoothManager.transferFileToDevice(otaFile)
                     ?.collect {
                         updateState {
                             copy(
@@ -147,6 +159,33 @@ class FirmwareUpdateViewModel @Inject constructor(
                             )
                         }
                     }
+            }
+
+            OtaFileType.FIRMWARE, OtaFileType.AUDIO -> {
+                when (val firmwareUpdateFile =
+                    firmwareRepository.getFirmwareFile(firmwareFileName)) {
+                    is Result.Error -> setErrorState(
+                        LoadFirmwareFilesError(
+                            firmwareUpdateFile.error
+                        )
+                    )
+
+                    is Result.Success -> {
+                        bluetoothManager.transferFileToDevice(firmwareUpdateFile.data!!)
+                            ?.collect {
+                                updateState {
+                                    copy(
+                                        firmwareFileTransferStatus = it,
+                                        isLoading = false,
+                                        error = if (it.status == FirmwareFileTransferState.FAILED) {
+                                            LoadFirmwareFilesError(Throwable("File transfer failed"))
+                                        } else null
+                                    )
+                                }
+                            }
+                    }
+                }
+
             }
         }
     }
@@ -269,6 +308,42 @@ class FirmwareUpdateViewModel @Inject constructor(
                 sendEffect(FirmwareUpdateEffect.NavigateBack)
             }
         }
+    }
+
+    private fun createFrikarTransferConfigFile(serverFirmwareModules: FirmwareFilesData): OtaFile {
+        val supportedBoards = serverFirmwareModules.firmwareModuleByUpdateId
+            .filter { it.serialNumber != null && it.serialNumber.isNotEmpty() }
+            .map { serverFirmwareModule ->
+                val boardName = serverFirmwareModule.fileName
+                    .split(":").lastOrNull()
+                    ?.split(".")?.firstOrNull() ?: ""
+                SupportedBoard(
+                    boardName = boardName,
+                    boardId = serverFirmwareModule.boardName,
+                    serialNumber = serverFirmwareModule.serialNumber.orEmpty(),
+                    firmwareVersion = serverFirmwareModule.firmwareVersion,
+                    fileName = serverFirmwareModule.fileName
+                )
+            }
+
+        val audioFiles = serverFirmwareModules.firmwareModuleByUpdateId
+            .map { AudioFile(it.fileName) }
+
+        val frikarTransferConfig = PodbikeTransferConfig(
+            productName = "FRIKAR",
+            releaseId = serverFirmwareModules.releaseId,
+            productId = serverFirmwareModules.productId,
+            supportedBoards = supportedBoards,
+            audioFiles = audioFiles
+        )
+
+        val configData = Gson().toJson(frikarTransferConfig).toByteArray()
+
+        return OtaFile(
+            type = OtaFileType.FRIKAR_TRANSFER_CONFIG,
+            name = "frikar_transfer_config.json",
+            bytes = configData
+        )
     }
 
     private fun setFirmwareVersionState(firmwareVersion: FirmwareVersion) {

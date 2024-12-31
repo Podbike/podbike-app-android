@@ -2,8 +2,6 @@ package com.podbike.app.data.bluetooth.model
 
 import android.Manifest
 import androidx.annotation.RequiresPermission
-import com.podbike.app.data.api.model.FirmwareFile
-import com.podbike.app.data.bluetooth.utils.YModem
 import com.podbike.app.data.bluetooth.values.HaarekBoardSpec
 import com.podbike.app.ui.scanning.DeviceInfo
 import kotlinx.coroutines.flow.Flow

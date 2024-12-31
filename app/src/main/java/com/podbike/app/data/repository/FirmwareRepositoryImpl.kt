@@ -1,8 +1,9 @@
 package com.podbike.app.data.repository
 
 import com.podbike.app.data.api.FirmwareApi
-import com.podbike.app.data.api.model.FirmwareFile
 import com.podbike.app.data.api.model.FirmwareFilesData
+import com.podbike.app.data.api.model.OtaFile
+import com.podbike.app.data.api.model.OtaFileType
 import com.podbike.app.utils.DataResult
 import com.podbike.app.utils.runWithErrorHandling
 import kotlinx.serialization.json.Json
@@ -59,11 +60,11 @@ class FirmwareRepositoryImpl : FirmwareRepository {
         }
     }
 
-    override suspend fun getFirmwareFile(fileName: String): DataResult<FirmwareFile?> {
+    override suspend fun getFirmwareFile(fileName: String): DataResult<OtaFile?> {
         return runWithErrorHandling {
             val response = firmwareApi.getFirmwareFile(fileName)
             val bytes = response.byteStream().readBytes()
-            FirmwareFile(fileName, bytes)
+            OtaFile(OtaFileType.FIRMWARE, fileName, bytes)
         }
     }
 }

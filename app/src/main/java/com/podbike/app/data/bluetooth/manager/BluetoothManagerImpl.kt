@@ -3,7 +3,7 @@ package com.podbike.app.data.bluetooth.manager
 import android.Manifest
 import android.content.Context
 import androidx.annotation.RequiresPermission
-import com.podbike.app.data.api.model.FirmwareFile
+import com.podbike.app.data.api.model.OtaFile
 import com.podbike.app.data.bluetooth.model.FirmwareFileTransferStatus
 import com.podbike.app.data.bluetooth.model.PodbikeDevice
 import com.podbike.app.data.bluetooth.utils.YModem
@@ -85,6 +85,6 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    override fun transferFileToDevice(file: FirmwareFile): Flow<FirmwareFileTransferStatus>? =
+    override fun transferFileToDevice(file: OtaFile): Flow<FirmwareFileTransferStatus>? =
         selectedDevice?.let { YModem.sendFileToDevice(file, it) }
 }

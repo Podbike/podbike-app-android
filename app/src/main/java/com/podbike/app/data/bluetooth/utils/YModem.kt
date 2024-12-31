@@ -2,7 +2,7 @@ package com.podbike.app.data.bluetooth.utils
 
 import android.Manifest
 import androidx.annotation.RequiresPermission
-import com.podbike.app.data.api.model.FirmwareFile
+import com.podbike.app.data.api.model.OtaFile
 import com.podbike.app.data.bluetooth.model.FirmwareFileTransferState
 import com.podbike.app.data.bluetooth.model.FirmwareFileTransferStatus
 import com.podbike.app.data.bluetooth.model.PodbikeDevice
@@ -137,7 +137,7 @@ class YModem {
         @OptIn(FlowPreview::class)
         @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
         fun sendFileToDevice(
-            file: FirmwareFile,
+            file: OtaFile,
             device: PodbikeDevice
         ): Flow<FirmwareFileTransferStatus> = flow {
             var operationError = false
@@ -149,7 +149,7 @@ class YModem {
 
                 // split file data for chunks of 128 bytes
                 val dataChunks =
-                    splitByteArrayIntoChunks(file.bytes, 128).mapIndexed { index, data ->
+                    splitByteArrayIntoChunks(file.bytes!!, 128).mapIndexed { index, data ->
                         prepareDataPacket(data, index)
                     }
 
@@ -189,7 +189,7 @@ class YModem {
                             packageIndex++
 
                         } else if (packageIndex == dataChunks.size && data.value[0] == ACK.toByte() && !eotSent) {
-                            i("[FirmwareUpdate] ALl packets sent, sending EOT")
+                            i("[FirmwareUpdate] All packets sent, sending EOT")
                             val eotArray = byteArrayOf(PODBIKE_ATD_BYTE.toByte(), EOT.toByte())
                             writeFirmwareValue(device, eotArray)
                             eotSent = true
@@ -224,7 +224,6 @@ class YModem {
                 operationError = true
             }
         }
-
         @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
         private suspend fun writeFirmwareValue(device: PodbikeDevice, data: ByteArray) {
             device.writeCharacteristic(
@@ -233,10 +232,10 @@ class YModem {
             )
         }
 
-        private fun getHeaderData(file: FirmwareFile): ByteArray {
+        private fun getHeaderData(file: OtaFile): ByteArray {
             val data = ByteArray(128) { 0 }
             val fileNameBytes = file.name.toByteArray(Charsets.UTF_8)
-            val fileSizeBytes = file.bytes.size.toString().toByteArray(Charsets.UTF_8)
+            val fileSizeBytes = file.bytes!!.size.toString().toByteArray(Charsets.UTF_8)
 
             fileNameBytes.copyInto(data, 0, 0, fileNameBytes.size)
             fileSizeBytes.copyInto(data, fileNameBytes.size + 1, 0, fileSizeBytes.size)

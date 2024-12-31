@@ -1,12 +1,11 @@
 package com.podbike.app.data.bluetooth.manager
 
 import android.os.ParcelUuid
-import com.podbike.app.data.api.model.FirmwareFile
+import com.podbike.app.data.api.model.OtaFile
 import com.podbike.app.data.bluetooth.model.FirmwareFileTransferStatus
 import com.podbike.app.data.bluetooth.model.PodbikeDevice
 import com.podbike.app.data.bluetooth.values.HaarekBoardSpec
 import com.podbike.app.ui.scanning.DeviceInfo
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import no.nordicsemi.android.kotlin.ble.core.scanner.BleScanFilter
 import no.nordicsemi.android.kotlin.ble.core.scanner.FilteredServiceUuid
@@ -30,7 +29,7 @@ interface BluetoothManager {
 
     fun disconnectAll()
 
-    fun transferFileToDevice(file: FirmwareFile): Flow<FirmwareFileTransferStatus>?
+    fun transferFileToDevice(file: OtaFile): Flow<FirmwareFileTransferStatus>?
 
     var selectedDevice: PodbikeDevice?
 }
