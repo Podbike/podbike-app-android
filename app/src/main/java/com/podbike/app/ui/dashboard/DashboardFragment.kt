@@ -287,8 +287,9 @@ class DashboardFragment : BaseFragment() {
             .arrowColor(requireContext().getColor(R.color.tooltip_gray))
             .backgroundColor(requireContext().getColor(R.color.tooltip_gray))
             .gravity(gravity)
-            .animated(true)
+            .animated(false)
             .transparentOverlay(false)
+            .ignoreOverlay(true)
             .build()
             .show();
     }
@@ -309,7 +310,7 @@ class DashboardFragment : BaseFragment() {
                     viewModel.processAction(DashboardAction.EnableInteractiveTutorial)
                 })
                 binding.fragmentDashboardTooltip.visibility = View.VISIBLE
-                startBounceAnimation()
+//                startBounceAnimation()
             }
 
             DashboardEffect.NavigateToStatistics -> findNavController().navigate(R.id.action_dashboardFragment_to_statisticsFragment)
