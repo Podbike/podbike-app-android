@@ -29,6 +29,7 @@ import com.podbike.app.utils.PermissionManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import timber.log.Timber.Forest.e
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -192,7 +193,13 @@ class FirmwareUpdateFragment : BaseFragment() {
                 UPGRADE -> {
                     headerTextRes = R.string.UpdateUpgrade
                     bodyText =
-                        getString(R.string.UpdateUpgradeInfo1) + "\n" + getString(R.string.UpdateUpgradeInfo2)
+                        buildString {
+                            append(getString(R.string.UpdateUpgradeInfo1))
+                            append("\n\n")
+                            append(getString(R.string.UpdateUpgradeInfo2))
+                            append("\n\n")
+                            append(getString(R.string.UpdateUpgradeInfo3))
+                        }
                     centerText = null
                     positiveButtonTextRes = null
                     isCancelButtonVisible = false
@@ -330,7 +337,11 @@ class FirmwareUpdateFragment : BaseFragment() {
             .setMessage(getString(R.string.UpdateIssue))
             .setPositiveButton("OK") { dialog, _ ->
                 dialog.dismiss()
-                findNavController().popBackStack(R.id.settingsFragment, false)
+                if (isAdded) {
+                    findNavController().popBackStack(R.id.settingsFragment, false)
+                } else {
+                    e("Fragment is not added")
+                }
             }
             .setCancelable(false)
             .create()
@@ -348,6 +359,10 @@ class FirmwareUpdateFragment : BaseFragment() {
             FirmwareUpdateEffect.NavigateToBluetoothSettings -> enableBluetooth()
             FirmwareUpdateEffect.NavigateToLocationPermissions -> permissionManager.requestPermissions()
             FirmwareUpdateEffect.NavigateToLocationSettings -> intentManager.openLocationSettings()
+            FirmwareUpdateEffect.NavigateToDashboard -> findNavController().popBackStack(
+                R.id.dashboardFragment,
+                false
+            )
         }
     }
 

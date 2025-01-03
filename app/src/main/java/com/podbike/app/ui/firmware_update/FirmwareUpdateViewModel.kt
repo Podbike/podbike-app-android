@@ -5,6 +5,7 @@ import com.google.gson.Gson
 import com.kfc_polska.ui.base.UiAction
 import com.kfc_polska.ui.base.UiEffect
 import com.kfc_polska.ui.base.UiState
+import com.podbike.app.data.UserPreferences
 import com.podbike.app.data.api.model.FirmwareFilesData
 import com.podbike.app.data.api.model.OtaFile
 import com.podbike.app.data.api.model.OtaFileType
@@ -35,7 +36,8 @@ import javax.inject.Inject
 @HiltViewModel
 class FirmwareUpdateViewModel @Inject constructor(
     private val bluetoothManager: BluetoothManager,
-    private val firmwareRepository: FirmwareRepository
+    private val firmwareRepository: FirmwareRepository,
+    private val userPreferences: UserPreferences
 ) : StateViewModel<FirmwareUpdateState, FirmwareUpdateAction, FirmwareUpdateEffect>(
     FirmwareUpdateState()
 ) {
@@ -234,8 +236,11 @@ class FirmwareUpdateViewModel @Inject constructor(
                     }
 
                     LICENSE_AGREEMENT -> {
-                        setFirmwareVersionState(TRANSFER_STARTED)
-                        getAndTransferFirmwareFiles()
+                        //TODO revert mock
+//                        setFirmwareVersionState(TRANSFER_STARTED)
+//                        getAndTransferFirmwareFiles()
+                        setFirmwareVersionState(TRANSFER_COMPLETED)
+
                     }
 
                     TRANSFER_STARTED -> {
@@ -245,9 +250,17 @@ class FirmwareUpdateViewModel @Inject constructor(
                     TRANSFER_COMPLETED -> {
                         setFirmwareVersionState(UPGRADE)
                         viewModelScope.launch {
-                            println("UPGRADE")
                             delay(3000)
-                            setFirmwareVersionState(UP_TO_DATE)
+                            val device =
+                                bluetoothManager.selectedDevice ?: return@launch setErrorState(
+                                    NoBluetoothDeviceError(
+                                        Throwable("No selected device")
+                                    )
+                                )
+                            //TODO uncomment when ready to not brick the device
+//                            YModem.YModemHelper.runUpgrade(device)
+                            val config = bluetoothManager.selectedDevice?.data?.getDeviceMetadata()
+                            userPreferences.setUpdateStartedFlag(true, config)
                         }
                     }
 
@@ -401,6 +414,7 @@ class FirmwareUpdateViewModel @Inject constructor(
         data object NavigateToLocationPermissions : FirmwareUpdateEffect()
         data object NavigateToBluetoothSettings : FirmwareUpdateEffect()
         data object NavigateToLocationSettings : FirmwareUpdateEffect()
+        data object NavigateToDashboard : FirmwareUpdateEffect()
     }
 
 }

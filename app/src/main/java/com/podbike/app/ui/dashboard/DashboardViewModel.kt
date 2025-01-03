@@ -13,6 +13,7 @@ import com.podbike.app.data.UserPreferences
 import com.podbike.app.data.bluetooth.manager.BluetoothManager
 import com.podbike.app.data.bluetooth.model.PodbikeDevice
 import com.podbike.app.data.bluetooth.model.PodbikeLightStatus
+import com.podbike.app.data.bluetooth.utils.YModem.YModemHelper
 import com.podbike.app.ui.base.StateViewModel
 import com.podbike.app.ui.base.collectWithErrorHandling
 import com.podbike.app.ui.dashboard.DashboardViewModel.DashboardAction
@@ -23,6 +24,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
+import timber.log.Timber.Forest.i
 import javax.inject.Inject
 import kotlin.time.TimeSource
 
@@ -36,6 +38,7 @@ class DashboardViewModel @Inject constructor(
     sealed class ErrorTypeSealed(val error: Throwable) {
         class DashboardTimeoutError(error: Throwable) : ErrorTypeSealed(error)
         class ConnectToDeviceError(error: Throwable) : ErrorTypeSealed(error)
+        class FrikarUpdateFailed(error: Throwable) : ErrorTypeSealed(error)
     }
 
     private var dashboardJob: Job? = null
@@ -139,6 +142,18 @@ class DashboardViewModel @Inject constructor(
         }
     }
 
+    private fun runFirmwareUpdateCheck() {
+        val currentDevice = userPreferences.getMostRecentDevice()
+        val hasUpdateStarted = currentDevice?.updateStarted == true
+        if (!hasUpdateStarted) {
+            return
+        }
+        val expectedConfigHash = currentDevice.updateConfigHash
+        viewModelScope.launch {
+            validateFirmwareUpdate(expectedConfigHash)
+        }
+    }
+
     private fun updateTripStartOffset(device: PodbikeDevice, isConnected: Boolean) {
         if (isConnected) {
             device.data.cancelCleanTripDataTimer()
@@ -157,6 +172,28 @@ class DashboardViewModel @Inject constructor(
         if (!isConnected && tripInactivityStartTime == null) {
             device.data.tripInactivityStartTime = TimeSource.Monotonic.markNow()
         }
+    }
+
+    @SuppressLint("MissingPermission")
+    private suspend fun validateFirmwareUpdate(expectedConfigHash: Int?) {
+        val currentDevice = bluetoothManager.selectedDevice ?: return
+        val metadata = try {
+            YModemHelper.getDeviceMetadata(currentDevice)
+        } catch (e: Exception) {
+            i("Failed to get metadata: $e")
+            null
+        }
+        if (metadata == null || expectedConfigHash == null) {
+            return updateState { copy(error = ErrorTypeSealed.FrikarUpdateFailed(Throwable("Couldn't compare hash"))) }
+        }
+        if (metadata.hashCode() == expectedConfigHash) {
+            sendEffect(DashboardEffect.FrikarUpdated)
+        } else {
+            updateState {
+                copy(error = ErrorTypeSealed.FrikarUpdateFailed(Throwable("Metadata hash mismatch")))
+            }
+        }
+        userPreferences.setUpdateStartedFlag(false)
     }
 
     private fun updateDeviceDataState(
@@ -236,6 +273,7 @@ class DashboardViewModel @Inject constructor(
             }
 
             is DashboardAction.PermissionsChanged -> {
+                runFirmwareUpdateCheck()
                 val hasAllPermissions =
                     action.hasBluetoothPermissions && action.isBluetoothEnabled && action.isLocationEnabled
 
@@ -322,6 +360,7 @@ class DashboardViewModel @Inject constructor(
         data object NavigateToAppSettings : DashboardEffect()
         data object NavigateToHelp : DashboardEffect()
         data object NavigateToStatistics : DashboardEffect()
+        data object FrikarUpdated : DashboardEffect()
     }
 
 }

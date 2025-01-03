@@ -152,6 +152,7 @@
     <string name="UpdateUpgrade">"Firmware Upgrade"</string>
     <string name="UpdateUpgradeInfo1">"Make sure the FRIKAR is stationary and in Bluetooth range of your phone."</string>
     <string name="UpdateUpgradeInfo2">"You will not be able to navigate away from this page until this process is complete."</string>
+    <string name="UpdateUpgradeInfo3">"Your bike turn indicators will be blinking during the process and will restart by itself. Please do not move or switch off the bike during this operation."</string>
     <string name="UpdateVersion">"Current Firmware Version:"</string>
     <string name="PrivacyPolicyHtml" translatable="false">
         <![CDATA[

@@ -1,5 +1,6 @@
 package com.podbike.app.data
 
+import com.podbike.app.data.bluetooth.model.PodbikeDeviceMetadata
 import com.podbike.app.ui.scanning.DeviceInfo
 
 interface UserPreferences {
@@ -18,5 +19,7 @@ interface UserPreferences {
 
     fun setTutorialCompleted(completed: Boolean)
     fun isTutorialCompleted(): Boolean
+
+    fun setUpdateStartedFlag(updateStarted: Boolean, config: PodbikeDeviceMetadata? = null)
 
 }

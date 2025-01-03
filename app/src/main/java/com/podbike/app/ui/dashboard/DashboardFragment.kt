@@ -131,6 +131,16 @@ class DashboardFragment : BaseFragment() {
                 hideConnectingDialog()
             }
 
+            when (state.error) {
+                is DashboardViewModel.ErrorTypeSealed.ConnectToDeviceError -> {}
+                is DashboardViewModel.ErrorTypeSealed.DashboardTimeoutError -> {}
+                is DashboardViewModel.ErrorTypeSealed.FrikarUpdateFailed -> {
+                    showAlertDialog("Firmware update failed")
+                }
+
+                null -> {}
+            }
+
             getTooltips(state.speedAbbreviation).forEach { tooltip ->
                 val view = binding.root.findViewById<View>(tooltip.widgetId)
                 if (state.isInteractiveTutorialEnabled) {
@@ -314,6 +324,7 @@ class DashboardFragment : BaseFragment() {
             }
 
             DashboardEffect.NavigateToStatistics -> findNavController().navigate(R.id.action_dashboardFragment_to_statisticsFragment)
+            DashboardEffect.FrikarUpdated -> showAlertDialog(getString(R.string.UpdateComplete))
         }
     }
 

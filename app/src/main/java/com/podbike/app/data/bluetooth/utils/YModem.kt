@@ -2,8 +2,8 @@ package com.podbike.app.data.bluetooth.utils
 
 import android.Manifest
 import androidx.annotation.RequiresPermission
-import com.podbike.app.data.bluetooth.manager.ConnectionManager
 import com.podbike.app.data.api.model.OtaFile
+import com.podbike.app.data.bluetooth.manager.ConnectionManager
 import com.podbike.app.data.bluetooth.model.FirmwareFileTransferState
 import com.podbike.app.data.bluetooth.model.FirmwareFileTransferStatus
 import com.podbike.app.data.bluetooth.model.PodbikeDevice
@@ -39,6 +39,7 @@ const val CRC_BYTES_COUNT = 2
 // Podbike related consts
 const val PODBIKE_DTA_BYTE = 0x52
 const val PODBIKE_ATD_BYTE = 0x57
+const val PODBIKE_UPDATE_BYTE = 0x55
 
 // Other
 const val DEFAULT_CHUNK_SIZE = 128
@@ -231,6 +232,12 @@ class YModem {
                 operationError = true
             }
         }
+
+        @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+        suspend fun runUpgrade(device: PodbikeDevice) {
+            writeFirmwareValue(device, byteArrayOf(PODBIKE_UPDATE_BYTE.toByte()))
+        }
+
         @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
         private suspend fun writeFirmwareValue(device: PodbikeDevice, data: ByteArray) {
             device.writeCharacteristic(

@@ -7,7 +7,7 @@ import android.icu.util.ULocale
 import android.os.Build
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.podbike.app.data.bluetooth.model.PodbikeTransferConfig
+import com.podbike.app.data.bluetooth.model.PodbikeDeviceMetadata
 import com.podbike.app.ui.scanning.DeviceInfo
 import timber.log.Timber
 
@@ -86,17 +86,7 @@ class UserPreferencesImpl(context: Context) : UserPreferences {
         return getRecentDevices().firstOrNull()
     }
 
-    private fun saveRecentDevices(devices: List<DeviceInfo>) {
-        val json = try {
-            gson.toJson(devices)
-        } catch (e: Exception) {
-            Timber.e(e)
-            return
-        }
-        sharedPreferences.edit().putString(KEY_CONNECTED_DEVICES, json).apply()
-    }
-
-    fun setUpdateStartedFlag(updateStarted: Boolean, config: PodbikeTransferConfig? = null) {
+    override fun setUpdateStartedFlag(updateStarted: Boolean, config: PodbikeDeviceMetadata?) {
         val devices = getRecentDevices().toMutableList()
         if (devices.isNotEmpty()) {
             val currentDevice = devices.first().copy(
@@ -106,6 +96,16 @@ class UserPreferencesImpl(context: Context) : UserPreferences {
             devices[0] = currentDevice
             saveRecentDevices(devices)
         }
+    }
+
+    private fun saveRecentDevices(devices: List<DeviceInfo>) {
+        val json = try {
+            gson.toJson(devices)
+        } catch (e: Exception) {
+            Timber.e(e)
+            return
+        }
+        sharedPreferences.edit().putString(KEY_CONNECTED_DEVICES, json).apply()
     }
     private fun getDefaultSpeedUnit(): SpeedUnit {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
