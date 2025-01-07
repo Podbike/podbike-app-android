@@ -147,7 +147,7 @@ class DashboardFragment : BaseFragment() {
                 fragmentDashboardSpeed.visibility = View.VISIBLE
                 fragmentDashboardWelcomeBack.visibility = View.INVISIBLE
             } else if (state.isBluetoothEnabled == false) {
-                clearDashboard(false)
+                clearDashboard(state)
                 fragmentDashboardEnableBluetoothButton.visibility = View.VISIBLE
                 fragmentDashboardSpeed.visibility = View.INVISIBLE
                 fragmentDashboardWelcomeBack.visibility = View.INVISIBLE
@@ -258,18 +258,26 @@ class DashboardFragment : BaseFragment() {
                         0
                     }
                 )
+            } else {
+                fragmentDashboardBatteryIndicator.setProgress(
+                    0,
+                    "0 ${state.rangeAbbreviation}"
+                )
             }
         }
     }
 
-    private fun FragmentDashboardBinding.clearDashboard(isBluetoothEnabled: Boolean) {
-        fragmentDashboardBatteryIndicator.setProgress(0, "")
+    private fun FragmentDashboardBinding.clearDashboard(state: DashboardViewModel.DashboardState) {
+        fragmentDashboardBatteryIndicator.setProgress(
+            0,
+            "0 ${state.rangeAbbreviation}"
+        )
         fragmentDashboardDistance.visibility = View.INVISIBLE
         fragmentDashboardDistanceUnit.visibility = View.INVISIBLE
         fragmentDashboardAssistance.currentAssistance = 0
         fragmentDashboardCadence.currentCadence = 0
         fragmentDashboardLights.setImageResource(
-            if (!isBluetoothEnabled) {
+            if (!state.isBluetoothEnabled) {
                 R.drawable.ic_baseline_bluetooth_disabled_24
             } else {
                 0
