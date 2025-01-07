@@ -9,7 +9,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
@@ -104,12 +103,15 @@ class FirmwareUpdateFragment : BaseFragment() {
 
     private fun setupBindings() {
         with(binding) {
-            actionPositiveButton.setOnClickListener {
+            checkForUpdatesButton.setOnClickListener {
                 viewModel.processAction(
                     FirmwareUpdateViewModel.FirmwareUpdateAction.ForwardAction(
                         permissionManager.isBluetoothEnabled()
                     )
                 )
+            }
+            okButton.setOnClickListener {
+                viewModel.processAction(FirmwareUpdateViewModel.FirmwareUpdateAction.GoBack)
             }
             actionNegativeButton.setOnClickListener {
                 viewModel.processAction(FirmwareUpdateViewModel.FirmwareUpdateAction.GoBack)
@@ -129,6 +131,7 @@ class FirmwareUpdateFragment : BaseFragment() {
             var centerText: String?
             var positiveButtonTextRes: Int?
             var isCancelButtonVisible: Boolean
+            var isOkButtonVisible: Boolean
             var isProgressVisible: Boolean
             var isFileProgressVisible: Boolean
             var isBackButtonVisible: Boolean
@@ -140,6 +143,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     centerText = getString(R.string.UpdateCurrent)
                     positiveButtonTextRes = R.string.UpdateButtonCheck
                     isCancelButtonVisible = false
+                    isOkButtonVisible = false
                     isProgressVisible = false
                     isFileProgressVisible = false
                     isBackButtonVisible = false
@@ -152,6 +156,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     centerText = getString(R.string.UpdateAvailable)
                     positiveButtonTextRes = R.string.UpdateButtonGet
                     isCancelButtonVisible = false
+                    isOkButtonVisible = false
                     isProgressVisible = false
                     isFileProgressVisible = false
                     isAppBarBackVisible = true
@@ -163,6 +168,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     centerText = null
                     positiveButtonTextRes = R.string.UpdateButtonTransfer
                     isCancelButtonVisible = true
+                    isOkButtonVisible = false
                     isProgressVisible = false
                     isFileProgressVisible = false
                     isAppBarBackVisible = true
@@ -173,10 +179,11 @@ class FirmwareUpdateFragment : BaseFragment() {
                     bodyText = getString(R.string.UpdateTransferInfo)
                     centerText = null
                     positiveButtonTextRes = null
-                    isCancelButtonVisible = false
+                    isCancelButtonVisible = true
+                    isOkButtonVisible = false
                     isProgressVisible = false
                     isFileProgressVisible = true
-                    isAppBarBackVisible = true
+                    isAppBarBackVisible = false
                 }
 
                 TRANSFER_COMPLETED -> {
@@ -185,25 +192,21 @@ class FirmwareUpdateFragment : BaseFragment() {
                     centerText = getString(R.string.UpdateTransferComplete)
                     positiveButtonTextRes = R.string.UpdateButtonUpgrade
                     isCancelButtonVisible = true
+                    isOkButtonVisible = false
                     isProgressVisible = false
                     isFileProgressVisible = false
                     isAppBarBackVisible = true
                 }
 
                 UPGRADE -> {
-                    headerTextRes = R.string.UpdateUpgrade
-                    bodyText =
-                        buildString {
-                            append(getString(R.string.UpdateUpgradeInfo1))
-                            append("\n\n")
-                            append(getString(R.string.UpdateUpgradeInfo2))
-                            append("\n\n")
-                            append(getString(R.string.UpdateUpgradeInfo3))
-                        }
-                    centerText = null
+                    headerTextRes = null
+                    bodyText = ""
+                    centerText =
+                        "Bike update started.\n\nPlease do not move or restart the bike while the turn indicators lights are blinking."
                     positiveButtonTextRes = null
                     isCancelButtonVisible = false
-                    isProgressVisible = true
+                    isOkButtonVisible = true
+                    isProgressVisible = false
                     isFileProgressVisible = false
                     isAppBarBackVisible = false
                 }
@@ -214,6 +217,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     centerText = null
                     positiveButtonTextRes = null
                     isCancelButtonVisible = false
+                    isOkButtonVisible = false
                     isProgressVisible = true
                     isFileProgressVisible = false
                     isAppBarBackVisible = true
@@ -226,6 +230,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                     centerText = null
                     positiveButtonTextRes = R.string.UpdateButtonCheck
                     isCancelButtonVisible = false
+                    isOkButtonVisible = false
                     isProgressVisible = false
                     isFileProgressVisible = false
                     isAppBarBackVisible = true
@@ -270,13 +275,15 @@ class FirmwareUpdateFragment : BaseFragment() {
             header.text = headerTextRes?.let { getString(it) }
             body.text = bodyText
             center.text = centerText
-            actionPositiveButton.text = positiveButtonTextRes?.let { getString(it) }
+            checkForUpdatesButton.text = positiveButtonTextRes?.let { getString(it) }
 
             header.isVisible = headerTextRes != null
             body.isVisible = bodyText != null
             center.isVisible = centerText != null
-            actionPositiveButton.isVisible = positiveButtonTextRes != null
+            checkForUpdatesButton.isVisible = positiveButtonTextRes != null
+            okButton.isVisible = isOkButtonVisible
             actionNegativeButton.isInvisible = !isCancelButtonVisible
+
             progressBar.isVisible = isProgressVisible || state.isLoading
             fileProgressIndicator.isVisible = isFileProgressVisible
             binding.appBar.appBarBack.isInvisible = !isAppBarBackVisible
@@ -302,50 +309,27 @@ class FirmwareUpdateFragment : BaseFragment() {
                 }
 
                 else -> {
-                    showGenericErrorDialog(throwable)
+                    e(throwable)
+                    showAlertDialog(getString(R.string.UpdateIssue)) {
+                        if (isAdded) {
+                            findNavController().popBackStack(R.id.settingsFragment, false)
+                        } else {
+                            e("Fragment is not added")
+                        }
+                    }
                 }
             }
         }
     }
 
-    //TODO export to a separate dialog manager or something
     private fun showBluetoothDisabledDialog() {
-        AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
-            .setMessage(getString(R.string.UpdateMissingDevice))
-            .setPositiveButton("OK") { dialog, _ ->
-                dialog.dismiss()
-                findNavController().popBackStack(R.id.settingsFragment, false)
-            }
-            .setCancelable(false)
-            .create()
-            .show()
+        showAlertDialog(getString(R.string.UpdateMissingDevice)) {
+            findNavController().popBackStack(R.id.settingsFragment, false)
+        }
     }
 
     private fun showNoInternetDialog() {
-        AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
-            .setMessage("The Internet connection appears to be offline.")
-            .setPositiveButton("OK") { dialog, _ ->
-                dialog.dismiss()
-            }
-            .setCancelable(false)
-            .create()
-            .show()
-    }
-
-    private fun showGenericErrorDialog(throwable: Throwable?) {
-        AlertDialog.Builder(requireContext(), R.style.CustomDialogTheme)
-            .setMessage(getString(R.string.UpdateIssue))
-            .setPositiveButton("OK") { dialog, _ ->
-                dialog.dismiss()
-                if (isAdded) {
-                    findNavController().popBackStack(R.id.settingsFragment, false)
-                } else {
-                    e("Fragment is not added")
-                }
-            }
-            .setCancelable(false)
-            .create()
-            .show()
+        showAlertDialog("The Internet connection appears to be offline.")
     }
 
     private fun processEffect(effect: FirmwareUpdateEffect) {

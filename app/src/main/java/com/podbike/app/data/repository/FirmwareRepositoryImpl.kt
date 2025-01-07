@@ -44,7 +44,9 @@ class FirmwareRepositoryImpl : FirmwareRepository {
     override suspend fun checkIsUpToDate(frameNumber: String): DataResult<Boolean> {
         return runWithErrorHandling {
             val frameNumberMap = mapOf("frameNumber" to frameNumber)
-            firmwareApi.getUpdateStatus(frameNumberMap) == 1
+            val status = firmwareApi.getUpdateStatus(frameNumberMap)
+            if (status > 2) throw Exception("Invalid status")
+            status == 1
         }
     }
 

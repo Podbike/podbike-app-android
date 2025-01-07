@@ -15,6 +15,7 @@ import com.podbike.app.data.bluetooth.model.FirmwareFileTransferState
 import com.podbike.app.data.bluetooth.model.FirmwareFileTransferStatus
 import com.podbike.app.data.bluetooth.model.PodbikeTransferConfig
 import com.podbike.app.data.bluetooth.model.SupportedBoard
+import com.podbike.app.data.bluetooth.utils.YModem
 import com.podbike.app.data.repository.FirmwareRepository
 import com.podbike.app.ui.base.StateViewModel
 import com.podbike.app.ui.firmware_update.FirmwareUpdateViewModel.ErrorTypeSealed.CheckForUpdatesError
@@ -27,7 +28,6 @@ import com.podbike.app.ui.firmware_update.FirmwareUpdateViewModel.FirmwareUpdate
 import com.podbike.app.ui.firmware_update.FirmwareVersion.*
 import com.podbike.app.utils.Result
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import timber.log.Timber.Forest.i
@@ -250,15 +250,13 @@ class FirmwareUpdateViewModel @Inject constructor(
                     TRANSFER_COMPLETED -> {
                         setFirmwareVersionState(UPGRADE)
                         viewModelScope.launch {
-                            delay(3000)
                             val device =
                                 bluetoothManager.selectedDevice ?: return@launch setErrorState(
                                     NoBluetoothDeviceError(
                                         Throwable("No selected device")
                                     )
                                 )
-                            //TODO uncomment when ready to not brick the device
-//                            YModem.YModemHelper.runUpgrade(device)
+                            YModem.YModemHelper.runUpgrade(device)
                             val config = bluetoothManager.selectedDevice?.data?.getDeviceMetadata()
                             userPreferences.setUpdateStartedFlag(true, config)
                         }

@@ -57,6 +57,10 @@ class DashboardViewModel @Inject constructor(
     private val speedUnit: SpeedUnit
         get() = userPreferences.getSpeedUnit()
 
+    init {
+        listenToConnectionChanges()
+    }
+
     @SuppressLint("MissingPermission")
     private fun dashboard() {
         setupDefaultUnits()
@@ -117,19 +121,24 @@ class DashboardViewModel @Inject constructor(
                     )
                 }
             }
-            launch {
-                device?.isConnected()?.distinctUntilChanged()
-                    ?.collectWithErrorHandling { isConnected ->
-                        updateState { copy(isLoading = !isConnected) }
-                        updateTripStartOffset(device, isConnected)
-                        if (!isConnected) {
-                            bluetoothManager.connect(
-                                device.device,
-                            )
-                        }
-                    }
-            }
         }
+    }
+
+    private fun listenToConnectionChanges() {
+        viewModelScope.launch {
+            val device = bluetoothManager.selectedDevice
+            device?.isConnected()?.distinctUntilChanged()
+                ?.collectWithErrorHandling { isConnected ->
+                    updateState { copy(isConnected = isConnected) }
+                    updateTripStartOffset(device, isConnected)
+                    if (!isConnected) {
+                        bluetoothManager.connect(
+                            device.device,
+                        )
+                    }
+                }
+        }
+
     }
 
     private fun setupDefaultUnits() {
@@ -184,11 +193,13 @@ class DashboardViewModel @Inject constructor(
             null
         }
         if (metadata == null || expectedConfigHash == null) {
+            userPreferences.setUpdateStartedFlag(false, null)
             return updateState { copy(error = ErrorTypeSealed.FrikarUpdateFailed(Throwable("Couldn't compare hash"))) }
         }
         if (metadata.hashCode() == expectedConfigHash) {
             sendEffect(DashboardEffect.FrikarUpdated)
         } else {
+            userPreferences.setUpdateStartedFlag(false, null)
             updateState {
                 copy(error = ErrorTypeSealed.FrikarUpdateFailed(Throwable("Metadata hash mismatch")))
             }
@@ -242,15 +253,6 @@ class DashboardViewModel @Inject constructor(
 
     override fun processAction(action: DashboardAction) {
         when (action) {
-            is DashboardAction.ToggleDashboard -> {
-                if (uiState.value.isLoading) {
-                    dashboardJob?.cancel()
-                    updateState { copy(isLoading = false) }
-                } else {
-                    updateState { copy(isLoading = true) }
-                    dashboard()
-                }
-            }
 
             is DashboardAction.BluetoothPermissions -> {
                 sendEffect(DashboardEffect.NavigateToBluetoothPermissions)
@@ -276,6 +278,8 @@ class DashboardViewModel @Inject constructor(
                 runFirmwareUpdateCheck()
                 val hasAllPermissions =
                     action.hasBluetoothPermissions && action.isBluetoothEnabled && action.isLocationEnabled
+                val needToReconnect =
+                    action.isBluetoothEnabled && uiState.value.isBluetoothEnabled.not()
 
                 updateState {
                     copy(
@@ -284,12 +288,25 @@ class DashboardViewModel @Inject constructor(
                         isLocationEnabled = action.isLocationEnabled
                     )
                 }
-                if (!hasAllPermissions) {
-                    dashboardJob?.cancel()
-                } else if (dashboardJob?.isActive != true) {
-                    dashboard()
+
+                if (hasAllPermissions) {
+                    if (dashboardJob?.isActive != true) {
+                        dashboard()
+                    } else if (needToReconnect) {
+                        viewModelScope.launch {
+                            bluetoothManager.selectedDevice?.let {
+                                bluetoothManager.selectedDevice = null
+                                bluetoothManager.connect(it.device)
+                                dashboardJob?.cancel()
+                                dashboard()
+                            }
+                        }
+                    }
+                } else {
+
                 }
             }
+
 
             is DashboardAction.SettingsClicked -> {
                 sendEffect(DashboardEffect.NavigateToAppSettings)
@@ -305,10 +322,11 @@ class DashboardViewModel @Inject constructor(
 
             is DashboardAction.ReturnToDashboardClicked -> {
                 updateState { copy(isInteractiveTutorialEnabled = false) }
+                sendEffect(DashboardEffect.HideNavigationIcons)
             }
 
             is DashboardAction.Retry -> {
-                updateState { copy(isLoading = true, error = null) }
+                updateState { copy(error = null) }
             }
 
             is DashboardAction.GoBack -> {
@@ -322,7 +340,7 @@ class DashboardViewModel @Inject constructor(
         val isBluetoothEnabled: Boolean = false,
         val isLocationEnabled: Boolean = false,
         val isInteractiveTutorialEnabled: Boolean = false,
-        val isLoading: Boolean = true,
+        val isConnected: Boolean = false,
         val deviceData: DeviceDataUiModel? = null,
         val distanceAbbreviation: String = "",
         val rangeAbbreviation: String = "",
@@ -331,7 +349,6 @@ class DashboardViewModel @Inject constructor(
     ) : UiState
 
     sealed class DashboardAction : UiAction {
-        data object ToggleDashboard : DashboardAction()
         data object BluetoothPermissions : DashboardAction()
         data object LocationPermissions : DashboardAction()
         data object EnableBluetooth : DashboardAction()
@@ -360,6 +377,7 @@ class DashboardViewModel @Inject constructor(
         data object NavigateToAppSettings : DashboardEffect()
         data object NavigateToHelp : DashboardEffect()
         data object NavigateToStatistics : DashboardEffect()
+        data object HideNavigationIcons : DashboardEffect()
         data object FrikarUpdated : DashboardEffect()
     }
 

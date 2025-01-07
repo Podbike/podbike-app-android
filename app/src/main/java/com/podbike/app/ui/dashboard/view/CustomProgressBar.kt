@@ -6,6 +6,7 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import com.podbike.app.R
 import com.podbike.app.databinding.ViewCustomProgressBarBinding
@@ -28,6 +29,8 @@ class CustomProgressBar @JvmOverloads constructor(
 
     fun setProgress(progress: Int, progressText: String) {
         val backgroundProgress = 100 - progress
+
+        binding.progressBarIndicatorView.isGone = progress == 0
 
         val constraintSet = ConstraintSet()
         constraintSet.clone(binding.root)

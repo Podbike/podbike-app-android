@@ -1,6 +1,7 @@
 package com.podbike.app.ui.dashboard
 
 import android.Manifest
+import android.app.Activity
 import android.app.AlertDialog
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
@@ -14,8 +15,6 @@ import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.ActivityCompat
-import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
@@ -23,6 +22,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.podbike.app.R
 import com.podbike.app.databinding.FragmentDashboardBinding
+import com.podbike.app.ui.MainActivity
 import com.podbike.app.ui.base.BaseFragment
 import com.podbike.app.ui.base.adjustEdgeToEdgeMargins
 import com.podbike.app.ui.dashboard.DashboardViewModel.DashboardAction
@@ -69,6 +69,20 @@ class DashboardFragment : BaseFragment() {
         )
     }
 
+    private val enableBluetoothLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            viewModel.processAction(
+                DashboardAction.PermissionsChanged(
+                    hasBluetoothPermissions = permissionManager.hasBluetoothPermission(),
+                    isBluetoothEnabled = true,
+                    isLocationEnabled = permissionManager.isLocationEnabled()
+                )
+            )
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -84,10 +98,13 @@ class DashboardFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         subscribeToViewModel()
         setupBindings()
+        (activity as? MainActivity)?.bluetoothStateFlow?.onEach { isEnabled ->
+            validatePermissions()
+        }?.launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onStart() {
+        super.onStart()
         validatePermissions()
     }
 
@@ -117,18 +134,37 @@ class DashboardFragment : BaseFragment() {
             fragmentDashboardReturnButton.setOnClickListener {
                 viewModel.processAction(DashboardAction.ReturnToDashboardClicked)
             }
+            fragmentDashboardEnableBluetoothButton.setOnClickListener {
+                viewModel.processAction(DashboardAction.EnableBluetooth)
+            }
         }
     }
 
     private fun processUiState(state: DashboardViewModel.DashboardState) {
         with(binding) {
-            fragmentDashboardWelcomeBack.isInvisible = state.deviceData != null
-            fragmentDashboardSpeed.isInvisible = state.deviceData == null
-
-            if (state.isLoading) {
-                showConnectingDialog()
+            if (state.isInteractiveTutorialEnabled) {
+                fragmentDashboardEnableBluetoothButton.visibility = View.INVISIBLE
+                fragmentDashboardSpeed.visibility = View.VISIBLE
+                fragmentDashboardWelcomeBack.visibility = View.INVISIBLE
+            } else if (state.isBluetoothEnabled == false) {
+                clearDashboard(false)
+                fragmentDashboardEnableBluetoothButton.visibility = View.VISIBLE
+                fragmentDashboardSpeed.visibility = View.INVISIBLE
+                fragmentDashboardWelcomeBack.visibility = View.INVISIBLE
+            } else if (state.deviceData == null) {
+                fragmentDashboardEnableBluetoothButton.visibility = View.INVISIBLE
+                fragmentDashboardSpeed.visibility = View.INVISIBLE
+                fragmentDashboardWelcomeBack.visibility = View.VISIBLE
             } else {
+                fragmentDashboardEnableBluetoothButton.visibility = View.INVISIBLE
+                fragmentDashboardSpeed.visibility = View.VISIBLE
+                fragmentDashboardWelcomeBack.visibility = View.INVISIBLE
+            }
+
+            if (state.isConnected) {
                 hideConnectingDialog()
+            } else {
+                showConnectingDialog()
             }
 
             when (state.error) {
@@ -161,40 +197,47 @@ class DashboardFragment : BaseFragment() {
             }
 
             fragmentDashboardDistanceUnit.text = state.distanceAbbreviation
+            if (state.isBluetoothEnabled) {
+                fragmentDashboardDistance.visibility = View.VISIBLE
+                fragmentDashboardDistanceUnit.visibility = View.VISIBLE
+            } else {
+                fragmentDashboardDistance.visibility = View.INVISIBLE
+                fragmentDashboardDistanceUnit.visibility = View.INVISIBLE
+            }
 
-            state.deviceData?.let {
-                fragmentDashboardSpeed.text = it.speed
+            if (state.deviceData != null && (state.isBluetoothEnabled)) {
+                fragmentDashboardSpeed.text = state.deviceData.speed
                 fragmentDashboardBatteryIndicator.setProgress(
-                    it.battery,
-                    "${it.range} ${state.rangeAbbreviation}"
+                    state.deviceData.battery,
+                    "${state.deviceData.range} ${state.rangeAbbreviation}"
                 )
-                fragmentDashboardDistance.text = it.distance.toString()
-                fragmentDashboardAssistance.currentAssistance = it.assist
-                fragmentDashboardCadence.currentCadence = it.cadence
+                fragmentDashboardDistance.text = state.deviceData.distance.toString()
+                fragmentDashboardAssistance.currentAssistance = state.deviceData.assist
+                fragmentDashboardCadence.currentCadence = state.deviceData.cadence
 
-                fragmentDashboardIconsLayout.isVisible = it.isMoving
-                fragmentDashboardMenuLayout.isVisible = !it.isMoving
+                fragmentDashboardIconsLayout.isVisible = state.deviceData.isMoving
+                fragmentDashboardMenuLayout.isVisible = !state.deviceData.isMoving
 
-                if (it.isFreezing) {
+                if (state.deviceData.isFreezing) {
                     fragmentDashboardIcon1.setColorFilter(requireContext().getColor(R.color.white))
                 } else {
                     fragmentDashboardIcon1.setColorFilter(requireContext().getColor(R.color.gray))
                 }
 
                 fragmentDashboardTurnIndicator.setTurnIndicators(
-                    it.lightStatus.indicatorLeft,
-                    it.lightStatus.indicatorRight
+                    state.deviceData.lightStatus.indicatorLeft,
+                    state.deviceData.lightStatus.indicatorRight
                 )
 
 
                 val bothTurnIndicatorsOn =
-                    it.lightStatus.indicatorLeft && it.lightStatus.indicatorRight
+                    state.deviceData.lightStatus.indicatorLeft && state.deviceData.lightStatus.indicatorRight
                 fragmentDashboardHazardIndicator.setHazardIndicator(bothTurnIndicatorsOn)
                 if (bothTurnIndicatorsOn) {
                     fragmentDashboardTurnIndicator.isVisible = false
                     fragmentDashboardHazardIndicator.isVisible = true
                     fragmentDashboardLayout.isVisible = false
-                } else if (it.lightStatus.indicatorLeft || it.lightStatus.indicatorRight) {
+                } else if (state.deviceData.lightStatus.indicatorLeft || state.deviceData.lightStatus.indicatorRight) {
                     fragmentDashboardTurnIndicator.isVisible = true
                     fragmentDashboardHazardIndicator.isVisible = false
                     fragmentDashboardLayout.isVisible = false
@@ -205,19 +248,33 @@ class DashboardFragment : BaseFragment() {
                 }
 
                 fragmentDashboardLights.setImageResource(
-                    if (state.isLoading) {
+                    if (!state.isConnected) {
                         R.drawable.ic_baseline_bluetooth_disabled_24
-                    } else if (it.lightStatus.highBeam) {
+                    } else if (state.deviceData.lightStatus.highBeam) {
                         R.drawable.ic_material_car_light_high
-                    } else if (it.lightStatus.lowBeam) {
+                    } else if (state.deviceData.lightStatus.lowBeam) {
                         R.drawable.ic_material_car_light_dimmed
                     } else {
                         0
                     }
                 )
-
             }
         }
+    }
+
+    private fun FragmentDashboardBinding.clearDashboard(isBluetoothEnabled: Boolean) {
+        fragmentDashboardBatteryIndicator.setProgress(0, "")
+        fragmentDashboardDistance.visibility = View.INVISIBLE
+        fragmentDashboardDistanceUnit.visibility = View.INVISIBLE
+        fragmentDashboardAssistance.currentAssistance = 0
+        fragmentDashboardCadence.currentCadence = 0
+        fragmentDashboardLights.setImageResource(
+            if (!isBluetoothEnabled) {
+                R.drawable.ic_baseline_bluetooth_disabled_24
+            } else {
+                0
+            }
+        )
     }
 
     private fun getTooltips(speedAbbreviation: String): List<TooltipInfo> = listOf(
@@ -274,7 +331,12 @@ class DashboardFragment : BaseFragment() {
             R.id.fragment_dashboard_icon_5,
             "Handbreak",
             "The symbol indicates that the parking break is engaged"
-        )
+        ),
+        TooltipInfo(
+            R.id.fragment_dashboard_lights,
+            "Mode and Lights",
+            "Low beam or high beam indicator and a place to display connection mode, e.g. Bluetooth disconnection"
+        ),
     )
 
     private fun setupTooltip(
@@ -320,10 +382,15 @@ class DashboardFragment : BaseFragment() {
                     viewModel.processAction(DashboardAction.EnableInteractiveTutorial)
                 })
                 binding.fragmentDashboardTooltip.visibility = View.VISIBLE
-//                startBounceAnimation()
+                startBounceAnimation()
             }
 
             DashboardEffect.NavigateToStatistics -> findNavController().navigate(R.id.action_dashboardFragment_to_statisticsFragment)
+            DashboardEffect.HideNavigationIcons -> {
+                binding.fragmentDashboardIconsLayout.isVisible = false
+                binding.fragmentDashboardMenuLayout.isVisible = true
+            }
+
             DashboardEffect.FrikarUpdated -> showAlertDialog(getString(R.string.UpdateComplete))
         }
     }
@@ -331,7 +398,7 @@ class DashboardFragment : BaseFragment() {
     private fun enableBluetooth() {
         try {
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            ActivityCompat.startActivityForResult(requireActivity(), enableBtIntent, 0, null)
+            enableBluetoothLauncher.launch(enableBtIntent)
         } catch (e: Exception) {
             intentManager.openBluetoothSettings()
         }
@@ -339,6 +406,7 @@ class DashboardFragment : BaseFragment() {
 
     private fun validatePermissions() {
         if (!permissionManager.hasBluetoothPermission() || !permissionManager.isBluetoothEnabled() || !permissionManager.isLocationEnabled()) {
+            enableBluetooth()
             permissionManager.requestPermissions()
         } else {
             viewModel.processAction(

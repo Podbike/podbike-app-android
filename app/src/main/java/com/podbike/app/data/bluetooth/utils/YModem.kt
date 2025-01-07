@@ -65,6 +65,8 @@ class YModem {
         @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
         suspend fun getDeviceMetadata(device: PodbikeDevice): PodbikeDeviceMetadata? {
 
+            if (device.client.isConnected == false) return null
+
             val dataFlow =
                 device.getCharacteristicNotifications(HaarekBoardSpec.FTP_DATA_CHARACTERISTIC_UUID)
 
