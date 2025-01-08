@@ -402,7 +402,9 @@ class DashboardFragment : BaseFragment() {
 
     private fun enableBluetooth() {
         try {
-            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE).apply {
+                setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+            }
             enableBluetoothLauncher.launch(enableBtIntent)
         } catch (e: Exception) {
             intentManager.openBluetoothSettings()
