@@ -205,13 +205,13 @@ class DashboardFragment : BaseFragment() {
                 fragmentDashboardDistanceUnit.visibility = View.INVISIBLE
             }
 
-            if (state.deviceData != null && (state.isBluetoothEnabled)) {
+            if (state.deviceData != null && state.isBluetoothEnabled) {
                 fragmentDashboardSpeed.text = state.deviceData.speed
                 fragmentDashboardBatteryIndicator.setProgress(
                     state.deviceData.battery,
                     "${state.deviceData.range} ${state.rangeAbbreviation}"
                 )
-                fragmentDashboardDistance.text = state.deviceData.distance.toString()
+                fragmentDashboardDistance.text = state.deviceData.distance
                 fragmentDashboardAssistance.currentAssistance = state.deviceData.assist
                 fragmentDashboardCadence.currentCadence = state.deviceData.cadence
 
@@ -228,7 +228,6 @@ class DashboardFragment : BaseFragment() {
                     state.deviceData.lightStatus.indicatorLeft,
                     state.deviceData.lightStatus.indicatorRight
                 )
-
 
                 val bothTurnIndicatorsOn =
                     state.deviceData.lightStatus.indicatorLeft && state.deviceData.lightStatus.indicatorRight
@@ -259,10 +258,7 @@ class DashboardFragment : BaseFragment() {
                     }
                 )
             } else {
-                fragmentDashboardBatteryIndicator.setProgress(
-                    0,
-                    "0 ${state.rangeAbbreviation}"
-                )
+                clearDashboard(state)
             }
         }
     }
@@ -272,15 +268,16 @@ class DashboardFragment : BaseFragment() {
             0,
             "0 ${state.rangeAbbreviation}"
         )
-        fragmentDashboardDistance.visibility = View.INVISIBLE
-        fragmentDashboardDistanceUnit.visibility = View.INVISIBLE
+        val isConnected = state.isConnected && state.isBluetoothEnabled
+        fragmentDashboardDistance.visibility = if (isConnected) View.VISIBLE else View.INVISIBLE
+        fragmentDashboardDistanceUnit.visibility = if (isConnected) View.VISIBLE else View.INVISIBLE
         fragmentDashboardAssistance.currentAssistance = 0
         fragmentDashboardCadence.currentCadence = 0
         fragmentDashboardLights.setImageResource(
-            if (!state.isBluetoothEnabled) {
+            if (!isConnected) {
                 R.drawable.ic_baseline_bluetooth_disabled_24
             } else {
-                0
+                R.drawable.ic_material_car_light_dimmed
             }
         )
     }

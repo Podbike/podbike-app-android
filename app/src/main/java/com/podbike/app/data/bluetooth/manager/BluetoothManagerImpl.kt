@@ -30,7 +30,7 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
     ): PodbikeDevice {
         try {
             if (selectedDevice?.device?.address == device.address) {
-                println("Reconnecting to device: ${device.address}")
+                Timber.i("Reconnecting to device: ${device.address}")
                 selectedDevice?.client?.reconnect()
                 return selectedDevice!!
             }
@@ -47,7 +47,7 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
 
             if (waitForPairing) {
                 connection.waitForBonding()
-                println("Waiting for bonding with device: ${device.address}")
+                Timber.d("Waiting for bonding with device: ${device.address}")
             }
 
             val podbikeDevice = PodbikeDevice(connection, device)
@@ -55,7 +55,7 @@ class BluetoothManagerImpl(val context: Context) : BluetoothManager {
 
             podbikeDevice.data.clearInMemoryDeviceMetadata()
             podbikeDevice.discoverServices()
-            println("Services discovered for device: ${device.address}")
+            Timber.d("Services discovered for device: ${device.address}")
 
             selectedDevice = podbikeDevice
             return podbikeDevice
