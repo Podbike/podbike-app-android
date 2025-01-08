@@ -45,7 +45,7 @@ class FirmwareRepositoryImpl : FirmwareRepository {
         return runWithErrorHandling {
             val frameNumberMap = mapOf("frameNumber" to frameNumber)
             val status = firmwareApi.getUpdateStatus(frameNumberMap)
-            if (status > 2) throw Exception("Invalid status")
+            if (status >= 2) throw Exception("Invalid status")
             status == 1
         }
     }
