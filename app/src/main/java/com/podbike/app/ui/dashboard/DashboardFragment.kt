@@ -286,6 +286,7 @@ class DashboardFragment : BaseFragment() {
         val isConnected = state.isConnected && state.isBluetoothEnabled
         fragmentDashboardDistance.visibility = if (isConnected) View.VISIBLE else View.INVISIBLE
         fragmentDashboardDistanceUnit.visibility = if (isConnected) View.VISIBLE else View.INVISIBLE
+        fragmentDashboardDistance.text = "0"
         fragmentDashboardAssistance.currentAssistance = 0
         fragmentDashboardCadence.currentCadence = 0
         fragmentDashboardLights.setImageResource(

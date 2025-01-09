@@ -139,6 +139,8 @@ class DashboardViewModel @Inject constructor(
                         bluetoothManager.connect(
                             device.device,
                         )
+                    } else {
+                        updateState { copy(deviceData = null) }
                     }
                 }
         }
