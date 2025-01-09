@@ -22,50 +22,41 @@ class DashboardHazardIndicator @JvmOverloads constructor(
         ContextCompat.getDrawable(context, R.drawable.ic_material_hazard_lights)
     private var isHazardIndicator = false
     private var hazardAnimator: ObjectAnimator? = null
-    private var hazardAlpha = 0f
 
     fun setHazardIndicator(isHazard: Boolean) {
-        //println("setHazardIndicator: $isHazard")
+        if (isHazard == isHazardIndicator) return
         isHazardIndicator = isHazard
+        println("isHazardIndicator: $isHazard")
         startAnimation()
         invalidate()
     }
 
     private fun startAnimation() {
+        hazardAnimator?.cancel()
         if (isHazardIndicator) {
-            hazardAnimator = ObjectAnimator.ofFloat(this, "hazardAlpha", 0f, 1f).apply {
-                duration = 500
-                repeatMode = ObjectAnimator.REVERSE
-                repeatCount = ObjectAnimator.INFINITE
+            hazardAnimator = ObjectAnimator.ofFloat(this, "alpha", 0f, 1f).apply {
+                duration = 150
                 start()
             }
         } else {
-            hazardAnimator?.cancel()
-            hazardAnimator = ObjectAnimator.ofFloat(this, "hazardAlpha", 1f, 0f).apply {
-                duration = 500
+
+            hazardAnimator = ObjectAnimator.ofFloat(this, "alpha", 1f, 0.0f).apply {
+                duration = 150
                 start()
             }
         }
-    }
-
-    fun setHazardAlpha(alpha: Float) {
-        hazardAlpha = alpha
-        invalidate()
     }
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (isHazardIndicator) {
-            hazardDrawable?.alpha = (hazardAlpha * 255).toInt()
-            // draw hazardDrawable at the center of the view
-            canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
-            hazardDrawable?.setBounds(
-                (width / 2 - hazardDrawable.intrinsicWidth / 2),
-                (height / 2 - hazardDrawable.intrinsicHeight / 2),
-                (width / 2 + hazardDrawable.intrinsicWidth / 2),
-                (height / 2 + hazardDrawable.intrinsicHeight / 2)
-            )
-            hazardDrawable?.draw(canvas)
-        }
+        // draw hazardDrawable at the center of the view
+        canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
+        hazardDrawable?.setBounds(
+            (width / 2 - hazardDrawable.intrinsicWidth / 2),
+            (height / 2 - hazardDrawable.intrinsicHeight / 2),
+            (width / 2 + hazardDrawable.intrinsicWidth / 2),
+            (height / 2 + hazardDrawable.intrinsicHeight / 2)
+        )
+        hazardDrawable?.draw(canvas)
     }
 }
