@@ -38,7 +38,7 @@ class PrivacyPolicyFragment : Fragment() {
         binding.appBar.appBarBack.setOnClickListener {
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
-        binding.appBar.appBarTitle.text = "Privacy"
+        binding.appBar.appBarTitle.text = getString(R.string.PolicyPrivacy)
     }
 
     private fun setupTabLayout() {

@@ -172,13 +172,13 @@ class DashboardFragment : BaseFragment() {
                 is DashboardViewModel.ErrorTypeSealed.ConnectToDeviceError -> {}
                 is DashboardViewModel.ErrorTypeSealed.DashboardTimeoutError -> {}
                 is DashboardViewModel.ErrorTypeSealed.FrikarUpdateFailed -> {
-                    showAlertDialog("Firmware update failed")
+                    showAlertDialog(getString(R.string.UpdateFailed))
                 }
 
                 null -> {}
             }
 
-            getTooltips(state.speedAbbreviation).forEach { tooltip ->
+            getTooltips(state.speedAbbreviation, state.distanceAbbreviation).forEach { tooltip ->
                 val view = binding.root.findViewById<View>(tooltip.widgetId)
                 if (state.isInteractiveTutorialEnabled) {
                     view.setOnClickListener {
@@ -244,7 +244,7 @@ class DashboardFragment : BaseFragment() {
                         }, 200)
                     }
                 }
-                
+
                 fragmentDashboardLights.setImageResource(
                     if (!state.isConnected) {
                         R.drawable.ic_baseline_bluetooth_disabled_24
@@ -281,65 +281,69 @@ class DashboardFragment : BaseFragment() {
         )
     }
 
-    private fun getTooltips(speedAbbreviation: String): List<TooltipInfo> = listOf(
+    private fun getTooltips(
+        speedAbbreviation: String,
+        distanceAbbreviation: String
+    ): List<TooltipInfo> = listOf(
         TooltipInfo(
             R.id.fragment_dashboard_speed,
-            "Speed",
-            "This is your current speed. It is displayed in $speedAbbreviation"
+            getString(R.string.HelpSpeedometerTitle),
+            getString(R.string.HelpSpeedometerDescription, speedAbbreviation)
         ),
         TooltipInfo(
             R.id.fragment_dashboard_battery_indicator,
-            "Battery",
-            "This is your current battery level with remaining range",
+            getString(R.string.HelpBatteryAndRangeTitle),
+            getString(R.string.HelpBatteryAndRangeDescription, distanceAbbreviation),
             Gravity.TOP
         ),
         TooltipInfo(
             R.id.fragment_dashboard_distance,
-            "Distance",
-            "This is the distance you have traveled",
+            getString(R.string.HelpOdometerTitle),
+            getString(R.string.HelpOdometerDescription),
             Gravity.TOP
         ),
         TooltipInfo(
             R.id.fragment_dashboard_assistance,
-            "Assistance",
-            "This is the level of assistance you are currently receiving",
+            getString(R.string.HelpAssistanceTitle),
+            getString(R.string.HelpAssistanceDescription),
             Gravity.TOP
         ),
         TooltipInfo(
             R.id.fragment_dashboard_cadence,
-            "Cadence",
-            "This is the number of revolutions per minute",
+            getString(R.string.HelpCadenceTitle),
+            getString(R.string.HelpCadenceDescription),
             Gravity.TOP
         ),
         TooltipInfo(
             R.id.fragment_dashboard_icon_1,
-            "Temperature",
-            "Lights up when temperature is below 4*C"
+            getString(R.string.HelpSnowAlertTitle),
+            getString(R.string.HelpSnowAlertDescription)
         ),
         TooltipInfo(
             R.id.fragment_dashboard_icon_2,
-            "Traction Control System",
-            "It activates when sensors detect that one or more wheels are losing grip, such as on slippery or uneven surfaces"
+            getString(R.string.HelpTractionControlTitle),
+            getString(R.string.HelpTractionControlDescription)
         ),
         TooltipInfo(
             R.id.fragment_dashboard_icon_3,
-            "Headlights",
-            "This symbol indicates that there is an issue with headlights"
+            getString(R.string.HelpLightAlertTitle),
+            getString(R.string.HelpLightAlertDescription)
         ),
         TooltipInfo(
             R.id.fragment_dashboard_icon_4,
-            "Tire pressure",
-            "It means that one or more tires have low pressure"
+            getString(R.string.HelpTireAlertTitle),
+            getString(R.string.HelpTireAlertDescription)
         ),
         TooltipInfo(
             R.id.fragment_dashboard_icon_5,
-            "Handbreak",
-            "The symbol indicates that the parking break is engaged"
+            getString(R.string.HelpBrakeAlertTitle),
+            getString(R.string.HelpBrakeAlertDescription)
         ),
         TooltipInfo(
             R.id.fragment_dashboard_lights,
-            "Mode and Lights",
-            "Low beam or high beam indicator and a place to display connection mode, e.g. Bluetooth disconnection"
+            getString(R.string.HelpModeAndLightsTitle),
+            getString(R.string.HelpModeAndLightsDescription),
+            Gravity.TOP
         ),
     )
 
@@ -379,8 +383,8 @@ class DashboardFragment : BaseFragment() {
             DashboardEffect.NavigateToLocationSettings -> intentManager.openLocationSettings()
             DashboardEffect.NavigateToAppSettings -> findNavController().navigate(R.id.action_dashboardFragment_to_settingsFragment)
             DashboardEffect.NavigateToHelp -> {
-                binding.fragmentDashboardTooltip.setTitle("Help Section")
-                binding.fragmentDashboardTooltip.setMessage("Here you'll discover how each component works. Simply click on any component to learn more.\n\n\nTap the Podbike logo to see Statistics\n\nHeads up: These icons will soon switch to warning icons, giving you insights into their functionality")
+                binding.fragmentDashboardTooltip.setTitle(getString(R.string.HelpInfoModalTitle))
+                binding.fragmentDashboardTooltip.setMessage(getString(R.string.HelpInfoModalDescription))
                 binding.fragmentDashboardTooltip.showOkButton(true, View.OnClickListener {
                     binding.fragmentDashboardTooltip.visibility = View.GONE
                     viewModel.processAction(DashboardAction.EnableInteractiveTutorial)

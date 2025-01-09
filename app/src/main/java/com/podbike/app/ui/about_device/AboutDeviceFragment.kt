@@ -84,15 +84,50 @@ class AboutDeviceFragment : BaseFragment() {
 
         val items = mutableListOf<AboutDeviceItem>()
 
-        items.add(AboutDeviceItem("Product ID: ${deviceMetadata.productId}", false))
-        items.add(AboutDeviceItem("Frame Number: ${deviceMetadata.frameNumber}", true))
+        items.add(
+            AboutDeviceItem(
+                "${getString(R.string.AboutDeviceProductId)}: ${deviceMetadata.productId}",
+                false
+            )
+        )
+        items.add(
+            AboutDeviceItem(
+                "${getString(R.string.AboutDeviceFrameNumber)}: ${deviceMetadata.frameNumber}",
+                true
+            )
+        )
 
         deviceMetadata.ecuModules.forEach { ecoModule ->
-            items.add(AboutDeviceItem("Board Name: ${ecoModule.boardName}", false))
-            items.add(AboutDeviceItem("Board ID: ${ecoModule.boardId}", false))
-            items.add(AboutDeviceItem("Board Position: ${ecoModule.boardPosition}", false))
-            items.add(AboutDeviceItem("Firmware Version: ${ecoModule.fwVersion}", false))
-            items.add(AboutDeviceItem("Serial Number: ${ecoModule.serialNumber}", true))
+            items.add(
+                AboutDeviceItem(
+                    "${getString(R.string.AboutDeviceBoardName)}: ${ecoModule.boardName}",
+                    false
+                )
+            )
+            items.add(
+                AboutDeviceItem(
+                    "${getString(R.string.AboutDeviceBoardId)}: ${ecoModule.boardId}",
+                    false
+                )
+            )
+            items.add(
+                AboutDeviceItem(
+                    "${getString(R.string.AboutDeviceBoardPosition)}: ${ecoModule.boardPosition}",
+                    false
+                )
+            )
+            items.add(
+                AboutDeviceItem(
+                    "${getString(R.string.AboutDeviceFirmwareVersion)}: ${ecoModule.fwVersion}",
+                    false
+                )
+            )
+            items.add(
+                AboutDeviceItem(
+                    "${getString(R.string.AboutDeviceSerialNumber)}: ${ecoModule.serialNumber}",
+                    true
+                )
+            )
         }
         val adapter = AboutDeviceAdapter(items)
         binding.recyclerView.adapter = adapter

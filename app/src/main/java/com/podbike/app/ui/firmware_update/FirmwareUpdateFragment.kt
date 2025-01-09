@@ -201,8 +201,7 @@ class FirmwareUpdateFragment : BaseFragment() {
                 UPGRADE -> {
                     headerTextRes = null
                     bodyText = ""
-                    centerText =
-                        "Bike update started.\n\nPlease do not move or restart the bike while the turn indicators lights are blinking."
+                    centerText = getString(R.string.UpdateUpgradeInfo)
                     positiveButtonTextRes = null
                     isCancelButtonVisible = false
                     isOkButtonVisible = true
