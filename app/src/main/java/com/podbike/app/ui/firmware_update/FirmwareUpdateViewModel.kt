@@ -13,6 +13,7 @@ import com.podbike.app.data.bluetooth.manager.BluetoothManager
 import com.podbike.app.data.bluetooth.model.AudioFile
 import com.podbike.app.data.bluetooth.model.FirmwareFileTransferState
 import com.podbike.app.data.bluetooth.model.FirmwareFileTransferStatus
+import com.podbike.app.data.bluetooth.model.PodbikeDeviceMetadata
 import com.podbike.app.data.bluetooth.model.PodbikeTransferConfig
 import com.podbike.app.data.bluetooth.model.SupportedBoard
 import com.podbike.app.data.bluetooth.utils.YModem
@@ -59,12 +60,12 @@ class FirmwareUpdateViewModel @Inject constructor(
             }
 
 
-            val frameNumber = getFrameNumber()
-            if (frameNumber == null) {
-                setErrorState(CheckForUpdatesError(Throwable("No frame number")))
+            val deviceMetadata = getDeviceMetadata()
+            if (deviceMetadata == null) {
+                setErrorState(CheckForUpdatesError(Throwable("No device metadata")))
                 return@launch
             }
-            val isUpToDate = firmwareRepository.checkIsUpToDate(frameNumber)
+            val isUpToDate = firmwareRepository.checkIsUpToDate(deviceMetadata)
             i("isUpToDate: $isUpToDate")
 
             when (isUpToDate) {
@@ -236,10 +237,9 @@ class FirmwareUpdateViewModel @Inject constructor(
                     }
 
                     LICENSE_AGREEMENT -> {
-                        //TODO revert mock
-//                        setFirmwareVersionState(TRANSFER_STARTED)
-//                        getAndTransferFirmwareFiles()
-                        setFirmwareVersionState(TRANSFER_COMPLETED)
+                        setFirmwareVersionState(TRANSFER_STARTED)
+                        getAndTransferFirmwareFiles()
+//                        setFirmwareVersionState(TRANSFER_COMPLETED)
 
                     }
 
@@ -367,10 +367,14 @@ class FirmwareUpdateViewModel @Inject constructor(
         }
     }
 
+    private suspend fun getDeviceMetadata(): PodbikeDeviceMetadata? {
+        return bluetoothManager.selectedDevice?.data?.getDeviceMetadata()
+    }
+
     private suspend fun getFrameNumber(): String? {
 //        //TODO remove mock
 //        return "000000-F8-1-00-000"
-        return bluetoothManager.selectedDevice?.data?.getDeviceMetadata()?.frameNumber
+        return getDeviceMetadata()?.frameNumber
     }
 
     data class FirmwareUpdateState(

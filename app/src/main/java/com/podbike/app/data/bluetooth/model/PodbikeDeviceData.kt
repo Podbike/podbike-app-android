@@ -136,10 +136,7 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
         return deviceMetadata ?: initDeviceMetadata()
     }
 
-    private var lastLightStatus: PodbikeLightStatus = PodbikeLightStatus()
-
     @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    @OptIn(FlowPreview::class)
     val lightStatus: Flow<PodbikeLightStatus>
         get() = flow {
             coroutineScope {
@@ -168,14 +165,7 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
                         )
 
                         emit(status)
-                        lastLightStatus = status
                     }
-            }
-        }.debounce { data ->
-            if ((!data.indicatorLeft && lastLightStatus.indicatorLeft) || (!data.indicatorRight && lastLightStatus.indicatorRight)) {
-                600L
-            } else {
-                0L
             }
         }
 

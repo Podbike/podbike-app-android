@@ -4,6 +4,7 @@ import com.podbike.app.data.api.FirmwareApi
 import com.podbike.app.data.api.model.FirmwareFilesData
 import com.podbike.app.data.api.model.OtaFile
 import com.podbike.app.data.api.model.OtaFileType
+import com.podbike.app.data.bluetooth.model.PodbikeDeviceMetadata
 import com.podbike.app.utils.DataResult
 import com.podbike.app.utils.runWithErrorHandling
 import kotlinx.serialization.json.Json
@@ -41,11 +42,10 @@ class FirmwareRepositoryImpl : FirmwareRepository {
     }
 
 
-    override suspend fun checkIsUpToDate(frameNumber: String): DataResult<Boolean> {
+    override suspend fun checkIsUpToDate(deviceMetadata: PodbikeDeviceMetadata): DataResult<Boolean> {
         return runWithErrorHandling {
-            val frameNumberMap = mapOf("frameNumber" to frameNumber)
-            val status = firmwareApi.getUpdateStatus(frameNumberMap)
-            if (status > 2) throw Exception("Invalid status")
+            val status = firmwareApi.getUpdateStatus(deviceMetadata)
+            if (status >= 2) throw Exception("Invalid status")
             status == 1
         }
     }

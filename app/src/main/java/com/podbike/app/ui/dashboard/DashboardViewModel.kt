@@ -302,8 +302,6 @@ class DashboardViewModel @Inject constructor(
                             }
                         }
                     }
-                } else {
-
                 }
             }
 

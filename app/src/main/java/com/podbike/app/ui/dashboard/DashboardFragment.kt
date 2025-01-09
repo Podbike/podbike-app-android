@@ -7,6 +7,8 @@ import android.bluetooth.BluetoothAdapter
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -34,7 +36,6 @@ import io.github.douglasjunior.androidSimpleTooltip.SimpleTooltip
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
-import kotlin.getValue
 
 @AndroidEntryPoint
 class DashboardFragment : BaseFragment() {
@@ -205,13 +206,13 @@ class DashboardFragment : BaseFragment() {
                 fragmentDashboardDistanceUnit.visibility = View.INVISIBLE
             }
 
-            if (state.deviceData != null && (state.isBluetoothEnabled)) {
+            if (state.deviceData != null && state.isBluetoothEnabled) {
                 fragmentDashboardSpeed.text = state.deviceData.speed
                 fragmentDashboardBatteryIndicator.setProgress(
                     state.deviceData.battery,
                     "${state.deviceData.range} ${state.rangeAbbreviation}"
                 )
-                fragmentDashboardDistance.text = state.deviceData.distance.toString()
+                fragmentDashboardDistance.text = state.deviceData.distance
                 fragmentDashboardAssistance.currentAssistance = state.deviceData.assist
                 fragmentDashboardCadence.currentCadence = state.deviceData.cadence
 
@@ -224,29 +225,26 @@ class DashboardFragment : BaseFragment() {
                     fragmentDashboardIcon1.setColorFilter(requireContext().getColor(R.color.gray))
                 }
 
-                fragmentDashboardTurnIndicator.setTurnIndicators(
-                    state.deviceData.lightStatus.indicatorLeft,
-                    state.deviceData.lightStatus.indicatorRight
-                )
 
 
-                val bothTurnIndicatorsOn =
-                    state.deviceData.lightStatus.indicatorLeft && state.deviceData.lightStatus.indicatorRight
-                fragmentDashboardHazardIndicator.setHazardIndicator(bothTurnIndicatorsOn)
-                if (bothTurnIndicatorsOn) {
-                    fragmentDashboardTurnIndicator.isVisible = false
-                    fragmentDashboardHazardIndicator.isVisible = true
-                    fragmentDashboardLayout.isVisible = false
-                } else if (state.deviceData.lightStatus.indicatorLeft || state.deviceData.lightStatus.indicatorRight) {
-                    fragmentDashboardTurnIndicator.isVisible = true
-                    fragmentDashboardHazardIndicator.isVisible = false
-                    fragmentDashboardLayout.isVisible = false
-                } else {
-                    fragmentDashboardTurnIndicator.isVisible = false
-                    fragmentDashboardHazardIndicator.isVisible = false
-                    fragmentDashboardLayout.isVisible = true
+                with(state.deviceData.lightStatus) {
+                    val isHazardIndicator = indicatorLeft && indicatorRight
+                    fragmentDashboardHazardIndicator.setHazardIndicator(isHazardIndicator)
+                    fragmentDashboardTurnIndicator.setTurnIndicators(indicatorLeft, indicatorRight)
+                    if (isHazardIndicator) {
+                        fragmentDashboardTurnIndicator.isVisible = false
+                        fragmentDashboardHazardIndicator.isVisible = true
+                    } else if (indicatorLeft || indicatorRight) {
+                        fragmentDashboardTurnIndicator.isVisible = true
+                        fragmentDashboardHazardIndicator.isVisible = false
+                    } else {
+                        Handler(Looper.getMainLooper()).postDelayed({
+                            fragmentDashboardTurnIndicator.isVisible = false
+                            fragmentDashboardHazardIndicator.isVisible = false
+                        }, 200)
+                    }
                 }
-
+                
                 fragmentDashboardLights.setImageResource(
                     if (!state.isConnected) {
                         R.drawable.ic_baseline_bluetooth_disabled_24
@@ -259,10 +257,7 @@ class DashboardFragment : BaseFragment() {
                     }
                 )
             } else {
-                fragmentDashboardBatteryIndicator.setProgress(
-                    0,
-                    "0 ${state.rangeAbbreviation}"
-                )
+                clearDashboard(state)
             }
         }
     }
@@ -272,15 +267,16 @@ class DashboardFragment : BaseFragment() {
             0,
             "0 ${state.rangeAbbreviation}"
         )
-        fragmentDashboardDistance.visibility = View.INVISIBLE
-        fragmentDashboardDistanceUnit.visibility = View.INVISIBLE
+        val isConnected = state.isConnected && state.isBluetoothEnabled
+        fragmentDashboardDistance.visibility = if (isConnected) View.VISIBLE else View.INVISIBLE
+        fragmentDashboardDistanceUnit.visibility = if (isConnected) View.VISIBLE else View.INVISIBLE
         fragmentDashboardAssistance.currentAssistance = 0
         fragmentDashboardCadence.currentCadence = 0
         fragmentDashboardLights.setImageResource(
-            if (!state.isBluetoothEnabled) {
+            if (!isConnected) {
                 R.drawable.ic_baseline_bluetooth_disabled_24
             } else {
-                0
+                R.drawable.ic_material_car_light_dimmed
             }
         )
     }
@@ -405,7 +401,9 @@ class DashboardFragment : BaseFragment() {
 
     private fun enableBluetooth() {
         try {
-            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE).apply {
+                setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+            }
             enableBluetoothLauncher.launch(enableBtIntent)
         } catch (e: Exception) {
             intentManager.openBluetoothSettings()
