@@ -148,7 +148,7 @@
     <string name="UpdateSending">"Sending"</string>
     <string name="UpdateTransfer">"Firmware Transfer"</string>
     <string name="UpdateTransferComplete">"Finished transferring all files!"</string>
-    <string name="UpdateTransferInfo">"Currently transferring files between cloud server and FRIKAR via the mobiile application"</string>
+    <string name="UpdateTransferInfo">"Currently transferring files between cloud server and FRIKAR via the mobile application"</string>
     <string name="UpdateUpgrade">"Firmware Upgrade"</string>
     <string name="UpdateUpgradeInfo1">"Make sure the FRIKAR is stationary and in Bluetooth range of your phone."</string>
     <string name="UpdateUpgradeInfo2">"You will not be able to navigate away from this page until this process is complete."</string>
