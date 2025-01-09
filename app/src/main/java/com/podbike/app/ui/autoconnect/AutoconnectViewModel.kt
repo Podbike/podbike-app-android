@@ -32,34 +32,32 @@ class AutoconnectViewModel @Inject constructor(
 
     private fun autoconnect() {
         autoconnectJob = viewModelScope.launch {
-            launch {
-                val deviceInfo = userPreferences.getMostRecentDevice()
-                if (deviceInfo == null) {
-                    delay(1000)
-                    updateState {
-                        copy(
-                            isLoading = false,
-                            error = ErrorTypeSealed.ConnectToDeviceError(Throwable("No device found"))
-                        )
-                    }
-                    return@launch
-                } else {
-                    updateState {
-                        copy(
-                            selectedDevice = deviceInfo,
-                            isLoading = true,
-                            error = null
-                        )
-                    }
-                    delay(1000)
-                    runWithErrorHandling {
-                        bluetoothManager.connect(
-                            deviceInfo,
-                        )
-                    }
-                    delay(1000)
-                    sendEffect(AutoconnectEffect.AutoconnectToFrikar)
+            val deviceInfo = userPreferences.getMostRecentDevice()
+            if (deviceInfo == null) {
+                delay(1000)
+                updateState {
+                    copy(
+                        isLoading = false,
+                        error = ErrorTypeSealed.ConnectToDeviceError(Throwable("No device found"))
+                    )
                 }
+                return@launch
+            } else {
+                updateState {
+                    copy(
+                        selectedDevice = deviceInfo,
+                        isLoading = true,
+                        error = null
+                    )
+                }
+                delay(1000)
+                runWithErrorHandling {
+                    bluetoothManager.connect(
+                        deviceInfo,
+                    )
+                }
+                delay(1000)
+                sendEffect(AutoconnectEffect.AutoconnectToFrikar)
             }
         }
     }
