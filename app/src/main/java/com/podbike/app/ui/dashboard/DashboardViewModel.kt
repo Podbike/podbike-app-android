@@ -9,6 +9,7 @@ import com.podbike.app.BuildConfig
 import com.podbike.app.data.DistanceUnit
 import com.podbike.app.data.DistanceUnit.*
 import com.podbike.app.data.SpeedUnit
+import com.podbike.app.data.TemperatureUnit
 import com.podbike.app.data.UserPreferences
 import com.podbike.app.data.bluetooth.manager.BluetoothManager
 import com.podbike.app.data.bluetooth.model.PodbikeDevice
@@ -56,6 +57,9 @@ class DashboardViewModel @Inject constructor(
 
     private val speedUnit: SpeedUnit
         get() = userPreferences.getSpeedUnit()
+
+    private val temperatureUnit: TemperatureUnit
+        get() = userPreferences.getTemperatureUnit()
 
     init {
         listenToConnectionChanges()
@@ -146,7 +150,14 @@ class DashboardViewModel @Inject constructor(
             copy(
                 distanceAbbreviation = unitConverter.getDistanceUnitAbbreviation(distanceUnit),
                 rangeAbbreviation = unitConverter.getDistanceUnitAbbreviation(rangeUnit),
-                speedAbbreviation = unitConverter.getSpeedUnitAbbreviation(speedUnit)
+                speedAbbreviation = unitConverter.getSpeedUnitAbbreviation(speedUnit),
+                temperatureAbbreviation = unitConverter.getTemperatureUnitAbbreviation(
+                    temperatureUnit
+                ),
+                freezingTemperature = when (temperatureUnit) {
+                    TemperatureUnit.CELSIUS -> 4
+                    TemperatureUnit.FAHRENHEIT -> 39
+                }
             )
         }
     }
@@ -157,6 +168,7 @@ class DashboardViewModel @Inject constructor(
         if (!hasUpdateStarted) {
             return
         }
+        updateState { copy(isUpdateOngoing = true) }
         val expectedConfigHash = currentDevice.updateConfigHash
         viewModelScope.launch {
             validateFirmwareUpdate(expectedConfigHash)
@@ -194,14 +206,23 @@ class DashboardViewModel @Inject constructor(
         }
         if (metadata == null || expectedConfigHash == null) {
             userPreferences.setUpdateStartedFlag(false, null)
-            return updateState { copy(error = ErrorTypeSealed.FrikarUpdateFailed(Throwable("Couldn't compare hash"))) }
+            return updateState {
+                copy(
+                    isUpdateOngoing = false,
+                    error = ErrorTypeSealed.FrikarUpdateFailed(Throwable("Couldn't compare hash"))
+                )
+            }
         }
         if (metadata.hashCode() == expectedConfigHash) {
+            updateState { copy(isUpdateOngoing = false) }
             sendEffect(DashboardEffect.FrikarUpdated)
         } else {
             userPreferences.setUpdateStartedFlag(false, null)
             updateState {
-                copy(error = ErrorTypeSealed.FrikarUpdateFailed(Throwable("Metadata hash mismatch")))
+                copy(
+                    isUpdateOngoing = false,
+                    error = ErrorTypeSealed.FrikarUpdateFailed(Throwable("Metadata hash mismatch"))
+                )
             }
         }
         userPreferences.setUpdateStartedFlag(false)
@@ -246,6 +267,9 @@ class DashboardViewModel @Inject constructor(
                 distanceAbbreviation = unitConverter.getDistanceUnitAbbreviation(distanceUnit),
                 rangeAbbreviation = unitConverter.getDistanceUnitAbbreviation(rangeUnit),
                 speedAbbreviation = unitConverter.getSpeedUnitAbbreviation(speedUnit),
+                temperatureAbbreviation = unitConverter.getTemperatureUnitAbbreviation(
+                    temperatureUnit
+                ),
                 isInteractiveTutorialEnabled = isInteractiveTutorialEnabled
             )
         }
@@ -343,6 +367,9 @@ class DashboardViewModel @Inject constructor(
         val distanceAbbreviation: String = "",
         val rangeAbbreviation: String = "",
         val speedAbbreviation: String = "",
+        val temperatureAbbreviation: String = "",
+        val freezingTemperature: Int = 0,
+        val isUpdateOngoing: Boolean = false,
         val error: ErrorTypeSealed? = null
     ) : UiState
 

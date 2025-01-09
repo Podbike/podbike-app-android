@@ -143,26 +143,9 @@ class DashboardFragment : BaseFragment() {
 
     private fun processUiState(state: DashboardViewModel.DashboardState) {
         with(binding) {
-            if (state.isInteractiveTutorialEnabled) {
-                fragmentDashboardEnableBluetoothButton.visibility = View.INVISIBLE
-                fragmentDashboardSpeed.visibility = View.VISIBLE
-                fragmentDashboardWelcomeBack.visibility = View.INVISIBLE
-            } else if (state.isBluetoothEnabled == false) {
-                clearDashboard(state)
-                fragmentDashboardEnableBluetoothButton.visibility = View.VISIBLE
-                fragmentDashboardSpeed.visibility = View.INVISIBLE
-                fragmentDashboardWelcomeBack.visibility = View.INVISIBLE
-            } else if (state.deviceData == null) {
-                fragmentDashboardEnableBluetoothButton.visibility = View.INVISIBLE
-                fragmentDashboardSpeed.visibility = View.INVISIBLE
-                fragmentDashboardWelcomeBack.visibility = View.VISIBLE
-            } else {
-                fragmentDashboardEnableBluetoothButton.visibility = View.INVISIBLE
-                fragmentDashboardSpeed.visibility = View.VISIBLE
-                fragmentDashboardWelcomeBack.visibility = View.INVISIBLE
-            }
+            updateDashboardState(state)
 
-            if (state.isConnected) {
+            if (state.isConnected || state.isUpdateOngoing) {
                 hideConnectingDialog()
             } else {
                 showConnectingDialog()
@@ -178,7 +161,12 @@ class DashboardFragment : BaseFragment() {
                 null -> {}
             }
 
-            getTooltips(state.speedAbbreviation, state.distanceAbbreviation).forEach { tooltip ->
+            getTooltips(
+                state.speedAbbreviation,
+                state.distanceAbbreviation,
+                state.temperatureAbbreviation,
+                state.freezingTemperature
+            ).forEach { tooltip ->
                 val view = binding.root.findViewById<View>(tooltip.widgetId)
                 if (state.isInteractiveTutorialEnabled) {
                     view.setOnClickListener {
@@ -225,8 +213,6 @@ class DashboardFragment : BaseFragment() {
                     fragmentDashboardIcon1.setColorFilter(requireContext().getColor(R.color.gray))
                 }
 
-
-
                 with(state.deviceData.lightStatus) {
                     val isHazardIndicator = indicatorLeft && indicatorRight
                     fragmentDashboardHazardIndicator.setHazardIndicator(isHazardIndicator)
@@ -262,6 +248,36 @@ class DashboardFragment : BaseFragment() {
         }
     }
 
+    private fun FragmentDashboardBinding.updateDashboardState(state: DashboardViewModel.DashboardState) {
+        if (state.isInteractiveTutorialEnabled) {
+            fragmentDashboardEnableBluetoothButton.visibility = View.INVISIBLE
+            fragmentDashboardSpeed.visibility = View.VISIBLE
+            fragmentDashboardWelcomeBack.visibility = View.INVISIBLE
+            fragmentDashboardUpdateOngoing.visibility = View.INVISIBLE
+        } else if (state.isBluetoothEnabled == false) {
+            clearDashboard(state)
+            fragmentDashboardEnableBluetoothButton.visibility = View.VISIBLE
+            fragmentDashboardSpeed.visibility = View.INVISIBLE
+            fragmentDashboardWelcomeBack.visibility = View.INVISIBLE
+            fragmentDashboardUpdateOngoing.visibility = View.INVISIBLE
+        } else if (state.isUpdateOngoing) {
+            fragmentDashboardEnableBluetoothButton.visibility = View.INVISIBLE
+            fragmentDashboardSpeed.visibility = View.INVISIBLE
+            fragmentDashboardWelcomeBack.visibility = View.INVISIBLE
+            fragmentDashboardUpdateOngoing.visibility = View.VISIBLE
+        } else if (state.deviceData == null) {
+            fragmentDashboardEnableBluetoothButton.visibility = View.INVISIBLE
+            fragmentDashboardSpeed.visibility = View.INVISIBLE
+            fragmentDashboardWelcomeBack.visibility = View.VISIBLE
+            fragmentDashboardUpdateOngoing.visibility = View.INVISIBLE
+        } else {
+            fragmentDashboardEnableBluetoothButton.visibility = View.INVISIBLE
+            fragmentDashboardSpeed.visibility = View.VISIBLE
+            fragmentDashboardWelcomeBack.visibility = View.INVISIBLE
+            fragmentDashboardUpdateOngoing.visibility = View.INVISIBLE
+        }
+    }
+
     private fun FragmentDashboardBinding.clearDashboard(state: DashboardViewModel.DashboardState) {
         fragmentDashboardBatteryIndicator.setProgress(
             0,
@@ -283,7 +299,9 @@ class DashboardFragment : BaseFragment() {
 
     private fun getTooltips(
         speedAbbreviation: String,
-        distanceAbbreviation: String
+        distanceAbbreviation: String,
+        temperatureAbbreviation: String,
+        freezingTemperature: Int = 0
     ): List<TooltipInfo> = listOf(
         TooltipInfo(
             R.id.fragment_dashboard_speed,
@@ -317,7 +335,10 @@ class DashboardFragment : BaseFragment() {
         TooltipInfo(
             R.id.fragment_dashboard_icon_1,
             getString(R.string.HelpSnowAlertTitle),
-            getString(R.string.HelpSnowAlertDescription)
+            getString(
+                R.string.HelpSnowAlertDescription,
+                "$freezingTemperature$temperatureAbbreviation"
+            )
         ),
         TooltipInfo(
             R.id.fragment_dashboard_icon_2,
