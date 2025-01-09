@@ -109,6 +109,11 @@ class DashboardFragment : BaseFragment() {
         validatePermissions()
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.processAction(DashboardAction.Resume)
+    }
+
     private fun subscribeToViewModel() {
         viewModel.uiState
             .flowWithLifecycle(viewLifecycleOwner.lifecycle)
@@ -422,6 +427,7 @@ class DashboardFragment : BaseFragment() {
             }
 
             DashboardEffect.FrikarUpdated -> showAlertDialog(getString(R.string.UpdateComplete))
+            DashboardEffect.FrikarUpdateFailed -> showAlertDialog(getString(R.string.UpdateFailed))
         }
     }
 

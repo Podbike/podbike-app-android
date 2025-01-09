@@ -141,6 +141,7 @@ class DashboardViewModel @Inject constructor(
                         )
                     } else {
                         updateState { copy(deviceData = null) }
+                        runFirmwareUpdateCheck()
                     }
                 }
         }
@@ -162,6 +163,11 @@ class DashboardViewModel @Inject constructor(
                 }
             )
         }
+    }
+
+    private fun runOngoingUpdateCheck() {
+        val isUpdateOngoing = userPreferences.getMostRecentDevice()?.updateStarted == true
+        updateState { copy(isUpdateOngoing = isUpdateOngoing) }
     }
 
     private fun runFirmwareUpdateCheck() {
@@ -208,10 +214,10 @@ class DashboardViewModel @Inject constructor(
         }
         if (metadata == null || expectedConfigHash == null) {
             userPreferences.setUpdateStartedFlag(false, null)
+            sendEffect(DashboardEffect.FrikarUpdateFailed)
             return updateState {
                 copy(
-                    isUpdateOngoing = false,
-                    error = ErrorTypeSealed.FrikarUpdateFailed(Throwable("Couldn't compare hash"))
+                    isUpdateOngoing = false
                 )
             }
         }
@@ -220,10 +226,10 @@ class DashboardViewModel @Inject constructor(
             sendEffect(DashboardEffect.FrikarUpdated)
         } else {
             userPreferences.setUpdateStartedFlag(false, null)
+            sendEffect(DashboardEffect.FrikarUpdateFailed)
             updateState {
                 copy(
-                    isUpdateOngoing = false,
-                    error = ErrorTypeSealed.FrikarUpdateFailed(Throwable("Metadata hash mismatch"))
+                    isUpdateOngoing = false
                 )
             }
         }
@@ -301,7 +307,6 @@ class DashboardViewModel @Inject constructor(
             }
 
             is DashboardAction.PermissionsChanged -> {
-                runFirmwareUpdateCheck()
                 val hasAllPermissions =
                     action.hasBluetoothPermissions && action.isBluetoothEnabled && action.isLocationEnabled
                 val needToReconnect =
@@ -353,6 +358,10 @@ class DashboardViewModel @Inject constructor(
                 updateState { copy(error = null) }
             }
 
+            is DashboardAction.Resume -> {
+                runOngoingUpdateCheck()
+            }
+
             is DashboardAction.GoBack -> {
                 sendEffect(DashboardEffect.NavigateBack)
             }
@@ -392,6 +401,7 @@ class DashboardViewModel @Inject constructor(
         data object HelpClicked : DashboardAction()
         data object ReturnToDashboardClicked : DashboardAction()
         data object Retry : DashboardAction()
+        data object Resume : DashboardAction()
         data object GoBack : DashboardAction()
     }
 
@@ -406,6 +416,7 @@ class DashboardViewModel @Inject constructor(
         data object NavigateToStatistics : DashboardEffect()
         data object HideNavigationIcons : DashboardEffect()
         data object FrikarUpdated : DashboardEffect()
+        data object FrikarUpdateFailed : DashboardEffect()
     }
 
 }
