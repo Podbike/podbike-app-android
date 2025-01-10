@@ -2,6 +2,7 @@ package com.podbike.app.data.bluetooth.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
 
 @Serializable
@@ -18,7 +19,7 @@ data class PodbikeDeviceMetadata(
     @SerialName("ECU Modules")
     val ecuModules: List<EcuModule>,
     @SerialName("AudioFiles")
-    val audioFiles: List<AudioFile>
+    val audioFiles: List<AudioFile> = emptyList()
 ) {
     companion object {
         fun mock(): PodbikeDeviceMetadata = PodbikeDeviceMetadata(
@@ -62,6 +63,72 @@ data class PodbikeDeviceMetadata(
                 AudioFile(filename = "shutdown_sound.mp3")
             )
         )
+
+        fun jsonMock(): PodbikeDeviceMetadata {
+            val json = "{\n" +
+                    "    \"Product name\": \"Frikar\",\n" +
+                    "    \"ReleaseID\":    \"R1.0.0\",\n" +
+                    "    \"ProductID\":    \"A294-1\",\n" +
+                    "    \"Frame number\": \"000000-F8-1-00-000\",\n" +
+                    "    \"ECU Modules\":  [{\n" +
+                    "            \"Board name\":   \"Haarek\",\n" +
+                    "            \"BoardID\":  \"E126-5\",\n" +
+                    "            \"Serial number\":    \"6611800\",\n" +
+                    "            \"Board position\":   \"Main Controller\",\n" +
+                    "            \"FWVersion\":    \"R01-57\"\n" +
+                    "        }, {\n" +
+                    "            \"Board name\":   \"BLE\",\n" +
+                    "            \"BoardID\":  \"E126-5\",\n" +
+                    "            \"Serial number\":    \"6611800\",\n" +
+                    "            \"Board position\":   \"Main BLE\",\n" +
+                    "            \"FWVersion\":    \"R01-52\"\n" +
+                    "        }, {\n" +
+                    "            \"Board name\":   \"FENRIS\",\n" +
+                    "            \"BoardID\":  \"E133-2\",\n" +
+                    "            \"Serial number\":    \"6608467\",\n" +
+                    "            \"Board position\":   \"Pedal Generator\",\n" +
+                    "            \"FWVersion\":    \"R01-55\"\n" +
+                    "        }, {\n" +
+                    "            \"Board name\":   \"FENRIS\",\n" +
+                    "            \"BoardID\":  \"E133-2\",\n" +
+                    "            \"Serial number\":    \"6608549\",\n" +
+                    "            \"Board position\":   \"Motor Left\",\n" +
+                    "            \"FWVersion\":    \"R01-55\"\n" +
+                    "        }, {\n" +
+                    "            \"Board name\":   \"FENRIS\",\n" +
+                    "            \"BoardID\":  \"E133-2\",\n" +
+                    "            \"Serial number\":    \"6608476\",\n" +
+                    "            \"Board position\":   \"Motor Right\",\n" +
+                    "            \"FWVersion\":    \"R01-55\"\n" +
+                    "        }, {\n" +
+                    "            \"Board name\":   \"Baldr\",\n" +
+                    "            \"BoardID\":  \"E131-1\",\n" +
+                    "            \"Serial number\":    \"5110844\",\n" +
+                    "            \"Board position\":   \"Front Left\",\n" +
+                    "            \"FWVersion\":    \"R01-04\"\n" +
+                    "        }, {\n" +
+                    "            \"Board name\":   \"Baldr\",\n" +
+                    "            \"BoardID\":  \"E131-1\",\n" +
+                    "            \"Serial number\":    \"5110838\",\n" +
+                    "            \"Board position\":   \"Front Right\",\n" +
+                    "            \"FWVersion\":    \"R01-04\"\n" +
+                    "        }, {\n" +
+                    "            \"Board name\":   \"Baldr\",\n" +
+                    "            \"BoardID\":  \"E131-1\",\n" +
+                    "            \"Serial number\":    \"5110927\",\n" +
+                    "            \"Board position\":   \"Rear Left\",\n" +
+                    "            \"FWVersion\":    \"R01-04\"\n" +
+                    "        }, {\n" +
+                    "            \"Board name\":   \"Baldr\",\n" +
+                    "            \"BoardID\":  \"E131-1\",\n" +
+                    "            \"Serial number\":    \"5110918\",\n" +
+                    "            \"Board position\":   \"Rear Right\",\n" +
+                    "            \"FWVersion\":    \"R01-04\"\n" +
+                    "        }]\n" +
+                    "}"
+            val metadata = Json.decodeFromString<PodbikeDeviceMetadata>(json)
+            return metadata
+        }
     }
 }
 
