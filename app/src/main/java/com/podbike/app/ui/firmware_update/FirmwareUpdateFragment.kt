@@ -248,8 +248,6 @@ class FirmwareUpdateFragment : BaseFragment() {
                                 append(" ")
                                 append(state.uploadingFileCount ?: 0)
                                 append(" ")
-                                append(getString(R.string.UpdateFiles))
-                                append(" ")
                                 append(getString(R.string.UpdateOutOf))
                                 append(" ")
                                 append(state.totalFileCount ?: 0)

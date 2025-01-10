@@ -4,6 +4,7 @@ import android.Manifest
 import androidx.annotation.RequiresPermission
 import com.podbike.app.data.bluetooth.values.HaarekBoardSpec
 import com.podbike.app.ui.scanning.DeviceInfo
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withTimeout
@@ -11,6 +12,7 @@ import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
 import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattServices
 import no.nordicsemi.android.kotlin.ble.core.data.GattConnectionState
 import no.nordicsemi.android.kotlin.ble.core.data.util.DataByteArray
+import timber.log.Timber
 import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
 
@@ -57,11 +59,18 @@ class PodbikeDevice(val client: ClientBleGatt, val device: DeviceInfo) {
         characteristicId: UUID,
         serviceId: UUID = HaarekBoardSpec.PODBIKE_SERVICE_UUID,
     ): Flow<DataByteArray>? {
-        val value = withTimeout(3.seconds) {
-            services?.findService(serviceId)
-                ?.findCharacteristic(characteristicId)
-                ?.getNotifications()
+        try {
+            val value = withTimeout(3.seconds) {
+                services?.findService(serviceId)
+                    ?.findCharacteristic(characteristicId)
+                    ?.getNotifications()
+            }
+            return value
+        } catch (e: TimeoutCancellationException) {
+            client.disconnect()
+            client.reconnect()
+            Timber.e(e, "getCharacteristicNotifications timeout")
+            return null
         }
-        return value
     }
 }
