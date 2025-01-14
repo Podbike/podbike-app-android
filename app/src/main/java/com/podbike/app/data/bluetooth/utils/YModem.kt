@@ -50,6 +50,7 @@ enum class GetDeviceMetadataInfo(val message: String) {
     SENDING_RQS_PKT("Sending RQS_PKT to request data"),
     RECEIVED_DATA("Received data: "),
     SENDING_ACK("Sending ACK for package "),
+    SENDING_NACK("Sending NACK for package "),
     DELAY_BEFORE_RQS_PKT("300ms delay before sending RQS_PKT"),
     SENDING_RQS_PKT_AGAIN("Sending RQS_PKT to request data"),
     SENDING_ACK_FOR_EOT("Sending ACK for EOT"),
@@ -71,6 +72,7 @@ class YModem {
                 device.getCharacteristicNotifications(HaarekBoardSpec.FTP_DATA_CHARACTERISTIC_UUID)
 
             val ackArray = byteArrayOf(PODBIKE_DTA_BYTE.toByte(), ACK.toByte())
+            val nackArray = byteArrayOf(PODBIKE_DTA_BYTE.toByte(), NACK.toByte())
             val rqsPktArray = byteArrayOf(PODBIKE_DTA_BYTE.toByte(), RQS_PKT.toByte())
 
             val collectedData = mutableListOf<ByteArray>()
@@ -102,15 +104,25 @@ class YModem {
                         GetDeviceMetadataInfo.RECEIVED_DATA,
                         data.value.toDisplayString()
                     )
-                    val cleanedData = data.value.copyOfRange(
-                        3,
-                        data.size - CRC_BYTES_COUNT
-                    ).filter { it != 0x00.toByte() }.toByteArray()
+                    val payload = data.value.copyOfRange(3, data.size - CRC_BYTES_COUNT)
+                    val cleanedPayload = payload.filter { it != 0x00.toByte() }.toByteArray()
+
+                    val receivedCrc = data.value.copyOfRange(data.size - CRC_BYTES_COUNT, data.size)
+                    val expectedCrc = calculateCRC(payload)
+
+                    if (!receivedCrc.contentEquals(expectedCrc)) {
+                        logStatus(GetDeviceMetadataInfo.SENDING_NACK, packageIndex.toString())
+                        device.writeCharacteristic(
+                            HaarekBoardSpec.FTP_DATA_CHARACTERISTIC_UUID,
+                            value = DataByteArray(value = nackArray)
+                        )
+                        return@collect
+                    }
 
                     if (packageIndex == 0) {
-                        fileName = cleanedData.toString(Charsets.UTF_8)
+                        fileName = cleanedPayload.toString(Charsets.UTF_8)
                     } else {
-                        collectedData.add(cleanedData)
+                        collectedData.add(cleanedPayload)
                     }
 
                     logStatus(GetDeviceMetadataInfo.SENDING_ACK, packageIndex.toString())
