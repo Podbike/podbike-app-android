@@ -360,6 +360,7 @@ class DashboardViewModel @Inject constructor(
 
             is DashboardAction.Resume -> {
                 runOngoingUpdateCheck()
+                setupDefaultUnits()
             }
 
             is DashboardAction.GoBack -> {
