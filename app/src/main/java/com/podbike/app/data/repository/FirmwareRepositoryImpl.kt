@@ -31,7 +31,9 @@ class FirmwareRepositoryImpl : FirmwareRepository {
         val retrofit: Retrofit = Retrofit.Builder()
             .baseUrl(baseUrl)
             .addConverterFactory(
-                Json.asConverterFactory(
+                @Suppress("JSON_FORMAT_REDUNDANT")
+                Json { ignoreUnknownKeys = true }
+                    .asConverterFactory(
                     "application/json; charset=UTF8".toMediaType()
                 )
             )

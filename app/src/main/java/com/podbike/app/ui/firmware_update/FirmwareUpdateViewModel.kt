@@ -323,7 +323,7 @@ class FirmwareUpdateViewModel @Inject constructor(
 
     private fun createFrikarTransferConfigFile(serverFirmwareModules: FirmwareFilesData): OtaFile {
         val supportedBoards = serverFirmwareModules.firmwareModuleByUpdateId
-            .filter { it.serialNumber != null && it.serialNumber.isNotEmpty() }
+            .filter { it.serialNumber != null }
             .map { serverFirmwareModule ->
                 val boardName = serverFirmwareModule.fileName
                     .split(":").lastOrNull()
@@ -331,7 +331,7 @@ class FirmwareUpdateViewModel @Inject constructor(
                 SupportedBoard(
                     boardName = boardName,
                     boardId = serverFirmwareModule.boardName,
-                    serialNumber = serverFirmwareModule.serialNumber.orEmpty(),
+                    serialNumber = serverFirmwareModule.serialNumber.toString(),
                     firmwareVersion = serverFirmwareModule.firmwareVersion,
                     fileName = serverFirmwareModule.fileName
                 )
@@ -352,7 +352,7 @@ class FirmwareUpdateViewModel @Inject constructor(
 
         return OtaFile(
             type = OtaFileType.FRIKAR_TRANSFER_CONFIG,
-            name = "frikar_transfer_config.json",
+            name = "frikar.json",
             bytes = configData
         )
     }
