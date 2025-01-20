@@ -31,6 +31,7 @@ serializationPlugin = "2.1.0"
 serializationLibrary = "1.7.3"
 retrofitKotlinxSerialization = "2.11.0"
 tooltip = "1.1.0"
+slf4j-timber = "1.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -64,6 +65,7 @@ kotlin-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serial
 retrofit-kotilinx-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofitKotlinxSerialization" }
 okhttp-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttpLogging" }
 tooltip = { group = "com.github.douglasjunior", name = "android-simple-tooltip", version.ref = "tooltip" }
+slf4j-timber = { group = "uk.kulikov", name = "slf4j2-timber", version.ref = "slf4j-timber" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
