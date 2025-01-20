@@ -306,7 +306,7 @@ class FirmwareUpdateViewModel @Inject constructor(
                 if (hasAllPermissions && !hasStartedFirmwareUpdate) {
                     Timber.tag("FirmwareUpdateViewModel").d("checkForUpdates")
                     checkForUpdates()
-                } else {
+                } else if (!hasAllPermissions) {
                     setErrorState(NoBluetoothDeviceError(Throwable("Bluetooth not available")))
                 }
             }
