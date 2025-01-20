@@ -7,6 +7,8 @@ import com.podbike.app.ui.scanning.DeviceInfo
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
 import no.nordicsemi.android.kotlin.ble.client.main.callback.ClientBleGatt
 import no.nordicsemi.android.kotlin.ble.client.main.service.ClientBleGattServices
@@ -25,6 +27,7 @@ class PodbikeDevice(val client: ClientBleGatt, val device: DeviceInfo) {
     private var services: ClientBleGattServices? = null
 
     val data = PodbikeDeviceData(this, device)
+    private val operationMutex = Mutex()
 
     suspend fun discoverServices() {
         services = client.discoverServices()
@@ -38,9 +41,11 @@ class PodbikeDevice(val client: ClientBleGatt, val device: DeviceInfo) {
         characteristicId: UUID,
         serviceId: UUID = HaarekBoardSpec.PODBIKE_SERVICE_UUID,
     ): DataByteArray? {
-        return services?.findService(serviceId)
-            ?.findCharacteristic(characteristicId)
-            ?.read()
+        return operationMutex.withLock {
+            services?.findService(serviceId)
+                ?.findCharacteristic(characteristicId)
+                ?.read()
+        }
     }
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
@@ -49,28 +54,21 @@ class PodbikeDevice(val client: ClientBleGatt, val device: DeviceInfo) {
         serviceId: UUID = HaarekBoardSpec.PODBIKE_SERVICE_UUID,
         value: DataByteArray
     ) {
-        services?.findService(serviceId)
-            ?.findCharacteristic(characteristicId)
-            ?.write(value)
-
+        operationMutex.withLock {
+            services?.findService(serviceId)
+                ?.findCharacteristic(characteristicId)
+                ?.write(value)
+        }
     }
 
     suspend fun getCharacteristicNotifications(
         characteristicId: UUID,
         serviceId: UUID = HaarekBoardSpec.PODBIKE_SERVICE_UUID,
     ): Flow<DataByteArray>? {
-        try {
-            val value = withTimeout(3.seconds) {
-                services?.findService(serviceId)
-                    ?.findCharacteristic(characteristicId)
-                    ?.getNotifications()
-            }
-            return value
-        } catch (e: TimeoutCancellationException) {
-            client.disconnect()
-            client.reconnect()
-            Timber.e(e, "getCharacteristicNotifications timeout")
-            return null
+        return operationMutex.withLock {
+            services?.findService(serviceId)
+                ?.findCharacteristic(characteristicId)
+                ?.getNotifications()
         }
     }
 }
