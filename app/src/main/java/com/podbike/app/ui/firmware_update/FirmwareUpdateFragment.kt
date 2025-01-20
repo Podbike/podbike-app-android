@@ -1,6 +1,7 @@
 package com.podbike.app.ui.firmware_update
 
 import android.Manifest
+import android.animation.ObjectAnimator
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
 import android.os.Build
@@ -254,8 +255,11 @@ class FirmwareUpdateFragment : BaseFragment() {
                                 append(" ")
                                 append(getString(R.string.UpdateFiles))
                             }
-                        fileProgressIndicator.progress =
-                            (this.currentPackage * 100) / this.totalPackages
+
+                        val progressValue = (this.currentPackage * 100) / this.totalPackages
+                        ObjectAnimator.ofInt(fileProgressIndicator, "progress", progressValue)
+                            .setDuration(if (progressValue == 0) 0 else 100)
+                            .start()
                     }
 
                     COMPLETED -> {
