@@ -9,7 +9,9 @@ import com.podbike.app.data.bluetooth.model.FirmwareFileTransferStatus
 import com.podbike.app.data.bluetooth.model.PodbikeDevice
 import com.podbike.app.data.bluetooth.model.PodbikeDeviceMetadata
 import com.podbike.app.data.bluetooth.values.HaarekBoardSpec
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -66,7 +68,7 @@ class YModem {
         @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
         suspend fun getDeviceMetadata(device: PodbikeDevice): PodbikeDeviceMetadata? {
 
-            if (device.client.isConnected == false) return null
+            if (!device.client.isConnected) return null
 
             val dataFlow =
                 device.getCharacteristicNotifications(HaarekBoardSpec.FTP_DATA_CHARACTERISTIC_UUID)
@@ -87,7 +89,7 @@ class YModem {
             dataFlow
                 .shareIn(
                     scope = ConnectionManager.connectionScope,
-                    started = SharingStarted.Lazily,
+                    started = SharingStarted.WhileSubscribed(),
                 )
                 .onSubscription {
                     logStatus(GetDeviceMetadataInfo.REGISTERING_LISTENER)
@@ -172,18 +174,15 @@ class YModem {
                 // split file data for chunks of 128 bytes
                 val dataChunks =
                     splitByteArrayIntoChunks(file.bytes!!, 128).mapIndexed { index, data ->
-                        prepareDataPacket(data, index)
+                        prepareDataPacket(data, index + 1)
                     }
 
-                val atdArray = byteArrayOf(PODBIKE_ATD_BYTE.toByte())
-                device.writeCharacteristic(
-                    HaarekBoardSpec.FTP_CONTROL_CHARACTERISTIC_UUID,
-                    value = DataByteArray(value = atdArray)
-                )
-
-                device.writeCharacteristic(
-                    HaarekBoardSpec.FTP_DATA_CHARACTERISTIC_UUID,
-                    value = DataByteArray(value = header)
+                emit(
+                    FirmwareFileTransferStatus(
+                        currentPackage = 0,
+                        totalPackages = dataChunks.size,
+                        status = FirmwareFileTransferState.TRANSFERRING
+                    )
                 )
 
                 var packageIndex = 0
@@ -191,15 +190,26 @@ class YModem {
                 var transferComplete = false
 
                 dataFlow
+                    ?.shareIn(
+                        scope = ConnectionManager.connectionScope,
+                        started = SharingStarted.WhileSubscribed(),
+                    )
+                    ?.onSubscription {
+                        val atdArray = byteArrayOf(PODBIKE_ATD_BYTE.toByte())
+                        device.writeCharacteristic(
+                            HaarekBoardSpec.FTP_CONTROL_CHARACTERISTIC_UUID,
+                            value = DataByteArray(value = atdArray)
+                        )
+                        device.writeCharacteristic(
+                            HaarekBoardSpec.FTP_DATA_CHARACTERISTIC_UUID,
+                            value = DataByteArray(value = header)
+                        )
+                    }
                     ?.takeWhile { !transferComplete && !operationError }
                     ?.timeout(TIMEOUT_DURATION)
                     ?.collect { data ->
                         i("[FirmwareUpdate] Transferring packet ${packageIndex + 1} of ${dataChunks.size}")
-                        if (packageIndex == 0 && data.value[0] == RQS_PKT.toByte()) {
-                            writeFirmwareValue(device, dataChunks[packageIndex])
-                            packageIndex++
-
-                        } else if (packageIndex >= 0 && packageIndex < dataChunks.size && data.value[0] == ACK.toByte()) {
+                        if (packageIndex < dataChunks.size && data.value[0] == ACK.toByte()) {
                             emit(
                                 FirmwareFileTransferStatus(
                                     currentPackage = packageIndex + 1,
@@ -209,13 +219,11 @@ class YModem {
                             )
                             writeFirmwareValue(device, dataChunks[packageIndex])
                             packageIndex++
-
                         } else if (packageIndex == dataChunks.size && data.value[0] == ACK.toByte() && !eotSent) {
                             i("[FirmwareUpdate] All packets sent, sending EOT")
                             val eotArray = byteArrayOf(PODBIKE_ATD_BYTE.toByte(), EOT.toByte())
                             writeFirmwareValue(device, eotArray)
                             eotSent = true
-
                         } else if (eotSent && data.value[0] == RQS_PKT.toByte()) {
                             i("[FirmwareUpdate] Got RQS_PKT after EOT, transfer complete; sending NULL packet")
                             emit(
@@ -228,22 +236,38 @@ class YModem {
                             transferComplete = true
                             val nullPacket = prepareDataPacket(ByteArray(128) { 0 }, 0)
                             writeFirmwareValue(device, nullPacket)
-
-                        } else if (data.value[0] == NACK.toByte() || data.value[0] == CA.toByte()) {
-                            throw Exception("Got NACK or CA from device; aborting transfer")
+                        } else if (data.value[0] == NACK.toByte()) {
+                            e("Got NAK from device; resending packet")
+                            packageIndex--
+                            writeFirmwareValue(device, dataChunks[packageIndex])
+                        } else if (data.value[0] == CA.toByte()) {
+                            throw Exception("Got CA from device; aborting transfer")
                         }
                     }
+
                 i("[FirmwareUpdate] File transfer complete")
             } catch (e: Exception) {
-                e("[FirmwareUpdate] Failed to send file: ${file.name}, error: ${e.message}")
-                emit(
-                    FirmwareFileTransferStatus(
-                        currentPackage = 0,
-                        totalPackages = 0,
-                        status = FirmwareFileTransferState.FAILED
+                if (e is CancellationException && e !is TimeoutCancellationException) {
+                    e("[FirmwareUpdate] Cancel requested")
+                    val abortArray =
+                        byteArrayOf(PODBIKE_ATD_BYTE.toByte(), CA.toByte(), CA.toByte())
+                    runCatching {
+                        device.writeCharacteristic(
+                            HaarekBoardSpec.FTP_DATA_CHARACTERISTIC_UUID,
+                            value = DataByteArray(value = abortArray)
+                        )
+                    }
+                } else {
+                    e("[FirmwareUpdate] Failed to send file: ${file.name}, error: ${e.message}")
+                    emit(
+                        FirmwareFileTransferStatus(
+                            currentPackage = 0,
+                            totalPackages = 0,
+                            status = FirmwareFileTransferState.FAILED
+                        )
                     )
-                )
-                operationError = true
+                    operationError = true
+                }
             }
         }
 
@@ -278,11 +302,12 @@ class YModem {
             data: ByteArray,
             packageIndex: Int
         ): ByteArray {
+            val packageSequence = packageIndex % 256
             var packet = ByteArray(134) { 0 }
             packet[0] = PODBIKE_ATD_BYTE.toByte()
             packet[1] = SOH.toByte()
-            packet[2] = packageIndex.toByte()
-            packet[3] = (0xFF - packageIndex).toByte()
+            packet[2] = packageSequence.toByte()
+            packet[3] = (255 - packageSequence).toByte()
             data.copyInto(packet, 4, 0, data.size)
             packet = packet.copyOfRange(0, 4 + data.size + 2)
             val crc = calculateCRC(packet.copyOfRange(4, 4 + data.size))
