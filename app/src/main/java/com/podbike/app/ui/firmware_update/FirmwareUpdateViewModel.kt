@@ -367,8 +367,11 @@ class FirmwareUpdateViewModel @Inject constructor(
         }
     }
 
+    private var deviceMetadata: PodbikeDeviceMetadata? = null
     private suspend fun getDeviceMetadata(): PodbikeDeviceMetadata? {
-        return bluetoothManager.selectedDevice?.data?.getDeviceMetadata()
+        if (deviceMetadata != null) return deviceMetadata
+        deviceMetadata = bluetoothManager.selectedDevice?.data?.getDeviceMetadata()
+        return deviceMetadata
     }
 
     private suspend fun getFrameNumber(): String? {

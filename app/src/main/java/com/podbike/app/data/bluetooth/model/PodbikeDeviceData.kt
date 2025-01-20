@@ -111,7 +111,7 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
         get() = getStringCharacteristicData(HaarekBoardSpec.GENERATED_POWER_CHARACTERISTIC_UUID)
 
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    suspend fun initDeviceMetadata(): PodbikeDeviceMetadata? {
+    suspend fun getDeviceMetadata(): PodbikeDeviceMetadata? {
         val maxAttempts = 3
         var retry = 0
         do {
@@ -129,11 +129,6 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
             }
         } while (retry < maxAttempts)
         return null
-    }
-
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    suspend fun getDeviceMetadata(): PodbikeDeviceMetadata? {
-        return deviceMetadata ?: initDeviceMetadata()
     }
 
     @get:RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
