@@ -9,7 +9,6 @@ import com.podbike.app.ui.base.collectWithErrorHandling
 import com.podbike.app.ui.scanning.DeviceInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
@@ -17,8 +16,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.update
@@ -137,14 +136,15 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
             coroutineScope {
                 device.getCharacteristicNotifications(
                     HaarekBoardSpec.LIGHT_STATUS_CHARACTERISTIC_UUID
-                )?.onStart {
-                    try {
-                        device.readCharacteristic(HaarekBoardSpec.LIGHT_STATUS_CHARACTERISTIC_UUID)
-                            ?.let { this.emit(it) }
-                    } catch (e: Exception) {
-                        Timber.e("Initial lights characteristic read error: $e")
+                )
+                    ?.onStart {
+                        try {
+                            device.readCharacteristic(HaarekBoardSpec.LIGHT_STATUS_CHARACTERISTIC_UUID)
+                                ?.let { this.emit(it) }
+                        } catch (e: Exception) {
+                            Timber.e("Initial lights characteristic read error: $e")
+                        }
                     }
-                }
                     ?.collectWithErrorHandling { data ->
                         val bytes = data.value
                         Timber.d(bytes.toDisplayString())
@@ -162,7 +162,7 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
                         emit(status)
                     }
             }
-        }
+        }.flowOn(Dispatchers.Main)
 
     fun startCleanTripDataTimer() {
         if (clearTripDataTimerJob?.isActive == true) {
@@ -210,11 +210,13 @@ data class PodbikeDeviceData(private val device: PodbikeDevice, val deviceInfo: 
             } catch (e: Exception) {
                 Timber.e("Error subscribing to characteristic $characteristicId: $e")
             }
-        }.shareIn(
-            scope = ConnectionManager.connectionScope,
-            started = SharingStarted.Lazily,
-            replay = 1
-        )
+        }
+            .flowOn(Dispatchers.Main)
+            .shareIn(
+                scope = ConnectionManager.connectionScope,
+                started = SharingStarted.Lazily,
+                replay = 1
+            )
 
     private fun DataByteArray.asString(): String {
         val bytes = this.value.filter { it != 0.toByte() }.toByteArray()
